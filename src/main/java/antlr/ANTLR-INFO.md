@@ -56,6 +56,24 @@ Go to your plugin library in your IDE and search for ANTLR (for IntelliJ, go to
 _IntelliJ IDEA -> Preferences... -> plugins_ and search for _ANTLR_). Install
 the plugin.
 
+# Simple Build
+
+The below testing section appears to be in some way outdated (`GQL.g4` does not exist), the last commit by Olof includes the output of his Antlr build process so this isn't super relevant for this project.
+Nonetheless I've created two new scripts for building what as far as I can tell is equivalent output to the last commit.
+ - They're just simple shell scripts should work on anything remotely POSIX.
+
+## Building the grammar
+
+```shell
+./antlrBuild.sh
+```
+
+## Cleaning the output files
+
+```shell
+./antlrClean.sh
+```
+
 ## Testing the GQL grammar
 In your shell, go to the folder [src](src). From there, type the following commands:
 

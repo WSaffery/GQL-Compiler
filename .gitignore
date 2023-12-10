@@ -15,3 +15,8 @@ src/antlr/GQLParser.java
 src/antlr/GQLVisitor.java
 /src/antlr/gql/
 /target/
+
+
+src/antlr/*.java
+src/antlr/*.interp
+src/antlr/*.tokens

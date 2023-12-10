@@ -1,0 +1,1 @@
+rm *.interp *.java *.tokens
