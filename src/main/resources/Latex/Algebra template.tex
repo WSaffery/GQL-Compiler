@@ -13,7 +13,9 @@
 
 \renewcommand{\arraystretch}{1.2}
 
-\newcommand{\rel}[1]{ \vDash_{#1}}
+\newcommand{\rel}[1][]{ \vDash_{#1}}
+% old bug: places \rel with nothing following, needed to manually add an empty {} pair (for my compiler anyway)
+% fix: additional [] adds blank default value for first argument
 
 \newcommand{\sem}[1]{\llbracket #1 \rrbracket_{D,G}}
 \newcommand{\semex}[1]{\llbracket #1 \rrbracket_{D,G,u}}
@@ -48,7 +50,25 @@
 \lstset{style=customc}
 
 \begin{document}
-    %%%%%%%%%%%%%%%%%%%%%
-    %% COPY QUERY HERE %%
-    %%%%%%%%%%%%%%%%%%%%%
+\begin{align*}
+    G &= g3 \\
+    \chi_{1} &= (x, \{\{Person\}\}, \emptyset) \\
+    \pi_{1} &= \chi_{1} \\
+    \rel &= \rel{W} \\
+    \Bar{\pi} &= (\pi_{1}) \\
+    \rel &= (\rel{1}) \\
+    T &= \{()\} \\
+    M_{1} &= \sem{\mathblue{MATCH } \Bar{\pi}}(T) = \biguplus_{u \in T} \{u \times u' \mid u' \in \textsf{match}(\Bar{\pi}, G, u, \rel)\} \\
+    Q_1 &= \sem{\mathblue{RETURN ALL } \*}(M_{1}) = M_{1} \\
+    G &= g3 \\
+    \chi_{2} &= (x, \{\{Professor\}\}, \emptyset) \\
+    \pi_{2} &= \chi_{2} \\
+    \rel{2} &= \rel{W} \\
+    \Bar{\pi} &= (\pi_{2}) \\
+    \rel{} &= (\rel{2}) \\
+    T &= \{()\} \\
+    M_{1} &= \sem{\mathblue{MATCH } \Bar{\pi}}(T) = \biguplus_{u \in T} \{u \times u' \mid u' \in \textsf{match}(\Bar{\pi}, G, u, \rel{})\} \\
+    Q_2 &= \sem{\mathblue{RETURN ALL } x}(M_{1}) = \biguplus_{u \in M_{1}} \{(x: \semex{x})\} \\
+    Q_{1, 2} &= \sem{Q_{1} \mathblue{ UNION ALL }Q_2}(T) = Q_{1} \biguplus Q_2 \\
+\end{align*}
 \end{document}
