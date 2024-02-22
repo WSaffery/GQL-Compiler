@@ -1,0 +1,4 @@
+FROM g4
+MATCH (m:Person)~[:Knows]~(f:Person)
+WHERE m.name="Max"
+RETURN f.age as a

@@ -1,0 +1,26 @@
+{
+  "n": {
+    "identity": "n1",
+    "labels": ["Person"],
+    "properties": {
+      "name": "Max",
+      "age": 18
+    }
+  },
+  "n": {
+    "identity": "n2",
+    "labels": ["Person"],
+    "properties": {
+      "name": "Phillip",
+      "age": 19
+    }
+  },
+  "n": {
+    "identity": "n3",
+    "labels": ["Person"],
+    "properties": {
+      "name": "Patricia",
+      "age": 18
+    }
+  }
+}
