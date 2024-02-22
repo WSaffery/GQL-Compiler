@@ -1,0 +1,2 @@
+Git won't store empty folders, so without this file added cloning the repository wouldn't also clone the above `graphEmpty` directory.
+Because the test suite relies on the `graphEmpty` directory existing, I've added this file to allow project builds to be reproduced.
