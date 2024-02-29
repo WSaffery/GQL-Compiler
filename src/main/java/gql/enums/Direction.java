@@ -19,6 +19,16 @@
 
 package gql.enums;
 
+// TODO! Add other orientations
+// Orientation               | Symbol
+// Left                      | <-
+// Undirected                |  ~
+// Right                     |  ->
+// Left or Undirected        | <~
+// Undirected or Right       |  ~>
+// Left, or right            | <->
+// Left, undirected or right |  -
+
 public enum Direction {
     LEFT_TO_RIGHT {
         @Override

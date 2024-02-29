@@ -172,8 +172,9 @@ public class PathPattern {
         return pathSequence.getPathSequence();
     }
 
+    // evaluation mode always defaults to WALK here, QualifiedPathPattern has it actually set
     @Override
     public String toString() {
-        return pathSequence.toString();
+        return "variableName: " + variableName + ", pathSequence: " + pathSequence.toString();
     }
 }

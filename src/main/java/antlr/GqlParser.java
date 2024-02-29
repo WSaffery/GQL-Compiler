@@ -275,6 +275,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_query; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterQuery(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitQuery(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitQuery(this);
 			else return visitor.visitChildren(this);
@@ -331,6 +339,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_queryConjunction; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterQueryConjunction(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitQueryConjunction(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitQueryConjunction(this);
 			else return visitor.visitChildren(this);
@@ -386,6 +402,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_queryExpression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterQueryExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitQueryExpression(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitQueryExpression(this);
@@ -446,6 +470,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_focusedQueryExpression; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterFocusedQueryExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitFocusedQueryExpression(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitFocusedQueryExpression(this);
 			else return visitor.visitChildren(this);
@@ -502,6 +534,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_ambientQueryExpression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterAmbientQueryExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitAmbientQueryExpression(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitAmbientQueryExpression(this);
@@ -561,6 +601,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_focusedMatchClause; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterFocusedMatchClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitFocusedMatchClause(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitFocusedMatchClause(this);
 			else return visitor.visitChildren(this);
@@ -619,6 +667,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_matchClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterMatchClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitMatchClause(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitMatchClause(this);
@@ -688,6 +744,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_whereClause; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterWhereClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitWhereClause(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitWhereClause(this);
 			else return visitor.visitChildren(this);
@@ -730,6 +794,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_returnStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterReturnStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitReturnStatement(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitReturnStatement(this);
@@ -810,6 +882,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_pathPatternList; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterPathPatternList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitPathPatternList(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitPathPatternList(this);
 			else return visitor.visitChildren(this);
@@ -869,6 +949,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_pathPattern; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterPathPattern(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitPathPattern(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitPathPattern(this);
@@ -930,6 +1018,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_pathPatternPrefix; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterPathPatternPrefix(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitPathPatternPrefix(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitPathPatternPrefix(this);
 			else return visitor.visitChildren(this);
@@ -975,6 +1071,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_pathPatternExpression; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterPathPatternExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitPathPatternExpression(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitPathPatternExpression(this);
 			else return visitor.visitChildren(this);
@@ -1010,6 +1114,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_pathTerm; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterPathTerm(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitPathTerm(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitPathTerm(this);
@@ -1055,6 +1167,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_path; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterPath(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitPath(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitPath(this);
@@ -1111,6 +1231,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_nodePattern; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterNodePattern(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitNodePattern(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitNodePattern(this);
 			else return visitor.visitChildren(this);
@@ -1159,6 +1287,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_edgePattern; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterEdgePattern(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitEdgePattern(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitEdgePattern(this);
@@ -1231,6 +1367,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_fullEdgePointingLeft; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterFullEdgePointingLeft(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitFullEdgePointingLeft(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitFullEdgePointingLeft(this);
 			else return visitor.visitChildren(this);
@@ -1273,6 +1417,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_fullEdgeUndirected; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterFullEdgeUndirected(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitFullEdgeUndirected(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitFullEdgeUndirected(this);
 			else return visitor.visitChildren(this);
@@ -1314,6 +1466,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_fullEdgePointingRight; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterFullEdgePointingRight(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitFullEdgePointingRight(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitFullEdgePointingRight(this);
@@ -1362,6 +1522,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_elementPatternFiller; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterElementPatternFiller(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitElementPatternFiller(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitElementPatternFiller(this);
@@ -1449,6 +1617,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_propertyList; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterPropertyList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitPropertyList(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitPropertyList(this);
 			else return visitor.visitChildren(this);
@@ -1517,6 +1693,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_returnList; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterReturnList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitReturnList(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitReturnList(this);
 			else return visitor.visitChildren(this);
@@ -1574,6 +1758,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_returnItem; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterReturnItem(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitReturnItem(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitReturnItem(this);
 			else return visitor.visitChildren(this);
@@ -1625,6 +1817,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_setOperator; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterSetOperator(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitSetOperator(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitSetOperator(this);
@@ -1679,6 +1879,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unionOperator; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterUnionOperator(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitUnionOperator(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitUnionOperator(this);
@@ -1742,6 +1950,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_otherSetOperator; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterOtherSetOperator(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitOtherSetOperator(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitOtherSetOperator(this);
 			else return visitor.visitChildren(this);
@@ -1796,6 +2012,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_setQuantifier; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterSetQuantifier(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitSetQuantifier(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitSetQuantifier(this);
 			else return visitor.visitChildren(this);
@@ -1843,6 +2067,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_len; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterLen(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitLen(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitLen(this);
 			else return visitor.visitChildren(this);
@@ -1884,6 +2116,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_quantifier; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterQuantifier(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitQuantifier(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitQuantifier(this);
@@ -1950,6 +2190,14 @@ public class GqlParser extends Parser {
 		public TerminalNode TRUTH_VALUE() { return getToken(GqlParser.TRUTH_VALUE, 0); }
 		public BooleanComparisonContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterBooleanComparison(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitBooleanComparison(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitBooleanComparison(this);
 			else return visitor.visitChildren(this);
@@ -1965,6 +2213,14 @@ public class GqlParser extends Parser {
 		}
 		public PropertyReferenceContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterPropertyReference(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitPropertyReference(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitPropertyReference(this);
 			else return visitor.visitChildren(this);
@@ -1976,6 +2232,14 @@ public class GqlParser extends Parser {
 		}
 		public ValueExpressionContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterValueExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitValueExpression(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitValueExpression(this);
 			else return visitor.visitChildren(this);
@@ -1986,6 +2250,14 @@ public class GqlParser extends Parser {
 			return getRuleContext(NameContext.class,0);
 		}
 		public NameExpressionContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterNameExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitNameExpression(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitNameExpression(this);
@@ -2004,6 +2276,14 @@ public class GqlParser extends Parser {
 		}
 		public ValueComparisonContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterValueComparison(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitValueComparison(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitValueComparison(this);
 			else return visitor.visitChildren(this);
@@ -2021,6 +2301,14 @@ public class GqlParser extends Parser {
 		}
 		public ExpressionComparisonContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterExpressionComparison(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitExpressionComparison(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitExpressionComparison(this);
 			else return visitor.visitChildren(this);
@@ -2032,6 +2320,14 @@ public class GqlParser extends Parser {
 			return getRuleContext(ExprContext.class,0);
 		}
 		public NegatedExpressionContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterNegatedExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitNegatedExpression(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitNegatedExpression(this);
@@ -2180,6 +2476,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_isLabelExpr; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterIsLabelExpr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitIsLabelExpr(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitIsLabelExpr(this);
 			else return visitor.visitChildren(this);
@@ -2233,6 +2537,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_labelExpression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterLabelExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitLabelExpression(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitLabelExpression(this);
@@ -2294,6 +2606,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_labelTerm; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterLabelTerm(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitLabelTerm(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitLabelTerm(this);
 			else return visitor.visitChildren(this);
@@ -2350,6 +2670,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_labelFactor; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterLabelFactor(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitLabelFactor(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitLabelFactor(this);
 			else return visitor.visitChildren(this);
@@ -2405,6 +2733,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_labelNegation; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterLabelNegation(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitLabelNegation(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitLabelNegation(this);
 			else return visitor.visitChildren(this);
@@ -2448,6 +2784,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_labelPrimary; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterLabelPrimary(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitLabelPrimary(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitLabelPrimary(this);
@@ -2506,6 +2850,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_label; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterLabel(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitLabel(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitLabel(this);
 			else return visitor.visitChildren(this);
@@ -2539,6 +2891,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_labelWildcard; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterLabelWildcard(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitLabelWildcard(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitLabelWildcard(this);
@@ -2579,6 +2939,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_parenthesizedLabelExpression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterParenthesizedLabelExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitParenthesizedLabelExpression(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitParenthesizedLabelExpression(this);
@@ -2639,6 +3007,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_comparator; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterComparator(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitComparator(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitComparator(this);
 			else return visitor.visitChildren(this);
@@ -2682,6 +3058,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_booleanComparator; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterBooleanComparator(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitBooleanComparator(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitBooleanComparator(this);
@@ -2733,6 +3117,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_compOp; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterCompOp(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitCompOp(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitCompOp(this);
 			else return visitor.visitChildren(this);
@@ -2778,6 +3170,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_graphName; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterGraphName(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitGraphName(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitGraphName(this);
 			else return visitor.visitChildren(this);
@@ -2811,6 +3211,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_name; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterName(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitName(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitName(this);
@@ -2850,6 +3258,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_value; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterValue(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitValue(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitValue(this);
@@ -2894,6 +3310,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_pathVariable; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterPathVariable(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitPathVariable(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitPathVariable(this);
 			else return visitor.visitChildren(this);
@@ -2928,6 +3352,14 @@ public class GqlParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_elementVariable; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterElementVariable(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitElementVariable(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitElementVariable(this);
 			else return visitor.visitChildren(this);
@@ -2961,6 +3393,14 @@ public class GqlParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_key; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).enterKey(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GqlParserListener ) ((GqlParserListener)listener).exitKey(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GqlParserVisitor ) return ((GqlParserVisitor<? extends T>)visitor).visitKey(this);

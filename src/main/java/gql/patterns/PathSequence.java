@@ -88,4 +88,14 @@ public class PathSequence {
     public ArrayList<ElementPattern> getPathSequence() {
         return pathSequence;
     }
+
+    public String toString()
+    {
+        String s = "[ ";
+        for (ElementPattern e : pathSequence) {
+            s += e.toString() + " ";
+        }
+        s += " ]";
+        return s;
+    }
 }

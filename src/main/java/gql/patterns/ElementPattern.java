@@ -29,9 +29,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public abstract class ElementPattern {
-    VariableName variableName;
-    ArrayList<ArrayList<Label>> labels;
-    HashMap<GqlIdentifier, Value> properties;
+    public VariableName variableName;
+    public ArrayList<ArrayList<Label>> labels;
+    public HashMap<GqlIdentifier, Value> properties;
     int patternIndex = 0;
 
     public abstract BindingTable match();
