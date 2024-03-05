@@ -28,3 +28,10 @@ Notes on quirks of the current codebase for quick reference
 - Some of the databases in test break these rules (i.e. fullExampleGraph)
 
 
+# Changes
+
+- Labels
+    - Elements only have single labels in gremlin
+    - Intention for the project is to implement a subset of GQL with only single labels for each element
+    - Old code implements and tests usage of multiple labels
+    - Current bandaid is to grab the first label associated with a vertex as its canonical "label" and continue to store its full label set in the "labels" property.

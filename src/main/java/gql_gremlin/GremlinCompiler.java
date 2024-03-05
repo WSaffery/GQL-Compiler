@@ -146,6 +146,9 @@ public class GremlinCompiler {
         if (labels.length == 1)
         {
             traversal = traversal.hasLabel(labels[0]);
+
+            // traversal = traversal.and(traversal.values("labels"))
+            // travers
         }
         else if (labels.length > 1)
         {

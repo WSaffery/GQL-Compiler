@@ -102,7 +102,13 @@ public class GremlinGraph extends gql.graphs.Graph {
 
     private void addNodeToCurrentGraph(JsonNode node) {
         String id = node.identity;
-        GraphTraversal<Vertex, Vertex> pipe = this.currentGraph.addV().property(T.id, id);
+        
+        if (node.labels != null)
+            assert(node.labels.size() >= 1);
+
+        GraphTraversal<Vertex, Vertex> pipe = node.labels != null ?
+            this.currentGraph.addV(node.labels.get(0)).property(T.id, id) : 
+            this.currentGraph.addV().property(T.id, id);
 
         if (!(node.labels == null)) {
             pipe.property("labels", node.labels.clone());
@@ -132,7 +138,13 @@ public class GremlinGraph extends gql.graphs.Graph {
 
     private void addEdgeToCurrentGraph(JsonEdge edge) {
         String id = edge.identity;
-        GraphTraversal<Edge, Edge> pipe = this.currentGraph.addE("edge").property(T.id, id);
+
+        if (edge.labels != null)
+            assert(edge.labels.size() >= 1);
+
+        GraphTraversal<Edge, Edge> pipe = edge.labels != null ?
+            this.currentGraph.addE(edge.labels.get(0)).property(T.id, id) :
+            this.currentGraph.addE("edge").property(T.id, id);
 
         String sourceNodeId = edge.start;
         String targetNodeId = edge.end;

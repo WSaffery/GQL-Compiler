@@ -186,10 +186,16 @@ public class GremlinGraphTest extends GraphTest {
     }
 
     private void addNode(GraphTraversalSource graph, String id, Tuple2<ArrayList, Map> values) {
-        GraphTraversal<Vertex, Vertex> pipe = graph.addV().property(T.id, id);
+        ArrayList<String> labels = values.getFirst();
+        if (labels != null)
+            assert(labels.size() >= 1);
 
-        ArrayList labels = values.getFirst();
-        pipe.property("labels", labels);
+        GraphTraversal<Vertex, Vertex> pipe = labels != null ? 
+            graph.addV(labels.get(0)).property(T.id, id) :
+            graph.addV().property(T.id, id);
+
+        if (labels != null)
+            pipe.property("labels", labels.clone());
 
         Map properties = values.getSecond();
         properties.forEach((propertyId, value) -> {
@@ -206,14 +212,20 @@ public class GremlinGraphTest extends GraphTest {
     }
 
     private void addEdge(GraphTraversalSource graph, String id, Tuple5<String, String, ArrayList, Map, Boolean> values) {
-        GraphTraversal<Edge, Edge> pipe = graph.addE("edge").property(T.id, id);
+        ArrayList<String> labels = values.getThird();
+        if (labels != null)
+            assert(labels.size() >= 1);
+
+        GraphTraversal<Edge, Edge> pipe = labels != null ?
+            graph.addE(labels.get(0)).property(T.id, id) :
+            graph.addE("edge").property(T.id, id);
 
         String sourceNodeId = values.getFirst();
         String targetNodeId = values.getSecond();
         pipe.from(graph.V(sourceNodeId)).to(graph.V(targetNodeId));
 
-        ArrayList labels = values.getThird();
-        pipe.property("labels", labels);
+        if (labels != null)
+            pipe.property("labels", labels.clone());
 
         Map properties = values.getFourth();
         properties.forEach((propertyId, value) -> {
