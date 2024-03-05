@@ -30,6 +30,11 @@ public class FloatingPointNumber extends Value {
         this.floatingPointNumber = Double.parseDouble(floatingPointNumber);
     }
 
+    public double toValue()
+    {
+        return floatingPointNumber;
+    }
+
     @Override
     public TruthValue isEqualTo(Value valueToCompareTo) {
         if (valueToCompareTo.equals(new TruthValue(null))) {

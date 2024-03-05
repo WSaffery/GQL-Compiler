@@ -17,18 +17,28 @@
  * under the License.
  */
 
+import static gql_gremlin.helpers.GremlinHelpers.appendTraversal;
+
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
+import java.util.List;
+import java.util.Map;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalExplanation;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import antlr.GqlLexer;
 import antlr.GqlParser;
+import gql.graphs.GremlinGraph;
 import gql_gremlin.GqlProgram;
+import gql_gremlin.GremlinCompiler;
 import gql_gremlin.visitors.AstListener;
 // import gql_gremlin.visitors.AstVisitor;
 // import gql_gremlin.visitors.GremlinVisitor;
@@ -40,21 +50,40 @@ public class GqlGremlinApp {
         assert(args.length > 1);
         
         System.out.println(args[0]);
-        GqlLexer lexer = MakeGqlFileLexer(testQueryFolder + args[0]);
+        GqlLexer lexer = makeGqlFileLexer(testQueryFolder + args[0]);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GqlParser parser = new GqlParser(tokens);
         
         ParseTree antlrAST = parser.query();
-
         AstListener listener = new AstListener();
-
-        // visitor.visit(antlrAST);
-        // listener.enter(antlrAst);
         ParseTreeWalker.DEFAULT.walk(listener, antlrAST);
-
         GqlProgram program = listener.GetResult();
 
-        
+        printProgram(program);
+
+        GremlinCompiler compiler = new GremlinCompiler();
+
+        GraphTraversal<Vertex, Map<String,Object>> traversal = compiler.compileToTraversal(program);
+
+        TraversalExplanation expl = traversal.explain();
+
+        System.out.println("Final Traversal:");
+        System.out.println(expl.prettyPrint());
+
+        GremlinGraph graph = GremlinGraph.getInstance();
+        graph.setLocalGraph(program.graph);
+        GraphTraversalSource g = graph.currentGraph;
+
+        // takes anonymous traversal and applies it to our target graph
+        traversal = appendTraversal(g, traversal.asAdmin().getBytecode());
+
+        List<Map<String,Object>> res = traversal.toList();
+
+        System.out.println("result: " + res);
+    }
+
+    public static void printProgram(GqlProgram program)
+    {
         program.queries.get(0).print();
         for (int i = 1; i < program.queries.size(); i++)
         {
@@ -63,7 +92,7 @@ public class GqlGremlinApp {
         }
     }
 
-    public static GqlLexer MakeGqlFileLexer(String filePath)
+    public static GqlLexer makeGqlFileLexer(String filePath)
     {
         CharStream input = null;
 

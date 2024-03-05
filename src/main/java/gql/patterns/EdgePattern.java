@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class EdgePattern extends ElementPattern {
-    Direction direction;
-    int quantifier;
+    public Direction direction;
+    public int quantifier;
 
     public EdgePattern(VariableName id, ArrayList<ArrayList<Label>> labels, HashMap<GqlIdentifier, Value> properties, Direction direction, int quantifier) {
         this.variableName = id;

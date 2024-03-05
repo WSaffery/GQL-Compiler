@@ -23,7 +23,7 @@ import org.javatuples.Pair;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 
-import gql.graphs.Graph;
+// import gql.graphs.Graph;
 import gql.graphs.GremlinGraph;
 
 
@@ -51,6 +51,18 @@ public class NewGremlinApp {
 
         System.out.println("Outward traversal");
         directedTraversalDemo(g, Direction.OUT, 2);
+
+        // g.addE("e4").from(V("n2")).to(V("n1")).property("test", 123).property("test2", 1234).iterate();
+
+        // List<Map<Object,Object>> edges2 = g.E().hasLabel("e4").valueMap().toList();
+        // edges2.forEach(e -> System.out.println(e.toString()));
+
+
+        System.out.println("Match traversal");
+        matchDemo(g);
+
+        System.out.println("Match traversal 2");
+        matchDemo2(g);
     }
 
 
@@ -165,5 +177,56 @@ public class NewGremlinApp {
             toList();
         table.forEach(p -> System.out.println(p.toString()));
 
+    }
+
+
+    public static void matchDemo(GraphTraversalSource g) 
+    {
+    
+    // not quite
+    List<Map<String, Object>> table = g.V().
+            match(
+                as("x").toE(Direction.OUT).toV(Direction.IN).as("y").toE(Direction.OUT).toV(Direction.IN).as("z"),
+                as("y").toE(Direction.OUT).toV(Direction.IN).as("x").toE(Direction.OUT).toV(Direction.IN).as("y")
+            ).
+            select("x", "y", "z").
+            toList();
+
+    // "The provided match pattern is unsolvable"
+    // List<Map<String, Object>> table = g.V().
+    //         match(
+    //             as("x").toE(Direction.OUT).toV(Direction.IN).as("y1").toE(Direction.OUT).toV(Direction.IN).as("z"),
+    //             as("y2").toE(Direction.OUT).toV(Direction.IN).as("x").toE(Direction.OUT).toV(Direction.IN).as("y2")
+    //         ).
+    //         where("y1", P.eq("y2")).
+    //         select("x", "y2", "z").
+    //         toList();
+        table.forEach(p -> System.out.println(p.toString()));
+    }
+
+    public static void matchDemo2(GraphTraversalSource g) 
+    {
+        // folded down
+        List<Map<String, Object>> table = g.V().
+            match(
+                as("x").toE(Direction.OUT).toV(Direction.IN).as("y"),
+                as("y").toE(Direction.OUT).toV(Direction.IN).as("z"),
+                as("y").toE(Direction.OUT).toV(Direction.IN).as("x"),
+                as("x").toE(Direction.OUT).toV(Direction.IN).as("y")
+            ).
+            select("x", "y", "z").
+            toList();
+
+        GraphTraversal<Vertex, Map<String, Object>> tr = g.V().
+            match(
+                as("x").toE(Direction.OUT).toV(Direction.IN).as("y"),
+                as("y").toE(Direction.OUT).toV(Direction.IN).as("z"),
+                as("y").toE(Direction.OUT).toV(Direction.IN).as("x"),
+                as("x").toE(Direction.OUT).toV(Direction.IN).as("y")
+            ).
+            select("x", "y", "z");
+
+        // works just fine
+        table.forEach(p -> System.out.println(p.toString()));
     }
 }

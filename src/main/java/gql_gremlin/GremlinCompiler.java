@@ -1,30 +1,46 @@
 package gql_gremlin;
 
-import antlr.GqlLexer;
+import gql.enums.EvaluationMode;
 import gql.enums.QueryConjunctor;
 import gql.expressions.Expression;
 import gql.expressions.references.NameExpression;
+import gql.expressions.references.PropertyReference;
+import gql.expressions.values.FloatingPointNumber;
+import gql.expressions.values.GqlIdentifier;
+import gql.expressions.values.GqlString;
 import gql.expressions.values.Label;
+import gql.expressions.values.TruthValue;
+import gql.expressions.values.Value;
 import gql.patterns.EdgePattern;
 import gql.patterns.ElementPattern;
+import gql.patterns.NodePattern;
 import gql.patterns.QualifiedPathPattern;
 import gql.returns.ReturnExpression;
 import gql.returns.ReturnItem;
 import gql.returns.ReturnStatement;
 
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+// import com.tinkerpop.blueprints.Direction;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
+import static gql_gremlin.helpers.GremlinHelpers.*;
 
-import java.io.IOException;
-import java.nio.file.NoSuchFileException;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+
+enum GQLDirection {
+    UNDIRECTED,
+    RIGHT_TO_LEFT,
+    LEFT_TO_RIGHT
+}
 
 // essentially takes the place of GqlFileQueryEvaluator
 public class GremlinCompiler {
@@ -51,83 +67,306 @@ public class GremlinCompiler {
         E
     }
 
-    public GraphTraversal<?, ?> compileToTraversal(QualifiedPathPattern pathPattern)
+    public String[] getLabelStrings(ArrayList<ArrayList<Label>> labels)
     {
-        GraphTraversal<?, ?> traversal = null;
-        LastTraversed lastTraversed = null;
-        // Store Traversal sidedness in enum
-        // Set initial traversal including start using first element of path sequence
-        for (ElementPattern pattern : pathPattern.pathPattern().getPathSequence())
+        if (labels.size() == 0)
         {
-            if (pattern instanceof EdgePattern) 
+            System.out.println("Fully empty label set");
+            return new String[0];
+        }
+        else if (labels.get(0).size() == 0)
+        {
+            System.out.println("Inner empty label set");
+            return new String[0];
+        }
+        else if (labels.size() != 1 || labels.get(0).size() != 1)
+        {
+            System.out.println("Too many label sets");
+            return null;
+        }
+        else 
+        {
+            return new String[] { labels.get(0).get(0).toString() };
+        }
+    }
+
+    public GraphTraversal<Edge, Edge> startTraversal(EdgePattern edgePattern)
+    {
+        GraphTraversal<Edge, Edge> startTraversal = start();
+
+        // list of label lists
+        // we match any object that has all the labels in any one of our label lists
+        // for now, simply assert there's only one label list
+        if (edgePattern.labels != null) 
+        {
+
+            String[] labelStrings = getLabelStrings(edgePattern.labels);
+            if (labelStrings.length == 1)
             {
-                EdgePattern edgePattern = (EdgePattern) pattern;
-                if (lastTraversed == null) 
-                {
-                    GraphTraversal<Edge, Edge> startTraversal = start();
-                    traversal = startTraversal;
-                    lastTraversed = LastTraversed.E;
-
-                    // list of label lists
-                    // we match any object that has all the labels in any one of our label lists
-                    // for now, simply assert there's only one label list
-                    if (edgePattern.labels != null) 
-                    {
-                        if (edgePattern.labels.size() == 1)
-                        {
-                            ArrayList<Label> labels = edgePattern.labels.get(0);
-                            if (labels.size() == 1) {
-                                traversal.hasLabel(labels.get(0).toString());
-                            }
-                            else 
-                            {
-                                String labelString1 = labels.get(0).toString();
-                                ArrayList<String> labelStrings = new ArrayList<>();
-                                for (Label l : labels.subList(1, labels.size()))
-                                {
-                                    labelStrings.add(l.toString());
-                                }
-                                traversal.hasLabel(labelString1, (String[]) labelStrings.toArray());
-                            }
-                        }
-                        else 
-                        {
-                            System.out.println("Multi label set patterns not supported");
-                        }
-                    }
-
-                    if (edgePattern.properties != null) 
-                    {
-                        System.out.println("Property patterns not supported");
-                    }
-                    
-
-                    if (edgePattern.variableName != null)
-                    {
-                        traversal.as(edgePattern.variableName.getId());
-                    }
-                }
-
-
+                startTraversal = startTraversal.hasLabel(labelStrings[0]);
             }
+            else if (labelStrings.length > 1)
+            {
+                System.out.println("Too many labels!");
+            }
+        }
+        
+
+        if (edgePattern.variableName != null)
+        {
+            startTraversal = startTraversal.as(edgePattern.variableName.getId());
+        }
+        
+        return startTraversal;
+    }
+
+    public static <A> GraphTraversal<A, A> startTraversal() 
+    {
+        GraphTraversal<A, A> startTraversal = start();
+
+        return startTraversal;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T[] safeToArray(List<T> list)
+    {
+        if (list == null)
+        {
+            Object[] empty = new Object[0];
+            return (T[]) empty;
+        }
+        else {
+            return (T[]) list.toArray();
+        }
+    }
+
+    public GraphTraversal<?, ?> filterByPattern(GraphTraversal<?, ?> traversal, ElementPattern pattern)
+    {
+        String[] labels = getLabelStrings(pattern.labels);
+        if (labels.length == 1)
+        {
+            traversal = traversal.hasLabel(labels[0]);
+        }
+        else if (labels.length > 1)
+        {
+            System.out.println("Too many labels in edge pattern");
+        }
+
+        for (Entry<GqlIdentifier, Value> item : pattern.properties.entrySet())
+        {
+            Value value = item.getValue();
+            if (value instanceof FloatingPointNumber)
+            {
+                FloatingPointNumber num = (FloatingPointNumber) value;
+                traversal = traversal.has(item.getKey().getId(), num.toValue());
+            }
+            else if (value instanceof GqlString)
+            {
+                GqlString str = (GqlString) value;
+                traversal = traversal.has(item.getKey().getId(), str.toString());
+            }
+            else if (value instanceof TruthValue)
+            {
+                TruthValue bool = (TruthValue) value;
+                traversal = traversal.has(item.getKey().getId(), bool.isTrue());
+            }
+            else 
+            {
+                System.out.println("Property Value of type " + value.getClass().getName() + " is not supported");
+            }
+            
         }
 
         return traversal;
     }
 
-
-    public GraphTraversal<?, ?> compileToTraversal(MatchExpression matchExpression, ReturnStatement returnStatement)
+    // TODO:
+    // Match doesn't work over arbitrary traversals with arbitrary labels
+    // Only works with a start label and an end label
+    // need to split up paths into start end pairs
+    public GraphTraversal<?, ?> compileToTraversal(QualifiedPathPattern pathPattern)
     {
-        GraphTraversal<Vertex, Vertex> traversal = V();
+        GraphTraversal<?, ?> traversal = null;
+        // Store Traversal sidedness in enum
+        // Set initial traversal including start using first element of path sequence
+        int i = 0;
+        final int end = pathPattern.pathPattern().getPathSequence().size();
+        for (ElementPattern pattern : pathPattern.pathPattern().getPathSequence())
+        {
+            if (pattern instanceof EdgePattern) 
+            {
+                EdgePattern edgePattern = (EdgePattern) pattern;
+                if (traversal == null) 
+                {
+                    String startLabel = edgePattern.variableName == null ? 
+                        "START!" + pathPattern.hashCode() : 
+                        edgePattern.variableName.getId(); 
+                
+                    traversal = as(startLabel);
+
+                    traversal = filterByPattern(traversal, edgePattern);
+                    traversal = traversal.toV(toGremlinDirection(edgePattern.direction));
+                }
+                else {
+                    // can use labels parameter in toE, but hasLabels is added in filterByPattern anyway
+                    traversal = traversal.toE(toGremlinDirection(edgePattern.direction));
+                    traversal = filterByPattern(traversal, edgePattern);
+
+                    if (edgePattern.variableName != null)
+                    {
+                        traversal = traversal.as(edgePattern.variableName.getId());
+                    }
+
+                    traversal = traversal.toV(toGremlinDirection(edgePattern.direction));
+                    
+                }
+            }
+            else if (pattern instanceof NodePattern)
+            {
+                NodePattern nodePattern = (NodePattern) pattern;
+                if (traversal == null)
+                {
+                    String startLabel = nodePattern.variableName == null ? 
+                        "START!" + pathPattern.hashCode() : 
+                        nodePattern.variableName.getId(); 
+                
+                    traversal = as(startLabel);
+
+                    // traversal = GremlinCompiler.<Vertex>startTraversal();
+                    traversal = filterByPattern(traversal, nodePattern);
+                }
+                else 
+                {
+                    traversal = filterByPattern(traversal, nodePattern);
+                    if (nodePattern.variableName != null && i == end-1)
+                    {
+                        traversal = traversal.as(nodePattern.variableName.getId());
+                    }
+                }
+            }
+            else 
+            {
+                System.out.println("Pattern of type " + pattern.getClass().getName() + " is not supported");
+            }
+            i += 1;
+        }
+
+        return traversal;
+    }
+
+    public GraphTraversal<?, ?> compileToTraversal(MatchPattern matchPattern)
+    {
+        GraphTraversal<?, ?> traversal = null;
+
+        KeyPattern head = matchPattern.headPattern();
+        KeyPattern tail = matchPattern.tailPattern();
+
+
+        if (head.label() != null)
+        {
+            traversal = as(head.label());
+        }
+
+        traversal = filterByPattern(traversal, head.pattern());
+        if (head.pattern() instanceof EdgePattern)
+        {
+            EdgePattern headEdgePattern = (EdgePattern) head.pattern();
+            traversal = traversal.toV(toGremlinDirection(headEdgePattern.direction).opposite());
+        }
+        else
+        {
+            assert(head.pattern() instanceof NodePattern);
+        }
+
+        for (ElementPattern pattern : matchPattern.middlePatterns())
+        {
+            assert(pattern.variableName == null);
+            if (pattern instanceof EdgePattern) 
+            {
+                EdgePattern edgePattern = (EdgePattern) pattern;
+                // can use labels parameter in toE, but hasLabels is added in filterByPattern anyway
+                traversal = traversal.toE(toGremlinDirection(edgePattern.direction));
+                traversal = filterByPattern(traversal, edgePattern);
+                traversal = traversal.toV(toGremlinDirection(edgePattern.direction).opposite());
+            }
+            else if (pattern instanceof NodePattern)
+            {
+                NodePattern nodePattern = (NodePattern) pattern;
+                traversal = filterByPattern(traversal, nodePattern);
+            }
+            else 
+            {
+                System.out.println("Pattern of type " + pattern.getClass().getName() + " is not supported");
+            }
+        }
+
+        if (tail.label() != null)
+        {
+            traversal = traversal.as(tail.label());
+        }
+
+        traversal = filterByPattern(traversal, tail.pattern());
+        if (head.pattern() instanceof EdgePattern)
+        {
+            EdgePattern tailEdgePattern = (EdgePattern) tail.pattern();
+            traversal = traversal.toE(toGremlinDirection(tailEdgePattern.direction));
+        }
+        else
+        {
+            assert(tail.pattern() instanceof NodePattern);
+        }
+
+
+        System.out.println("match traversal: " + traversal.explain().prettyPrint());
+        return traversal;
+    }
+
+    public GraphTraversal<?, ?> startMatch(QualifiedPathPattern pathPattern)
+    {
+        ElementPattern pattern1 = pathPattern.pathPattern().getPathSequence().get(0);
+        if (pattern1 instanceof NodePattern)
+        {
+            return V();
+        }
+        else 
+        {
+            GraphTraversal<Edge, Edge> startTraversal = start();
+            return startTraversal;
+        }
+    }
+
+    public GraphTraversal<Vertex, Vertex> vertexStart()
+    {
+        return start();
+    }
+
+    public GraphTraversal<Vertex, Map<String,Object>> compileToTraversal(MatchExpression matchExpression, ReturnStatement returnStatement)
+    {
         ArrayList<GraphTraversal<?,?>> traversals = new ArrayList<>();
+        
+        ArrayList<MatchPattern> matchPatterns = new ArrayList<>();
+
 
         for (QualifiedPathPattern p : matchExpression.pathPatterns)
         {
-            traversals.add(compileToTraversal(p));
+            if (p.evaluationMode() == EvaluationMode.WALK)
+            {
+                matchPatterns.addAll(MatchPatternFactory.makeMatchPatterns(p.pathPattern()));
+            }
+            else 
+            {
+                System.out.printf("Evaluation mode %s not supported%n", p.evaluationMode().toString());
+            }
         }
 
-        GraphTraversal<?,?>[] traversalArray = (GraphTraversal<?, ?>[]) traversals.toArray();
-        traversal.match(traversalArray);
+        for (MatchPattern m : matchPatterns)
+        {
+            traversals.add(compileToTraversal(m));
+        }
+
+        GraphTraversal<?,?>[] traversalArray = traversals.toArray(new GraphTraversal<?, ?>[0]);
+        
+        GraphTraversal<Vertex, Map<String,Object>> traversal = vertexStart().V().match(traversalArray);
 
         if (matchExpression.whereClause.isPresent())
         {
@@ -136,39 +375,51 @@ public class GremlinCompiler {
             System.out.println("Where clause unsupported");
         }
 
+
         return traversal;
     }
 
-    public static void variadicSelect(GraphTraversal<?, ?> traversal, ArrayList<String> selectKeys)
+
+    public static GraphTraversal<Vertex, Map<String,Object>> variadicSelect(GraphTraversal<Vertex, ?> traversal, AbstractCollection<String> selectKeys)
     {
         if (selectKeys.size() == 0) {
-            return;
+            return null;
         }
-        else if (selectKeys.size() == 1)
+
+        String[] array = selectKeys.toArray(new String[0]);
+
+        if (array.length == 1)
         {
-            traversal.select(selectKeys.get(0));
+            return traversal.select(array[0]);
         }
-        else if (selectKeys.size() == 2) 
+        else if (array.length == 2)
         {
-            traversal.select(selectKeys.get(0), selectKeys.get(1));
+            return traversal.select(array[0], array[1]);
         }
-        else {
-            String[] subarray = (String[]) selectKeys.subList(2, selectKeys.size()).toArray();
-            traversal.select(selectKeys.get(0), selectKeys.get(1), subarray);
+        else 
+        {
+            // avoids using copyOfRange explicitly, does so implicitly
+            String[] subarray = Arrays.asList(array).subList(2, array.length).toArray(new String[0]);
+            return traversal.select(array[0], array[1], subarray);
         }
     }
 
-    public GraphTraversal<Vertex, Vertex> compileToTraversal(GqlQuery query)
+    public GraphTraversal<Vertex, Map<String,Object>> compileToTraversal(GqlQuery query)
     {
-        GraphTraversal<Vertex, Vertex> traversal = V();
-        ArrayList<GraphTraversal<?,?>> traversals = new ArrayList<>();
+        // GraphTraversal<Vertex, Vertex> traversal = V();
 
-        for (MatchExpression m : query.matchExpressions)
+        if (query.matchExpressions.size() > 1)
         {
-            traversals.add(compileToTraversal(m, query.returnStatement));
+            System.out.println("Multi match programs not supported");
+            return null;
         }
 
+
+        GraphTraversal<Vertex,?> traversal = compileToTraversal(query.matchExpressions.get(0), query.returnStatement);
+
         ArrayList<String> returnNames = new ArrayList<>();
+        ArrayList<Entry<String,String>> returnReferences = new ArrayList<>();
+
         for (ReturnItem item : query.returnStatement.getReturnItems())
         {
             if (item instanceof ReturnExpression)
@@ -179,6 +430,19 @@ public class GremlinCompiler {
                     NameExpression nameExpr = (NameExpression) expr;
                     returnNames.add(nameExpr.getName().getId());
                 }
+                else if (expr instanceof PropertyReference)
+                {
+                    PropertyReference propertyReference = (PropertyReference) expr;
+                    String referenceName = propertyReference.name.getName().getId();
+                    String referenceKey = propertyReference.key.getId();
+                    returnReferences.add(Map.entry(
+                        referenceName,
+                        referenceKey));
+
+                    returnNames.add(referenceName);
+                    // should indicate this is only required for the reference
+                    // and not be included in actual output
+                }
                 else 
                 {
                     System.out.println("Unsupported return item");
@@ -186,29 +450,43 @@ public class GremlinCompiler {
             }
         }
 
-        GraphTraversal<?,?>[] traversalArray = (GraphTraversal<?, ?>[]) traversals.toArray();
-        traversal.match(traversalArray);
+        HashSet<String> selectedNames = new HashSet<>(returnNames);
+        for (Entry<String, String> e : returnReferences)
+        {
+            selectedNames.add(e.getKey());
+        }
 
-        variadicSelect(traversal, returnNames);
+        // GraphTraversal<?,?>[] traversalArray = traversals.toArray(new GraphTraversal<?, ?>[0]);
+        // traversal = union(traversalArray);
 
-        return traversal;
+        // GraphTraversal<Vertex, Map<String,Object>> intermediary = variadicSelect(traversal, selectedNames);
+
+        // for (Entry<String, String> e : returnReferences)
+        // {
+        //     intermediary = intermediary.from(e.getKey()).values(e.getValue());
+        // }
+
+
+        GraphTraversal<Vertex, Map<String,Object>> result = variadicSelect(traversal, returnNames);
+        
+        return result;
     }
 
     // discards graphName information from focused match clauses
-    public GraphTraversal<Vertex, Vertex> compileToTraversal(GqlProgram program)
+    public GraphTraversal<Vertex, Map<String,Object>> compileToTraversal(GqlProgram program)
     {
         if (program.queries.size() == 1)
         {
             return compileToTraversal(program.queries.get(0));
         }
 
-        ArrayList<GraphTraversal<Vertex, Vertex>> queryTraversals = new ArrayList<>();
+        ArrayList<GraphTraversal<Vertex, Map<String,Object>>> queryTraversals = new ArrayList<>();
         for (GqlQuery query : program.queries) 
         {
             queryTraversals.add(compileToTraversal(query));
         }
 
-        GraphTraversal<Vertex, Vertex> fullTraversal = queryTraversals.get(0);
+        GraphTraversal<Vertex, Map<String,Object>> fullTraversal = queryTraversals.get(0);
         for (int i = 1; i < queryTraversals.size(); i++)
         {
             fullTraversal = conjoinTraversals(

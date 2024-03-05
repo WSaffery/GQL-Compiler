@@ -43,6 +43,7 @@ public class Label {
         return Objects.hash(label);
     }
 
+    // returns identifying string of the label, "nil" if nulled.
     @Override
     public String toString() {
         return this.label.toString();
@@ -50,5 +51,10 @@ public class Label {
 
     public String toLatex() {
         return this.label.toString();
+    }
+
+    // returns identifying string of the label, null if nulled.
+    public String getId() {
+        return label.getId();
     }
 }

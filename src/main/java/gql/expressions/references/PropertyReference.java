@@ -27,8 +27,8 @@ import gql.graphs.GqlGraphElement;
 import gql.tables.Record;
 
 public class PropertyReference extends Expression {
-    NameExpression name;
-    GqlIdentifier key;
+    public NameExpression name;
+    public GqlIdentifier key;
 
     public PropertyReference(String name, String key) {
         this.name = new NameExpression(name);

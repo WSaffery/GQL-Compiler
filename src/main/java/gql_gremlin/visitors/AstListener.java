@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import antlr.GqlParserBaseListener;
 import antlr.GqlParser.FocusedMatchClauseContext;
+import antlr.GqlParser.FocusedQueryExpressionContext;
 import antlr.GqlParser.MatchClauseContext;
 import antlr.GqlParser.OtherSetOperatorContext;
 import antlr.GqlParser.PathPatternContext;
@@ -48,6 +49,12 @@ public class AstListener extends GqlParserBaseListener {
     public void exitQueryExpression(QueryExpressionContext ctx)
     {
         currentQuery = null;
+    }
+
+    public void enterFocusedMatchClause(FocusedMatchClauseContext ctx)
+    {
+        assert(result.graph == null || result.graph == ctx.graphName().getText());
+        result.graph = ctx.graphName().getText();
     }
 
     public void enterMatchClause(MatchClauseContext ctx)
