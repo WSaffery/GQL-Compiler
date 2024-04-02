@@ -63,6 +63,15 @@ public class NewGremlinApp {
 
         System.out.println("Match traversal 2");
         matchDemo2(g);
+
+        System.out.println("Fake Match traversal");
+        fakeMatchDemo(g);
+
+        System.out.println("Fake Match traversal 2");
+        fakeMatchDemo2(g);
+
+        System.out.println("Fake Match traversal 3");
+        fakeMatchDemo3(g);
     }
 
 
@@ -209,12 +218,13 @@ public class NewGremlinApp {
         // folded down
         List<Map<String, Object>> table = g.V().
             match(
-                as("x").toE(Direction.OUT).toV(Direction.IN).as("y"),
+                as("x").identity().as("x1").toE(Direction.OUT).toV(Direction.IN).as("y"),
                 as("y").toE(Direction.OUT).toV(Direction.IN).as("z"),
                 as("y").toE(Direction.OUT).toV(Direction.IN).as("x"),
                 as("x").toE(Direction.OUT).toV(Direction.IN).as("y")
             ).
-            select("x", "y", "z").
+            select("x", "y", "z", "x1").
+            by().by().by().by(valueMap()).
             toList();
 
         GraphTraversal<Vertex, Map<String, Object>> tr = g.V().
@@ -224,9 +234,104 @@ public class NewGremlinApp {
                 as("y").toE(Direction.OUT).toV(Direction.IN).as("x"),
                 as("x").toE(Direction.OUT).toV(Direction.IN).as("y")
             ).
-            select("x", "y", "z");
+            select("x", "y", "z", "z");
 
         // works just fine
         table.forEach(p -> System.out.println(p.toString()));
     }
+
+    // works!
+    public static void fakeMatchDemo(GraphTraversalSource g) 
+    {
+    List<Map<String, Object>> table = g.V().
+        as("x", "x1").toE(Direction.OUT).toV(Direction.IN).as("y").toE(Direction.OUT).toV(Direction.IN).as("z").
+        select("y").to(Direction.OUT).where(P.eq("x")).to(Direction.OUT).where(P.eq("y")).
+        select("x", "y", "z", "x1").
+        by().by().by().by(valueMap()).
+        toList();
+
+    table.forEach(p -> System.out.println(p.toString()));
+    }
+
+
+    // Q1
+    // x -> y > z
+    // y -> x -> y
+
+    // Q2
+    // x -> y > z
+    // a -> x
+    // a -> b -> a
+    // if there's a shared variable center on it and select
+    // otherwise use union
+    // but what if there's a path with a shared variable with two distinct universes
+    // add it after the union?
+
+    // approaches
+    // aggregate and cap
+    // product
+    // very long traversal with skips back using select
+    // this works but now we just have one long chain
+    // can't use matches counting algorithm to order our traversals nicely
+
+    // to do implement this for everything
+
+    public static void fakeMatchDemo2(GraphTraversalSource g) 
+    {
+    List<Map<String, Object>> table = g.V().
+        as("x").
+        out().
+        as("y"). 
+        out(). 
+        as("z"). 
+        select("x").
+        in(). 
+        as("a"). 
+        out(). 
+        as("b").
+        out().
+        where(P.eq("a")).
+        select("x", "y", "z", "a", "b").
+        toList();
+
+    table.forEach(p -> System.out.println(p.toString()));
+    }
+
+    // ACYLIC x -> y -> z
+    public static void fakeMatchDemo3(GraphTraversalSource g) 
+    {
+    List<Map<String, Object>> table = g.V().
+        as("x").
+        out().
+        as("y"). 
+        out(). 
+        as("z").
+        simplePath().
+        select("x", "y", "z").
+        toList();
+
+    table.forEach(p -> System.out.println(p.toString()));
+    }
+
+    // doesn't work
+    // public static void newMatchDemo(GraphTraversalSource g) 
+    // {
+    //     List<Map<String, Object>> table = g.V().
+    //     match(
+    //         as("x"),
+    //         as("y"),
+    //         as("z"),
+    //         as("a"),
+    //         as("b"),
+    //         as("x").out().where(P.eq("y")).out().as("z"),
+    //         as("a").out().as("x"),
+    //         as("a").out().where(P.eq("b")).out().as("a")
+    //     ).
+    //     select("x", "y", "z", "a", "b").
+    //     toList();
+
+    //     table.forEach(p -> System.out.println(p.toString()));
+    // }
+    
+    
 }

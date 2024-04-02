@@ -2,6 +2,7 @@ package gql_gremlin;
 
 import gql.enums.EvaluationMode;
 import gql.enums.QueryConjunctor;
+import gql.enums.SetQuantifier;
 import gql.expressions.Expression;
 import gql.expressions.references.NameExpression;
 import gql.expressions.references.PropertyReference;
@@ -15,6 +16,7 @@ import gql.patterns.EdgePattern;
 import gql.patterns.ElementPattern;
 import gql.patterns.NodePattern;
 import gql.patterns.QualifiedPathPattern;
+import gql.returns.Asterisk;
 import gql.returns.ReturnExpression;
 import gql.returns.ReturnItem;
 import gql.returns.ReturnStatement;
@@ -30,6 +32,7 @@ import static gql_gremlin.helpers.GremlinHelpers.*;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +44,18 @@ enum GQLDirection {
     RIGHT_TO_LEFT,
     LEFT_TO_RIGHT
 }
+
+record PropertyResult(
+    String propertyKey,
+    String alias
+)
+{}
+
+record MatchPropertyResults (
+    List<PropertyResult> headPropertyResult,
+    List<PropertyResult> endPropertyResult
+)
+{}
 
 // essentially takes the place of GqlFileQueryEvaluator
 public class GremlinCompiler {
@@ -269,7 +284,7 @@ public class GremlinCompiler {
         return start();
     }
 
-    public GraphTraversal<Vertex, Map<String,Object>> compileToTraversal(MatchExpression matchExpression, ReturnStatement returnStatement)
+    public GraphTraversal<Vertex, Map<String,Object>> compileToTraversal(MatchExpression matchExpression)
     {
         ArrayList<GraphTraversal<?,?>> traversals = new ArrayList<>();
         
@@ -343,20 +358,26 @@ public class GremlinCompiler {
             return null;
         }
 
-
-        GraphTraversal<Vertex,?> traversal = compileToTraversal(query.matchExpressions.get(0), query.returnStatement);
-
+        ArrayList<String> fullReturnNames = new ArrayList<>();
         ArrayList<String> returnNames = new ArrayList<>();
-        ArrayList<Entry<String,String>> returnReferences = new ArrayList<>();
+        
+
+ 
+        // reference name [element label] : {(reference key [property name], alias [value label]), ...}        
+        HashMap<String, List<PropertyResult>> returnReferences = new HashMap<>();
 
         for (ReturnItem item : query.returnStatement.getReturnItems())
         {
             if (item instanceof ReturnExpression)
             {
-                Expression expr = ((ReturnExpression) item).getExpression();
+                ReturnExpression returnExpression = (ReturnExpression) item;
+                Expression expr = returnExpression.getExpression();
+                String alias = returnExpression.getName().getId();
+
                 if (expr instanceof NameExpression) 
                 {
                     NameExpression nameExpr = (NameExpression) expr;
+                    fullReturnNames.add(nameExpr.getName().getId());
                     returnNames.add(nameExpr.getName().getId());
                 }
                 else if (expr instanceof PropertyReference)
@@ -364,13 +385,11 @@ public class GremlinCompiler {
                     PropertyReference propertyReference = (PropertyReference) expr;
                     String referenceName = propertyReference.name.getName().getId();
                     String referenceKey = propertyReference.key.getId();
-                    returnReferences.add(Map.entry(
-                        referenceName,
-                        referenceKey));
+                    
+                    returnReferences.putIfAbsent(referenceName, new ArrayList<>());
+                    returnReferences.get(referenceName).add(new PropertyResult(referenceKey, alias));
 
-                    returnNames.add(referenceName);
-                    // should indicate this is only required for the reference
-                    // and not be included in actual output
+                    returnNames.add(alias);
                 }
                 else 
                 {
@@ -379,26 +398,30 @@ public class GremlinCompiler {
             }
         }
 
-        HashSet<String> selectedNames = new HashSet<>(returnNames);
-        for (Entry<String, String> e : returnReferences)
+
+        GraphTraversal<Vertex, Map<String,Object>> traversal = 
+            compileToTraversal(query.matchExpressions.get(0));
+
+        if (query.returnStatement.getSetQuantifier() != SetQuantifier.ALL)
         {
-            selectedNames.add(e.getKey());
+            System.out.println("Distinct not currently supported");
         }
 
-        // GraphTraversal<?,?>[] traversalArray = traversals.toArray(new GraphTraversal<?, ?>[0]);
-        // traversal = union(traversalArray);
+        // return everything matched
+        if (query.returnStatement.getReturnItems().size() == 1 
+            && query.returnStatement.getReturnItems().get(0) instanceof Asterisk)
+        {
+            return traversal;
+        }
 
-        // GraphTraversal<Vertex, Map<String,Object>> intermediary = variadicSelect(traversal, selectedNames);
+        traversal = variadicSelect(traversal, returnNames);
 
-        // for (Entry<String, String> e : returnReferences)
-        // {
-        //     intermediary = intermediary.from(e.getKey()).values(e.getValue());
-        // }
-
-
-        GraphTraversal<Vertex, Map<String,Object>> result = variadicSelect(traversal, returnNames);
+        for (String returnName : returnNames)
+        {
+            traversal = traversal.by(start().valueMap());
+        }
         
-        return result;
+        return traversal;
     }
 
     // discards graphName information from focused match clauses
