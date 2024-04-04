@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Path;
+import org.apache.tinkerpop.gremlin.process.traversal.Pop;
 import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal.Admin;
 import org.apache.tinkerpop.gremlin.process.traversal.TraversalStrategy;
@@ -100,8 +101,8 @@ public class NewGremlinApp {
         System.out.println("Aggriter traversal");
         aggrIterDemo(g_cyclic);
 
-        System.out.println("Map tests");
-        mapTestDemo(g_cyclic);
+        // System.out.println("Map tests");
+        // mapTestDemo(g_cyclic);
     }
 
 
@@ -559,8 +560,7 @@ public class NewGremlinApp {
 
         System.out.println("Aggr Iter");
         
-        // is there any problems from emit + local and then traversers dying in a later match?
-        // or is it fine and that'd  only be bad with emit + global
+        // WORKS
         List<Map<String,Object>> table1 = g.V("n1").
             as("x").
             sideEffect(e -> System.out.println("a: " + e)).
@@ -568,84 +568,49 @@ public class NewGremlinApp {
             as("e1").
             otherV().
             repeat(
-                // sideEffect(id().aggregate(Scope.local,"y").by(loops())).
-                // as("b").
-                // outE().
-                // sideEffect(id().aggregate(Scope.local,"e2").by(loops())).
-                // otherV().
-                // as("c")
-                // sideEffect(id().aggregate(Scope.local,"z").by(loops()))
                 as("y").
                 outE(). 
                 as("e2").
                 otherV().
-                aggregate(Scope.local, "z").
-                sideEffect(loops().as("l"))
-                // sideEffect(e -> System.out.println("z: " + e)).
-                // sideEffect(
-                //     loops().as("l").
-                //     select("y", "e2", "z", "l").
-                //     sideEffect(e -> System.out.println("d: " + e)).
-                //     as("t")
-                // )
+                as("z")
             ).
             times(2).
             emit(loops().is(P.gt(0))).
-            select("x", "y", "z", "l").
-            // dedup().
-            // path().
+            select(Pop.all,"x", "e1", "y", "e2", "z").
             toList();
         table1.forEach(p -> System.out.println(p.toString()));
-        // not darn working
-        // System.out.println(g.V().call("--list").toList());
 
-        System.out.println("Aggr Iter path");
-        List<Path> table2 = g.V("n1").
-        as("x").
-        outE(). 
-        as("e1"). 
-        otherV().
-        repeat(
-            aggregate(Scope.local, "y").
-            // as("b").
-            outE().
-            aggregate(Scope.local, "e2"). 
+        System.out.println("Union join");
+        @SuppressWarnings("unchecked")
+        List<?> table2 = g.V("n1").
+            as("x").
+            sideEffect(e -> System.out.println("a: " + e)).
+            outE(). 
+            as("e1").
             otherV().
-            // as("c")
-            aggregate(Scope.local, "z")
-        ).
-        times(2).
-        emit(loops().is(P.gt(0))).
-        // select("a", "e1" ,"b", "e2","c").
-        path().
-        toList();
-    table2.forEach(p -> System.out.println(p.toString()));
-
-    System.out.println("Aggr Iter 2");
-    List<Map<String,Object>> table3 = g.V("n1").
-        as("x").
-        outE(). 
-        as("e1"). 
-        otherV().
-        barrier().
-        flatMap(
             repeat(
-                group("y").by(loops()).
-                outE().
-                group("e2").by(loops()).
+                as("y").
+                outE(). 
+                as("e2").
                 otherV().
-                group("z").by(loops())
+                as("z")
             ).
             times(2).
-            emit(loops().is(P.gt(0)))    
-        ).
-        select("x", "e1" ,"y", "e2","z").
-        // path().
-        toList();
-    table3.forEach(p -> System.out.println(p.toString()));
+            emit(loops().is(P.gt(0))).
+            local(
+                union(
+                    select(Pop.last,"x").project("x"),
+                    select(Pop.all, "e1", "y", "e2", "z")
+                ).
+                unfold(). 
+                group(). 
+                by(select(Column.keys)).
+                by(select(Column.values))
+            ).
+            toList();
+        table2.forEach(p -> System.out.println(p.toString()));
 
-    List<Object> ids = g.V().id().toList();
-    ids.forEach(v -> System.out.println(v.toString()));
+    // can use union and unfold to merge selection of singleton variables with Pop.single and group variables with Pop.all
     }
 
 
