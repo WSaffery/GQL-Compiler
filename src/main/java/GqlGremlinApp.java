@@ -48,9 +48,9 @@ public class GqlGremlinApp {
     static String testQueryFolder = "/src/test/resources/queries/";
 
     public static void main(String[] args) throws Exception {
-        assert(args.length > 1);
-        
+        assert(args.length >= 1);        
         System.out.println(args[0]);
+
         GqlLexer lexer = makeGqlFileLexer(testQueryFolder + args[0]);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GqlParser parser = new GqlParser(tokens);
@@ -61,6 +61,11 @@ public class GqlGremlinApp {
         GqlProgram program = listener.GetResult();
 
         printProgram(program);
+
+        if (args.length >= 2 && args[1].equals("-p"))
+        {
+            return;
+        }
 
         GremlinCompiler compiler = new GremlinCompiler();
 
