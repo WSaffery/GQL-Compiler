@@ -1,0 +1,26 @@
+{
+  "n": {
+    "identity": "a",
+    "labels": ["A"]
+  },
+  "n": {
+    "identity": "b",
+    "labels": ["B"]
+  },
+  "n": {
+    "identity": "c",
+    "labels": ["C"] 
+  },
+  "n": {
+    "identity": "d",
+    "labels": ["D"] 
+  },
+  "n": {
+    "identity": "e",
+    "labels": ["E"] 
+  },
+  "n": {
+    "identity": "f",
+    "labels": ["F"] 
+  }
+}
