@@ -20,3 +20,5 @@ src/antlr/GQLVisitor.java
 src/antlr/*.java
 src/antlr/*.interp
 src/antlr/*.tokens
+
+.vscode

@@ -39,6 +39,8 @@ import java.util.Map;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
+
 /**
  * CURRENTLY NOT IN USE
  */
@@ -148,7 +150,7 @@ public class GremlinGraph extends gql.graphs.Graph {
 
         String sourceNodeId = edge.start;
         String targetNodeId = edge.end;
-        pipe.from(this.currentGraph.V(sourceNodeId)).to(this.currentGraph.V(targetNodeId));
+        pipe.from(V(sourceNodeId)).to(V(targetNodeId));
 
         if (!(edge.labels == null)) {
             pipe.property("labels", edge.labels.clone());

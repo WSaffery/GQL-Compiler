@@ -308,6 +308,8 @@ public class GremlinCompiler {
             traversals.add(compileToTraversal(m));
         }
 
+        // System.out.println("Traversals: " + traversals);
+
         GraphTraversal<?,?>[] traversalArray = traversals.toArray(new GraphTraversal<?, ?>[0]);
         
         GraphTraversal<Vertex, Map<String,Object>> traversal = vertexStart().V().match(traversalArray);
