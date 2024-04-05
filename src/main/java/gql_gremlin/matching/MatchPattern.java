@@ -1,12 +1,10 @@
-package ast;
+package gql_gremlin.matching;
 
 import java.util.List;
 
-import ast.patterns.ElementPattern;
-
 public record MatchPattern(
-    KeyPattern headPattern,
-    List<ElementPattern> middlePatterns,
-    KeyPattern tailPattern
+    OrderedElementPattern headPattern,
+    List<OrderedElementPattern> middlePatterns,
+    OrderedElementPattern tailPattern
 ) 
 {}

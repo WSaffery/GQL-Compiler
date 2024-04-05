@@ -5,10 +5,6 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import ast.GqlProgram;
-import ast.KeyPattern;
-import ast.MatchExpression;
-import ast.MatchPattern;
-import ast.MatchPatternFactory;
 import ast.expressions.Expression;
 import ast.expressions.Value;
 import ast.expressions.references.NameExpression;
@@ -28,6 +24,9 @@ import enums.QueryConjunctor;
 import enums.SetQuantifier;
 import exceptions.SemanticErrorException;
 import exceptions.SyntaxErrorException;
+import gql_gremlin.matching.MatchExpression;
+import gql_gremlin.matching.MatchPattern;
+import gql_gremlin.matching.MatchPatternFactory;
 
 // import com.tinkerpop.blueprints.Direction;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
@@ -216,11 +215,11 @@ public class GremlinCompiler {
     {
         GraphTraversal<?, ?> traversal = null;
 
-        KeyPattern head = matchPattern.headPattern();
-        KeyPattern tail = matchPattern.tailPattern();
+        ElementPattern head = matchPattern.headPattern();
+        ElementPattern tail = matchPattern.tailPattern();
 
 
-        if (head.label() != null)
+        if (head.labelExpression() != null)
         {
             traversal = as(head.label());
         }
