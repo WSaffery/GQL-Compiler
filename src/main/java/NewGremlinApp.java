@@ -1,31 +1,23 @@
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Path;
 import org.apache.tinkerpop.gremlin.process.traversal.Pop;
-import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal.Admin;
 import org.apache.tinkerpop.gremlin.process.traversal.TraversalStrategy;
 import org.apache.tinkerpop.gremlin.process.traversal.Bytecode;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.DefaultGraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalExplanation;
 import org.apache.tinkerpop.gremlin.structure.Column;
 import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.structure.Property;
-import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Pair;
 
-import graphs.Graph;
 import graphs.GremlinGraph;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
@@ -137,7 +129,8 @@ public class NewGremlinApp {
 
         HashMap<Bytecode, ArrayList<String>> bytecodes = new HashMap<>();
         
-        for (Pair<TraversalStrategy, Admin<?, ?>> x : expl.getStrategyTraversals()) {
+
+        for (@SuppressWarnings("rawtypes") Pair<TraversalStrategy, Admin<?, ?>> x : expl.getStrategyTraversals()) {
             Bytecode bytecode = x.getValue1().getBytecode();
             if (bytecodes.containsKey(bytecode)) {
                 bytecodes.get(bytecode).add(x.getValue0().toString());
@@ -257,14 +250,14 @@ public class NewGremlinApp {
             by().by().by().by(valueMap()).
             toList();
 
-        GraphTraversal<Vertex, Map<String, Object>> tr = g.V().
-            match(
-                as("x").toE(Direction.OUT).toV(Direction.IN).as("y"),
-                as("y").toE(Direction.OUT).toV(Direction.IN).as("z"),
-                as("y").toE(Direction.OUT).toV(Direction.IN).as("x"),
-                as("x").toE(Direction.OUT).toV(Direction.IN).as("y")
-            ).
-            select("x", "y", "z", "z");
+        // GraphTraversal<Vertex, Map<String, Object>> tr = g.V().
+        //     match(
+        //         as("x").toE(Direction.OUT).toV(Direction.IN).as("y"),
+        //         as("y").toE(Direction.OUT).toV(Direction.IN).as("z"),
+        //         as("y").toE(Direction.OUT).toV(Direction.IN).as("x"),
+        //         as("x").toE(Direction.OUT).toV(Direction.IN).as("y")
+        //     ).
+        //     select("x", "y", "z", "z");
 
         // works just fine
         table.forEach(p -> System.out.println(p.toString()));
@@ -506,7 +499,7 @@ public class NewGremlinApp {
         table1.forEach(p -> System.out.println(p.toString()));
 
         System.out.println("Iter Trail");
-        @SuppressWarnings("unchecked")
+        
         List<Path> table2 = g.V().
             repeat(
                 outE().

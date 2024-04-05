@@ -435,9 +435,10 @@ public class GremlinCompiler {
 
         traversal = variadicSelect(traversal, returnNames);
 
-        for (String returnName : returnNames)
+        for (@SuppressWarnings("unused") String returnName : returnNames)
         {
-            traversal = traversal.by(start().valueMap());
+            // by default we just map out all the properties of every returned variable
+            traversal = traversal.by(valueMap());
         }
         
         return traversal;
