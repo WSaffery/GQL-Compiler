@@ -53,7 +53,10 @@ public class AstListener extends GqlParserBaseListener {
 
     public void enterFocusedMatchClause(FocusedMatchClauseContext ctx)
     {
-        assert(result.graph == null || result.graph == ctx.graphName().getText());
+        if (!(result.graph == null || result.graph == ctx.graphName().getText()))
+        {
+            throw new SemanticErrorException("Queries with multiple FROM statement's aren't supported");
+        }
         result.graph = ctx.graphName().getText();
     }
 

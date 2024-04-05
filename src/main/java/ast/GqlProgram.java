@@ -3,8 +3,8 @@ package ast;
 import java.util.ArrayList;
 import java.util.List;
 
+import enums.QueryConjunctor;
 import gql_gremlin.GqlQuery;
-import gql_gremlin.enums.QueryConjunctor;
 
 // conjunctions and queries are stored flat file in order of appearance.
 // query1 conjunction1 query2 conjunction2 query3 ...

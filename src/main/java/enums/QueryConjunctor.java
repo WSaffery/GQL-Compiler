@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package gql.enums;
+package enums;
 
 public enum QueryConjunctor {
     UNION_ALL {

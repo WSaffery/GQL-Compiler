@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package gql_gremlin.enums;
+package enums;
 
 public enum BooleanComparator {
     OR,

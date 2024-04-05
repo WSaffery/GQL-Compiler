@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package gql.enums;
+package enums;
 
 // TODO! Add other orientations
 // Orientation               | Symbol

@@ -3,6 +3,8 @@ package ast;
 import java.util.ArrayList;
 import java.util.List;
 
+import ast.patterns.ElementPattern;
+import ast.patterns.PathPattern;
 
 public class MatchPatternFactory {
 

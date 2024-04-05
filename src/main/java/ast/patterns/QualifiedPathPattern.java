@@ -1,4 +1,6 @@
-import gql_gremlin.enums.EvaluationMode;
+package ast.patterns;
+
+import enums.EvaluationMode;
 
 public record QualifiedPathPattern(
     PathPattern pathPattern,
