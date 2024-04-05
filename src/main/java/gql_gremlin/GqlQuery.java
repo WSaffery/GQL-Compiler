@@ -1,9 +1,8 @@
 package gql_gremlin;
 
 import java.util.ArrayList;
-import java.util.Optional;
-
-import gql.returns.ReturnStatement;
+import ast.ReturnStatement;
+import ast.MatchExpression;
 
 public class GqlQuery {
     public ArrayList<MatchExpression> matchExpressions = new ArrayList<>();

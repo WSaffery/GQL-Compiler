@@ -1,29 +1,33 @@
 package gql_gremlin;
 
-import gql.enums.EvaluationMode;
-import gql.enums.QueryConjunctor;
-import gql.enums.SetQuantifier;
-import gql.expressions.Expression;
-import gql.expressions.references.NameExpression;
-import gql.expressions.references.PropertyReference;
-import gql.expressions.values.FloatingPointNumber;
-import gql.expressions.values.GqlIdentifier;
-import gql.expressions.values.GqlString;
-import gql.expressions.values.Label;
-import gql.expressions.values.TruthValue;
-import gql.expressions.values.Value;
-import gql.patterns.EdgePattern;
-import gql.patterns.ElementPattern;
-import gql.patterns.NodePattern;
-import gql.patterns.QualifiedPathPattern;
-import gql.returns.Asterisk;
-import gql.returns.ReturnExpression;
-import gql.returns.ReturnItem;
-import gql.returns.ReturnStatement;
-
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import ast.GqlProgram;
+import ast.KeyPattern;
+import ast.MatchExpression;
+import ast.MatchPattern;
+import ast.MatchPatternFactory;
+import ast.expressions.Expression;
+import ast.expressions.Value;
+import ast.expressions.references.NameExpression;
+import ast.expressions.references.PropertyReference;
+import ast.patterns.EdgePattern;
+import ast.patterns.ElementPattern;
+import ast.patterns.NodePattern;
+import ast.patterns.QualifiedPathPattern;
+import ast.patterns.label.Label;
+import ast.patterns.label.LabelExpression;
+import ast.patterns.label.WildcardLabel;
+import ast.returns.Asterisk;
+import ast.returns.ReturnExpression;
+import ast.returns.ReturnItem;
+import enums.EvaluationMode;
+import enums.QueryConjunctor;
+import enums.SetQuantifier;
+import exceptions.SemanticErrorException;
+import exceptions.SyntaxErrorException;
 
 // import com.tinkerpop.blueprints.Direction;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
@@ -33,7 +37,6 @@ import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -109,27 +112,30 @@ public class GremlinCompiler {
     {
         GraphTraversal<Edge, Edge> startTraversal = start();
 
-        // list of label lists
-        // we match any object that has all the labels in any one of our label lists
-        // for now, simply assert there's only one label list
-        if (edgePattern.labels != null) 
-        {
+        final LabelExpression labelExpression = edgePattern.labelExpression();
+        final String variableName = edgePattern.variableName;
 
-            String[] labelStrings = getLabelStrings(edgePattern.labels);
-            if (labelStrings.length == 1)
+        if (labelExpression != null) 
+        {         
+            if (labelExpression instanceof Label)
             {
-                startTraversal = startTraversal.hasLabel(labelStrings[0]);
+                Label label = (Label) labelExpression;
+                startTraversal = startTraversal.hasLabel(label.getValue());
             }
-            else if (labelStrings.length > 1)
+            else if (labelExpression instanceof WildcardLabel)
             {
                 System.out.println("Too many labels!");
+            }
+            else 
+            {
+                throw new SemanticErrorException("Only basic label expressions are implemented");
             }
         }
         
 
-        if (edgePattern.variableName != null)
+        if (variableName != null)
         {
-            startTraversal = startTraversal.as(edgePattern.variableName.getId());
+            startTraversal = startTraversal.as(variableName);
         }
         
         return startTraversal;
@@ -157,36 +163,44 @@ public class GremlinCompiler {
 
     public GraphTraversal<?, ?> filterByPattern(GraphTraversal<?, ?> traversal, ElementPattern pattern)
     {
-        String[] labels = getLabelStrings(pattern.labels);
-        if (labels.length == 1)
-        {
-            traversal = traversal.hasLabel(labels[0]);
 
-            // traversal = traversal.and(traversal.values("labels"))
-            // travers
-        }
-        else if (labels.length > 1)
-        {
-            System.out.println("Too many labels in edge pattern");
+        final LabelExpression labelExpression = pattern.labelExpression();
+
+        if (labelExpression != null) 
+        {         
+            if (labelExpression instanceof Label)
+            {
+                Label label = (Label) labelExpression;
+                traversal = traversal.hasLabel(label.getValue());
+            }
+            else if (labelExpression instanceof WildcardLabel)
+            {
+                System.out.println("Too many labels!");
+            }
+            else 
+            {
+                throw new SemanticErrorException("Only basic label expressions are implemented");
+            }
         }
 
-        for (Entry<GqlIdentifier, Value> item : pattern.properties.entrySet())
+        for (Entry<String, Value> item : pattern.properties().entrySet())
         {
-            Value value = item.getValue();
-            if (value instanceof FloatingPointNumber)
+            String key = item.getKey();
+            Object value = item.getValue();
+            if (value instanceof Float)
             {
-                FloatingPointNumber num = (FloatingPointNumber) value;
-                traversal = traversal.has(item.getKey().getId(), num.toValue());
+                Float num = (Float) value;
+                traversal = traversal.has(key, num);
             }
-            else if (value instanceof GqlString)
+            else if (value instanceof String)
             {
-                GqlString str = (GqlString) value;
-                traversal = traversal.has(item.getKey().getId(), str.toString());
+                String str = (String) value;
+                traversal = traversal.has(key, str);
             }
-            else if (value instanceof TruthValue)
+            else if (value instanceof Boolean)
             {
-                TruthValue bool = (TruthValue) value;
-                traversal = traversal.has(item.getKey().getId(), bool.isTrue());
+                Boolean bool = (Boolean) value;
+                traversal = traversal.has(key, bool);
             }
             else 
             {
@@ -368,25 +382,25 @@ public class GremlinCompiler {
         // reference name [element label] : {(reference key [property name], alias [value label]), ...}        
         HashMap<String, List<PropertyResult>> returnReferences = new HashMap<>();
 
-        for (ReturnItem item : query.returnStatement.getReturnItems())
+        for (ReturnItem item : query.returnStatement.returnItems())
         {
             if (item instanceof ReturnExpression)
             {
                 ReturnExpression returnExpression = (ReturnExpression) item;
-                Expression expr = returnExpression.getExpression();
-                String alias = returnExpression.getName().getId();
+                Expression expr = returnExpression.expression();
+                String alias = returnExpression.name();
 
                 if (expr instanceof NameExpression) 
                 {
                     NameExpression nameExpr = (NameExpression) expr;
-                    fullReturnNames.add(nameExpr.getName().getId());
-                    returnNames.add(nameExpr.getName().getId());
+                    fullReturnNames.add(nameExpr.name());
+                    returnNames.add(nameExpr.name());
                 }
                 else if (expr instanceof PropertyReference)
                 {
                     PropertyReference propertyReference = (PropertyReference) expr;
-                    String referenceName = propertyReference.name.getName().getId();
-                    String referenceKey = propertyReference.key.getId();
+                    String referenceName = propertyReference.name();
+                    String referenceKey = propertyReference.key();
                     
                     returnReferences.putIfAbsent(referenceName, new ArrayList<>());
                     returnReferences.get(referenceName).add(new PropertyResult(referenceKey, alias));
@@ -398,20 +412,23 @@ public class GremlinCompiler {
                     System.out.println("Unsupported return item");
                 }
             }
+            else {
+                throw new SyntaxErrorException("Bad return syntax");
+            }
         }
 
 
         GraphTraversal<Vertex, Map<String,Object>> traversal = 
             compileToTraversal(query.matchExpressions.get(0));
 
-        if (query.returnStatement.getSetQuantifier() != SetQuantifier.ALL)
+        if (query.returnStatement.setQuantifier() != SetQuantifier.ALL)
         {
             System.out.println("Distinct not currently supported");
         }
 
         // return everything matched
-        if (query.returnStatement.getReturnItems().size() == 1 
-            && query.returnStatement.getReturnItems().get(0) instanceof Asterisk)
+        if (query.returnStatement.returnItems().size() == 1 
+            && query.returnStatement.returnItems().get(0) instanceof Asterisk)
         {
             return traversal;
         }

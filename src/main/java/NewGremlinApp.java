@@ -25,11 +25,10 @@ import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Pair;
 
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
+import graphs.Graph;
+import graphs.GremlinGraph;
 
-import gql.graphs.Graph;
-// import gql.graphs.Graph;
-import gql.graphs.GremlinGraph;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 
 
 public class NewGremlinApp {    

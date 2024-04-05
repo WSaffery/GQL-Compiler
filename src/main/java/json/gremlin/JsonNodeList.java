@@ -20,6 +20,7 @@
 package json.gremlin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import exceptions.InvalidNodeFormatException;
 
 import java.util.*;
