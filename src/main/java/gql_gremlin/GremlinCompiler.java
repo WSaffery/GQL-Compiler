@@ -113,46 +113,6 @@ public class GremlinCompiler {
         }
     }
 
-    // public GraphTraversal<Edge, Edge> startTraversal(EdgePattern edgePattern)
-    // {
-    //     GraphTraversal<Edge, Edge> startTraversal = start();
-
-    //     final LabelExpression labelExpression = edgePattern.labelExpression();
-    //     final String variableName = edgePattern.variableName;
-
-    //     if (labelExpression != null) 
-    //     {         
-    //         if (labelExpression instanceof Label)
-    //         {
-    //             Label label = (Label) labelExpression;
-    //             startTraversal = startTraversal.hasLabel(label.getValue());
-    //         }
-    //         else if (labelExpression instanceof WildcardLabel)
-    //         {
-    //             System.out.println("Too many labels!");
-    //         }
-    //         else 
-    //         {
-    //             throw new SemanticErrorException("Only basic label expressions are implemented");
-    //         }
-    //     }
-        
-
-    //     if (variableName != null)
-    //     {
-    //         startTraversal = startTraversal.as(variableName);
-    //     }
-        
-    //     return startTraversal;
-    // }
-
-    // public static <A> GraphTraversal<A, A> startTraversal() 
-    // {
-    //     GraphTraversal<A, A> startTraversal = start();
-
-    //     return startTraversal;
-    // }
-
     @SuppressWarnings("unchecked")
     public static <T> T[] safeToArray(List<T> list)
     {
