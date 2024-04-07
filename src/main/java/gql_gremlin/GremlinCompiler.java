@@ -140,7 +140,7 @@ public class GremlinCompiler {
             }
             else if (labelExpression instanceof WildcardLabel)
             {
-                System.out.println("Too many labels!");
+                // System.out.println("Too many labels!");
             }
             else 
             {
@@ -281,7 +281,7 @@ public class GremlinCompiler {
         }
 
 
-        System.out.println("match traversal: " + traversal.explain().prettyPrint());
+        System.out.println("(0) match traversal: " + traversal.explain().prettyPrint());
         return traversal;
     }
 
@@ -359,7 +359,7 @@ public class GremlinCompiler {
         traversal = captureInstance(traversal, tail); // capture if not preceded
 
 
-        System.out.println("match traversal: " + traversal.explain().prettyPrint());
+        System.out.println("(1) match traversal: " + traversal.explain().prettyPrint());
         return traversal;
     }
 
@@ -390,10 +390,11 @@ public class GremlinCompiler {
 
     public GraphTraversal<Vertex, Map<String,Object>> compileToTraversal(MatchExpression matchExpression)
     {        
-        GraphTraversal<Vertex, ?> traversal = start();
+        GraphTraversal<Vertex, ?> traversal = V();
 
         EnumMap<EvaluationMode, List<PathPattern>> pathPatterns = new EnumMap<>(EvaluationMode.class);
-        pathPatterns.replaceAll((k, v) -> new ArrayList<>());
+        for (EvaluationMode mode : EvaluationMode.values()) 
+            pathPatterns.put(mode, new ArrayList<>());
 
         for (QualifiedPathPattern p : matchExpression.pathPatterns)
         {
@@ -411,12 +412,13 @@ public class GremlinCompiler {
             // 
         }
 
-
         // we currently distinguish match step patterns vs path patterns purely by EvalMode
         // in the future when path capture (p = ...) is supported will need to expand to include 
         // captured WALK patterns as path patterns, not match step patterns.
         List<List<OrderedElementPattern>> matchPatterns = 
             MatchPatternFactory.makeMatchPatterns(orderedPathPatterns.get(EvaluationModeCategory.unrestrictedMode()));
+
+        System.out.println("Match Pattern Fragments: " + matchPatterns.toString());
 
         ArrayList<GraphTraversal<?,?>> matchTraversals = new ArrayList<>();
         
@@ -542,7 +544,8 @@ public class GremlinCompiler {
         for (@SuppressWarnings("unused") String returnName : returnNames)
         {
             // by default we just map out all the properties of every returned variable
-            traversal = traversal.by(valueMap());
+            traversal = traversal.by(id());
+            // traversal = traversal.by(valueMap());
         }
         
         return traversal;

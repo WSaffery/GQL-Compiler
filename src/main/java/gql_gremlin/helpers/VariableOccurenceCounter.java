@@ -17,10 +17,10 @@ public class VariableOccurenceCounter {
         return counts.get(EvaluationModeCategory.RESTRICTED) > 0;
     }
 
-    // returns true if the variable is reference by multiple path patterns
+    // returns true if the variable is reference by multiple unrestricted path patterns
     public boolean intersection()
     {
-        return counts.get(EvaluationModeCategory.RESTRICTED) > 0 || counts.get(EvaluationModeCategory.UNRESTRICTED) > 0;
+        return counts.get(EvaluationModeCategory.UNRESTRICTED) > 1;
     }
 
     public void increment(EvaluationModeCategory category)
