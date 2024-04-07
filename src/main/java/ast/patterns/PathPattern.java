@@ -2,22 +2,28 @@ package ast.patterns;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import exceptions.SemanticErrorException;
 
 public class PathPattern {
-    String variableName;
+    Optional<String> variableName;
     ArrayList<ElementPattern> pathSequence = new ArrayList<>();
 
-    public PathPattern(String variable, ArrayList<ElementPattern> pathSequence)
+    public PathPattern(Optional<String> variable, ArrayList<ElementPattern> pathSequence)
     {
         validatePathSequence(pathSequence);
         this.variableName = variable;
         this.pathSequence = pathSequence;
     }
 
-    public List<ElementPattern> getPathSequence() {
+    public List<ElementPattern> pathSequence() {
         return pathSequence;
+    }
+
+    public Optional<String> variableName()
+    {
+        return variableName;
     }
 
     public static void validatePathSequence(ArrayList<ElementPattern> pathSequence)

@@ -25,16 +25,6 @@ public enum EvaluationMode {
     ACYCLIC,
     SIMPLE;
 
-    public static EvaluationMode[] pathRestrictedEvaluationModes()
-    {
-        return new EvaluationMode[] {SIMPLE, ACYCLIC, TRAIL};
-    }
-
-    public static EvaluationMode[] pathUnrestrictedEvaluationModes()
-    {
-        return new EvaluationMode[] {WALK};
-    }
-
     public String toLatex() {
         switch(this) {
             case WALK:

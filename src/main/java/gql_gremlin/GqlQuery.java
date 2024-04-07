@@ -2,7 +2,7 @@ package gql_gremlin;
 
 import java.util.ArrayList;
 import ast.returns.ReturnStatement;
-import ast.MatchExpression;
+import gql_gremlin.matching.MatchExpression;
 
 public class GqlQuery {
     public ArrayList<MatchExpression> matchExpressions = new ArrayList<>();

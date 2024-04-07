@@ -41,6 +41,7 @@ import org.apache.commons.lang.NotImplementedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
     ExpressionVisitor expressionVisitor = new ExpressionVisitor();
@@ -70,12 +71,12 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
         }
 
         // TODO: implement path variable name correctly
-        return new PathPattern(null, pathSequence);
+        return new PathPattern(Optional.empty(), pathSequence);
     }
 
     @Override
     public NodePattern visitNodePattern(NodePatternContext ctx) {
-        String variableName = visitElementVariable(ctx.elementPatternFiller().elementVariable());
+        Optional<String> variableName = visitElementVariable(ctx.elementPatternFiller().elementVariable());
         LabelExpression labels = visitIsLabelExpr(ctx.elementPatternFiller().isLabelExpr());
         HashMap<String, Value> properties = visitPropertyList(ctx.elementPatternFiller().propertyList());
 
@@ -84,7 +85,8 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
 
     @Override
     public EdgePattern visitEdgePattern(EdgePatternContext ctx) {
-        EdgePattern edge = new EdgePattern(null, null, null, Direction.LEFT_TO_RIGHT);
+        // default unlabelled right pointing edge
+        EdgePattern edge = new EdgePattern(Optional.empty(), null, null, Direction.LEFT_TO_RIGHT);
 
         if (ctx.getChild(0) instanceof FullEdgeUndirectedContext) {
             edge = visitFullEdgeUndirected((FullEdgeUndirectedContext) ctx.getChild(0));
@@ -117,7 +119,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
     }
 
     private EdgePattern getEdgePattern(ElementPatternFillerContext ctx, Direction direction) {
-        String variableName = visitElementVariable(ctx.elementVariable());
+        Optional<String> variableName = visitElementVariable(ctx.elementVariable());
         LabelExpression labels = visitIsLabelExpr(ctx.isLabelExpr());
         HashMap<String, Value> properties = visitPropertyList(ctx.propertyList());
 
@@ -134,9 +136,9 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
     }
 
     @Override
-    public String visitElementVariable(ElementVariableContext ctx) {
-        if (ctx == null) return null;
-        return ctx.ID().getText();
+    public Optional<String> visitElementVariable(ElementVariableContext ctx) {
+        if (ctx == null) return Optional.empty();
+        return Optional.of(ctx.ID().getText());
     }
 
     @Override

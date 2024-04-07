@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import antlr.GqlParserBaseListener;
 import antlr.GqlParser.FocusedMatchClauseContext;
-import antlr.GqlParser.FocusedQueryExpressionContext;
 import antlr.GqlParser.MatchClauseContext;
 import antlr.GqlParser.OtherSetOperatorContext;
 import antlr.GqlParser.PathPatternContext;
@@ -19,11 +18,11 @@ import antlr.GqlParser.WhereClauseContext;
 import exceptions.SemanticErrorException;
 import ast.expressions.Expression;
 import ast.GqlProgram;
-import ast.MatchExpression;
 import ast.patterns.QualifiedPathPattern;
 import enums.EvaluationMode;
 import enums.QueryConjunctor;
 import gql_gremlin.GqlQuery;
+import gql_gremlin.matching.MatchExpression;
 
 // Ast Visitor for single graph query
 // builds up the program result using local state, visitors below visit query all return Null.

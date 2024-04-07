@@ -4,114 +4,111 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import ast.patterns.EdgePattern;
 import ast.patterns.ElementPattern;
 import ast.patterns.PathPattern;
 import enums.EvaluationMode;
+import enums.EvaluationModeCategory;
 import exceptions.SemanticErrorException;
+import gql_gremlin.helpers.VariableOccurenceCounter;
 
 public class MatchPatternFactory {
 
     // should probably drop enum map and just split into restricted vs non-restricted
 
     // TODO! this
-    public static EnumMap<EvaluationMode, List<MatchPattern>> makeMatchPatterns(
+    public static EnumMap<EvaluationMode, List<OrderedPathPattern>> makeOrderedPaths(
         EnumMap<EvaluationMode, List<PathPattern>> pathPatterns)
     {
-        EvaluationMode[] pathRestrictedModes = {
-            EvaluationMode.SIMPLE, EvaluationMode.ACYCLIC, 
-            EvaluationMode.TRAIL};
-        
-        EvaluationMode[] pathUnrestrictedModes = { EvaluationMode.WALK };
 
         EvaluationMode[] evaluationOrder = {
             EvaluationMode.SIMPLE, EvaluationMode.ACYCLIC, 
             EvaluationMode.TRAIL, EvaluationMode.WALK };
 
-        HashMap<String, Integer> varOccurences = new HashMap<>();
-        EnumMap<EvaluationMode, List<List<OrderedElementPattern>>> orderedPathPatterns = new EnumMap<>(EvaluationMode.class);
+        // count occurences of each variable name, broken down by eval mode category 
+        // [unrestricted (WALK) vs restricted (the rest)]
+        HashMap<String, VariableOccurenceCounter> varOccurences = new HashMap<>();
+
+        EnumMap<EvaluationMode, List<OrderedPathPattern>> orderedPathPatterns = 
+            new EnumMap<>(EvaluationMode.class);
         
         for (EvaluationMode mode : evaluationOrder)
         {
             final List<PathPattern> modePathPatterns = pathPatterns.get(mode);
-            // final List<> modeOrderedPathPatterns = orderedPathPatterns.get(mode);
+            final List<OrderedPathPattern> modeOrderedPathPatterns = orderedPathPatterns.get(mode);
 
             for (PathPattern pathPattern : modePathPatterns)
             {
-                for (ElementPattern elementPattern : pathPattern.getPathSequence())
+                final OrderedPathPattern orderedPathPattern = new OrderedPathPattern(pathPattern.variableName());
+
+                for (ElementPattern elementPattern : pathPattern.pathSequence())
                 {
-                    final String variableName = elementPattern.variableName();
-                    final Integer occurences = varOccurences.get(variableName);
-                    if (occurences == 0)
+                    final Optional<String> variableName = elementPattern.variableName();
+                    if (variableName.isPresent())
                     {
-                        varOccurences.put(variableName, 1);
-
+                        final VariableOccurenceCounter counter = varOccurences.get(variableName.get());
+                        final boolean preceeded = counter.preceeded();
+                        counter.increment(mode);
+                        orderedPathPattern.pathSequence().add(
+                            new OrderedElementPattern(
+                                elementPattern, Optional.of(counter), preceeded
+                                )
+                            );
                     }
-                    // varOccurences.merge(variableName, 1, Integer::sum); // place 1 if not found, otherwise add 1
-
+                    else 
+                    {
+                        orderedPathPattern.pathSequence().add(
+                            new OrderedElementPattern(
+                                elementPattern, Optional.empty(), false
+                                )
+                            );
+                    }                    
                 }
+
+                modeOrderedPathPatterns.add(orderedPathPattern);
             }
         }
 
-        return null;
-
-        // assert(EvaluationMode.values().length == executionOrder.length); // incase more modes are added
-        
-
-
+        return orderedPathPatterns;
     }
 
 
-
-    public static List<MatchPattern> makeMatchPatterns(List<PathPattern> pathPatterns)
+    // combine many paths patterns into one list of match patterns, connecting connected paths by shared variable names
+    // this removes all path context from execution so paths must be
+    // * Unrestricted
+    // * Uncaptured
+    public static List<List<OrderedElementPattern>> makeMatchPatterns(List<OrderedPathPattern> pathPatterns)
     {
-        HashMap<String, Integer> varOccurences = new HashMap<>();
-        
-        for (PathPattern pathPattern : pathPatterns)
-        {
-            for (ElementPattern elementPattern : pathPattern.getPathSequence())
-            {
-                final String variableName = elementPattern.variableName();
-                varOccurences.merge(variableName, 1, Integer::sum); // place 1 if not found, otherwise add 1
-            }
-        }
+        final List<List<OrderedElementPattern>> matchPatterns = new ArrayList<>();
 
-        List<MatchPattern> matchPatterns = new ArrayList<>();
-
-        for (PathPattern pathPattern : pathPatterns)
+        for (OrderedPathPattern pathPattern : pathPatterns)
         {
-            List<ElementPattern> pathSequence = pathPattern.getPathSequence();
+            assert(!pathPattern.captured());
+
+            final List<OrderedElementPattern> pathSequence = pathPattern.pathSequence();
             
-            ElementPattern firstPattern = pathSequence.get(0);
-            List<OrderedElementPattern> middlePatterns = new ArrayList<>();
+            OrderedElementPattern firstPattern = pathSequence.get(0);
+            List<OrderedElementPattern> patterns = new ArrayList<>();
+            patterns.add(firstPattern);
 
             for (int i = 1; i < pathSequence.size(); i++)
             {
-                final ElementPattern pattern = pathSequence.get(i);
-                final String currentVariable = pattern.variableName();
-
+                final OrderedElementPattern pattern = pathSequence.get(i);
+                patterns.add(pattern);
+            
                 // add our subpattern, ending at the current pattern
-                if (varOccurences.get(currentVariable) > 1 || i == pathSequence.size() - 1)
+                if (pattern.intersection() || i == pathSequence.size() - 1)
                 {
-                    if (pattern instanceof EdgePattern)
-                    {
-                        // !TODO: evaluate this by cases
-                        throw new SemanticErrorException("Joining patterns on edge variable's unsupported");
-                    }
+                    // can join on edges no cases because we're not targeting shortest
+                    // paths or anything
                     
-                    MatchPattern p = new MatchPattern(
-                        new OrderedElementPattern(firstPattern, false),
-                        middlePatterns, 
-                        new OrderedElementPattern(pattern, false)
-                    );
-                    matchPatterns.add(p);
+                    matchPatterns.add(patterns);
 
                     firstPattern = pattern;
-                    middlePatterns = new ArrayList<>();
-                }
-                else { // keep building the subpattern
-                    middlePatterns.add(new OrderedElementPattern(pattern, false));
+                    patterns = new ArrayList<>();
+                    patterns.add(pattern);
                 }
             }
         }
