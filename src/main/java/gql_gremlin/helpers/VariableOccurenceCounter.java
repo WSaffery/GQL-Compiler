@@ -10,6 +10,11 @@ public class VariableOccurenceCounter {
     EnumMap<EvaluationModeCategory, Integer> counts = new EnumMap<>(Map.of(
         EvaluationModeCategory.UNRESTRICTED, 0, EvaluationModeCategory.RESTRICTED, 0));
     
+    public Map<EvaluationModeCategory, Integer> counts()
+    {
+        return counts;
+    }
+
     // returns true if the variable has been previously referenced
     // by a path pattern with an evaluation mode in the RESTRICTED category
     public boolean preceeded()
@@ -17,10 +22,10 @@ public class VariableOccurenceCounter {
         return counts.get(EvaluationModeCategory.RESTRICTED) > 0;
     }
 
-    // returns true if the variable is reference by multiple unrestricted path patterns
+    // returns true if the variable is reference by multiple path patterns
     public boolean intersection()
     {
-        return counts.get(EvaluationModeCategory.UNRESTRICTED) > 1;
+        return counts.get(EvaluationModeCategory.UNRESTRICTED) + counts.get(EvaluationModeCategory.RESTRICTED) > 1;
     }
 
     public void increment(EvaluationModeCategory category)

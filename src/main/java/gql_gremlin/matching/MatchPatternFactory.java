@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
-import ast.patterns.EdgePattern;
 import ast.patterns.ElementPattern;
 import ast.patterns.PathPattern;
 import enums.EvaluationMode;
 import enums.EvaluationModeCategory;
-import exceptions.SemanticErrorException;
 import gql_gremlin.helpers.VariableOccurenceCounter;
 
 public class MatchPatternFactory {
@@ -19,7 +19,7 @@ public class MatchPatternFactory {
     // should probably drop enum map and just split into restricted vs non-restricted
 
     // TODO! this
-    public static EnumMap<EvaluationMode, List<OrderedPathPattern>> makeOrderedPaths(
+    public static OrderedPathResult makeOrderedPaths(
         EnumMap<EvaluationMode, List<PathPattern>> pathPatterns)
     {
 
@@ -75,7 +75,34 @@ public class MatchPatternFactory {
             }
         }
 
-        return orderedPathPatterns;
+        return new OrderedPathResult(orderedPathPatterns, varOccurences);
+    }
+
+    public static Optional<String> getJointVariable(
+        Map<String, VariableOccurenceCounter> variableOccurences
+    )
+    {
+        Optional<String> res = Optional.empty();
+        int unrestrictedCount = 0;
+
+        for (Entry<String, VariableOccurenceCounter> e : variableOccurences.entrySet())
+        {
+            final VariableOccurenceCounter counter = e.getValue();
+            final Map<EvaluationModeCategory, Integer> counts = counter.counts();
+            
+            if (counts.get(EvaluationModeCategory.RESTRICTED) > 1)
+            {
+                int currentUnrestrictedCount = counts.get(EvaluationModeCategory.UNRESTRICTED);
+                if (currentUnrestrictedCount > unrestrictedCount)
+                {
+                    res = Optional.of(e.getKey());
+                    unrestrictedCount = currentUnrestrictedCount;
+                }
+            }
+
+        }
+
+        return res;
     }
 
 

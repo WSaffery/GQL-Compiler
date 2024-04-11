@@ -25,6 +25,7 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 import exceptions.InvalidEdgeFormatException;
 import exceptions.InvalidNodeFormatException;
@@ -122,5 +123,10 @@ public abstract class Graph {
 
     public void printGraphName() {
         System.out.println("The current working graph is " + currentGraphName);
+    }
+
+    public Optional<String> getGraphDescription()
+    {
+        return Optional.empty();
     }
 }

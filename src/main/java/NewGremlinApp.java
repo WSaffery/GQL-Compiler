@@ -1,10 +1,12 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Path;
 import org.apache.tinkerpop.gremlin.process.traversal.Pop;
+import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal.Admin;
 import org.apache.tinkerpop.gremlin.process.traversal.TraversalStrategy;
 import org.apache.tinkerpop.gremlin.process.traversal.Bytecode;
@@ -15,12 +17,15 @@ import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalExplanation;
 import org.apache.tinkerpop.gremlin.structure.Column;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Pair;
 
 import graphs.GremlinGraph;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
+
+// record QualifiedTraverser(Object Sack, )
 
 
 public class NewGremlinApp {    
@@ -43,6 +48,39 @@ public class NewGremlinApp {
 
         System.out.println("Trail traversal");
         trailTraversalDemo(g, 2);
+
+        graph.setLocalGraph("g5");
+        g = graph.currentGraph;
+        // (a) -> (b) -> (c) 
+        // (c) -> (c)
+        // (c) -> (b)
+        // (b) -> (c)
+
+        System.out.println("Out Trail traversal");
+        outTrailTraversalDemo(g, 2);
+
+        System.out.println("Out Trail traversal 2");
+        outTrailTraversal2Demo(g, 2);
+
+        System.out.println("Out Trail traversal 3");
+        outTrailTraversal3Demo(g, 2);
+
+        System.out.println("Out Trail traversal 3 (3)");
+        outTrailTraversal3Demo(g, 3);
+
+        System.out.println("Lambda Trail traversal");
+        lambdaTrailTraversalDemo(g, 2);
+
+        System.out.println("Lambda Trail traversal (3)");
+        lambdaTrailTraversalDemo(g, 3);
+
+        graph.setLocalGraph("g");
+        g = graph.currentGraph;
+
+        if (true)
+        {
+            return;
+        }
 
         System.out.println("Inward traversal");
         directedTraversalDemo(g, Direction.IN, 2);
@@ -183,6 +221,114 @@ public class NewGremlinApp {
             path().
             toList();
         table2.forEach(p -> System.out.println(p.toString()));
+    }
+
+    // out trail traversal
+    public static void outTrailTraversalDemo(GraphTraversalSource g, int num) 
+    {
+        // see https://tinkerpop.apache.org/docs/current/reference/#dedup-step
+        @SuppressWarnings("unchecked")
+        List<Path> table = g.V().
+            repeat(
+                outE().
+                dedup().
+                inV()
+            ).
+            times(num).
+            path().
+            toList();
+        table.forEach(p -> System.out.println(p.toString()));
+    }
+
+    public static void outTrailTraversal2Demo(GraphTraversalSource g, int num) 
+    {
+        // see https://tinkerpop.apache.org/docs/current/reference/#dedup-step
+        List<Path> table = g.V().
+            outE().
+            as("visited").
+            inV().
+            outE().
+            where(P.neq("visited")).
+            inV().
+            path().
+            toList();
+
+        table.forEach(p -> System.out.println(p.toString()));
+    }
+
+    // can we even do trail properly??
+    public static void outTrailTraversal3Demo(GraphTraversalSource g, int num) 
+    {
+        // see https://tinkerpop.apache.org/docs/current/reference/#dedup-step
+        
+        // where + any doesn't seem to work 
+        // seems doomed
+
+
+        List<Path> table = g.V().
+            outE().
+            as("visited").
+            inV().
+            repeat(
+                outE().
+                as("check").
+                where(not(
+                    select(Pop.all, "visited").sideEffect(s -> System.out.println("v " + s)).any(P.eq("check")).
+                    sideEffect(s -> System.out.println("s " + s))
+                )).
+                as("visited").
+                inV()
+            ).
+            times(num-1).
+            path().
+            toList();
+
+        table.forEach(p -> System.out.println(p.toString()));
+
+        // System.out.println("unrestricted");
+
+        // List<Path> table2 = g.V().
+        //     outE().
+        //     // as("visited").
+        //     inV().
+        //     repeat(
+        //         outE().
+        //         // where(P.neq("visited")).
+        //         // as("visited").
+        //         inV()
+        //     ).
+        //     times(num-1).
+        //     path().
+        //     toList();
+
+        // table2.forEach(p -> System.out.println(p.toString()));
+    }
+
+    // lambda traversal
+    // reasoning
+    // can use VertexProgram instead of lambda to achieve same affect in OLAP
+    // design lambda so as not to cause perfomance issues running in main memory
+    // problems
+    // hard to get sideeffect result out of sack
+    // hard to use a mutating sack, must add and return this, not just add, otherwise will assign to void
+
+    // lambda steps can use traverser.sack() for easier manipulation
+    public static void lambdaTrailTraversalDemo(GraphTraversalSource g, int num)
+    {
+        List<Path> table = g.
+        withSack(() -> new HashSet<Element>(), (s) -> new HashSet<>(s)).
+        V().
+        repeat(
+            outE().
+            filter(t -> !(((HashSet<Element>) t.sack()).contains(t.get()))).
+            sideEffect(t -> ((HashSet<Element>) t.sack()).add(t.get())).
+            inV()
+        ).
+        times(num).
+        path().
+        toList();
+
+        table.forEach(r -> System.out.println(r));
     }
 
     // a drop in replacement for toE that will continue along "undirected" edges pointing in the "wrong" direction.
