@@ -3,80 +3,158 @@ package gql_gremlin.matching;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 
 import ast.patterns.ElementPattern;
+import ast.patterns.ParenPathPattern;
+import ast.patterns.PathComponent;
 import ast.patterns.PathPattern;
+import ast.patterns.QualifiedPathPattern;
 import enums.EvaluationMode;
 import enums.EvaluationModeCategory;
+import exceptions.SemanticErrorException;
 import gql_gremlin.helpers.VariableOccurenceCounter;
 
 public class MatchPatternFactory {
 
     // should probably drop enum map and just split into restricted vs non-restricted
 
-    // TODO! this
-    public static OrderedPathResult makeOrderedPaths(
-        EnumMap<EvaluationMode, List<PathPattern>> pathPatterns)
+    public static void addVariables(PathPattern path, Set<String> variables)
     {
-
-        EvaluationMode[] evaluationOrder = {
-            EvaluationMode.SIMPLE, EvaluationMode.ACYCLIC, 
-            EvaluationMode.TRAIL, EvaluationMode.WALK };
-
-        // count occurences of each variable name, broken down by eval mode category 
-        // [unrestricted (WALK) vs restricted (the rest)]
-        HashMap<String, VariableOccurenceCounter> varOccurences = new HashMap<>();
-
-        EnumMap<EvaluationMode, List<OrderedPathPattern>> orderedPathPatterns = 
-            new EnumMap<>(EvaluationMode.class);
-
-        for (EvaluationMode mode : EvaluationMode.values()) 
-            orderedPathPatterns.put(mode, new ArrayList<>());
-        
-        for (EvaluationMode mode : evaluationOrder)
+        for (PathComponent component : path.pathSequence())
         {
-            final List<PathPattern> modePathPatterns = pathPatterns.get(mode);
-            final List<OrderedPathPattern> modeOrderedPathPatterns = orderedPathPatterns.get(mode);
-
-            for (PathPattern pathPattern : modePathPatterns)
+            if (component instanceof ParenPathPattern)
             {
-                final OrderedPathPattern orderedPathPattern = new OrderedPathPattern(pathPattern.variableName());
+                ParenPathPattern parenPath = (ParenPathPattern) component;
+                addVariables(parenPath.pathPattern(), variables);
+            }
+            else 
+            {
+                assert component instanceof ElementPattern;
+                ElementPattern elem = (ElementPattern) component;
+                elem.variableName().ifPresent(name -> variables.add(name));
+            }
+        }    
+    }
 
-                for (ElementPattern elementPattern : pathPattern.pathSequence())
+    // verifies there is no variables in parenthesised subpaths that are used outside of their core path.
+    public void verifyNesting(List<QualifiedPathPattern> pathPatterns)
+    {
+        HashSet<String> nestedVariables = new HashSet<>();
+        HashSet<String> variables = new HashSet<>();
+
+        for (QualifiedPathPattern pathPattern : pathPatterns)
+        {
+            HashSet<String> newNestedVariables = new HashSet<>();
+            HashSet<String> newVariables = new HashSet<>();
+
+            for (PathComponent component : pathPattern.pathPattern().pathSequence())
+            {
+                if (component instanceof ParenPathPattern)
                 {
-                    final Optional<String> variableName = elementPattern.variableName();
-                    if (variableName.isPresent())
-                    {
-                        varOccurences.putIfAbsent(variableName.get(), new VariableOccurenceCounter());
-                        final VariableOccurenceCounter counter = varOccurences.get(variableName.get());
-                        final boolean preceeded = counter.preceeded();
-                        counter.increment(mode);
-                        orderedPathPattern.pathSequence().add(
-                            new OrderedElementPattern(
-                                elementPattern, Optional.of(counter), preceeded
-                                )
-                            );
-                    }
-                    else 
-                    {
-                        orderedPathPattern.pathSequence().add(
-                            new OrderedElementPattern(
-                                elementPattern, Optional.empty(), false
-                                )
-                            );
-                    }                    
-                }
+                    // a single path pattern forms a tree of references on its variables
+                    // because of nesting from paren path
+                    // however in the ordering case we're only interested in references across paths
+                    // 
+                    ParenPathPattern parenPath = (ParenPathPattern) component;
+                    addVariables(parenPath.pathPattern(), newNestedVariables);
+                    
+                    HashSet<String> priorVariables = new HashSet<>();
+                    priorVariables.addAll(nestedVariables);
+                    priorVariables.addAll(variables);
 
-                modeOrderedPathPatterns.add(orderedPathPattern);
+                    priorVariables.retainAll(newNestedVariables); // convert to intersection
+
+                    if (priorVariables.size() > 0)
+                    {
+                        throw new SemanticErrorException("Intersection of nested variable with other variable across paths");
+                    }
+                }
+                else 
+                {
+                    assert component instanceof ElementPattern;
+                    ElementPattern elem = (ElementPattern) component;
+                    Optional<String> varName = elem.variableName();
+                    if (varName.isPresent())
+                    {
+                        String name = varName.get();
+                        newVariables.add(name);
+                        if (nestedVariables.contains(name))
+                        {
+                            throw new SemanticErrorException("Intersection of variable with nested variable across paths");
+                        }
+                    }
+                }
+            }
+
+            nestedVariables.addAll(newNestedVariables);
+            variables.addAll(newVariables);
+        }
+    }
+
+    // TODO! this
+    public static Map<String, VariableReferences> getVariableReferenceMap(
+        List<QualifiedPathPattern> restrictedPathPatterns,
+        List<PathPattern> unrestrictedPathPatterns)
+    {
+        HashMap<String, VariableReferences> variableReferenceMap = new HashMap<>();
+        // variables nested in parenthesied paths ought not to have cross references at all
+
+        for (int i = 0; i < restrictedPathPatterns.size(); i++)
+        {
+            QualifiedPathPattern pattern = restrictedPathPatterns.get(i);
+
+            for (PathComponent component : pattern.pathPattern().pathSequence())
+            {
+                if (component instanceof ElementPattern)
+                {
+                    ElementPattern elem = (ElementPattern) component;
+                    Optional<String> varName = elem.variableName();
+                    if (varName.isPresent())
+                    {
+                        String name = varName.get();
+                        variableReferenceMap.putIfAbsent(name, new VariableReferences(new ArrayList<>()));
+                        variableReferenceMap.get(name).restrictedReferenceIndices().add(i);
+                    }
+                }
+                else 
+                {
+                    assert component instanceof ParenPathPattern;
+                }
             }
         }
 
-        return new OrderedPathResult(orderedPathPatterns, varOccurences);
+        for (PathPattern pathPattern : unrestrictedPathPatterns)
+        {
+            for (PathComponent component : pathPattern.pathSequence())
+            {
+                if (component instanceof ElementPattern)
+                {
+                    ElementPattern elem = (ElementPattern) component;
+                    Optional<String> varName = elem.variableName();
+                    varName.ifPresent(
+                        name -> {
+                            variableReferenceMap.putIfAbsent(name, new VariableReferences(new ArrayList<>()));
+                            // variableReferenceMap.get(name).restrictedReferenceIndices().add(i);
+                            variableReferenceMap.compute(name, (n, r) -> r.addUnrestrictedReference());
+                        }
+                    );
+                }
+                else 
+                {
+                    assert component instanceof ParenPathPattern;
+                }
+            }
+        }
+
+        return variableReferenceMap;
     }
+
 
     public static Optional<String> getJointVariable(
         Map<String, VariableOccurenceCounter> variableOccurences
@@ -110,41 +188,122 @@ public class MatchPatternFactory {
     // this removes all path context from execution so paths must be
     // * Unrestricted
     // * Uncaptured
-    public static List<List<OrderedElementPattern>> makeMatchPatterns(List<OrderedPathPattern> pathPatterns)
+
+    public static List<PathPattern> makeMatchPatterns(List<PathPattern> pathPatterns, Map<String, VariableReferences> referenceMap)
     {
-        final List<List<OrderedElementPattern>> matchPatterns = new ArrayList<>();
+        final List<PathPattern> matchPatterns = new ArrayList<>();
 
-        for (OrderedPathPattern pathPattern : pathPatterns)
+        for (PathPattern pathPattern : pathPatterns)
         {
-            assert(!pathPattern.captured());
-
-            final List<OrderedElementPattern> pathSequence = pathPattern.pathSequence();
+            // assert(!pathPattern.captured());
+            final List<PathComponent> pathSequence = pathPattern.pathSequence();
             
-            OrderedElementPattern firstPattern = pathSequence.get(0);
-            List<OrderedElementPattern> patterns = new ArrayList<>();
-            patterns.add(firstPattern);
+            int firstIntersection = -1;
+            for (int i = 0; i < pathSequence.size(); i++)
+            {
+                final PathComponent component = pathSequence.get(i);
+                if (component instanceof ElementPattern)
+                {
+                    final ElementPattern elem = (ElementPattern) component;
+                    final boolean intersection = 
+                        elem.variableName().isPresent() && 
+                        referenceMap.containsKey(elem.variableName().get()) &&
+                        referenceMap.get(elem.variableName().get()).intersection();
+                    
+                    if (intersection)
+                    {
+                        firstIntersection = i;
+                        break;
+                    }
+                }
+            }
+
+            // add the full pattern and continue
+            if (firstIntersection == -1 || firstIntersection == pathSequence.size())
+            {
+                matchPatterns.add(pathPattern); // add original path pattern unchanged
+                continue;
+            }
+
+            // add the first subpattern and the rest
+            matchPatterns.add(new PathPattern(new ArrayList<>(pathSequence.subList(0, firstIntersection))));
+
+
+            PathComponent firstComponent = pathSequence.get(firstIntersection);
+            ArrayList<PathComponent> components = new ArrayList<>();
+            components.add(firstComponent);
 
             for (int i = 1; i < pathSequence.size(); i++)
             {
-                final OrderedElementPattern pattern = pathSequence.get(i);
-                patterns.add(pattern);
-            
-                // add our subpattern, ending at the current pattern
-                if (pattern.intersection() || i == pathSequence.size() - 1)
+                final PathComponent component = pathSequence.get(i);
+                components.add(component);
+
+                boolean intersection = false;
+                if (component instanceof ElementPattern)
+                {
+                    final ElementPattern elem = (ElementPattern) component;
+                    intersection = 
+                        elem.variableName().isPresent() && 
+                        referenceMap.containsKey(elem.variableName().get()) &&
+                        referenceMap.get(elem.variableName().get()).intersection();
+
+                }
+
+                if (intersection || i == pathSequence.size() - 1)
                 {
                     // can join on edges no cases because we're not targeting shortest
                     // paths or anything
-                    
-                    matchPatterns.add(patterns);
-
-                    firstPattern = pattern;
-                    patterns = new ArrayList<>();
-                    patterns.add(pattern);
+                    // huh? unsure what above means
+                    matchPatterns.add(new PathPattern(components));
+                }
+                if (intersection)
+                {
+                    firstComponent = component;
+                    components = new ArrayList<>();
+                    components.add(firstComponent);
                 }
             }
         }
 
         return matchPatterns;
     }
+
+
+    // public static List<List<OrderedElementPattern>> makeMatchPatterns(List<OrderedPathPattern> pathPatterns)
+    // {
+    //     final List<List<OrderedElementPattern>> matchPatterns = new ArrayList<>();
+
+    //     for (OrderedPathPattern pathPattern : pathPatterns)
+    //     {
+    //         assert(!pathPattern.captured());
+
+    //         final List<OrderedElementPattern> pathSequence = pathPattern.pathSequence();
+            
+    //         OrderedElementPattern firstPattern = pathSequence.get(0);
+    //         List<OrderedElementPattern> patterns = new ArrayList<>();
+    //         patterns.add(firstPattern);
+
+    //         for (int i = 1; i < pathSequence.size(); i++)
+    //         {
+    //             final OrderedElementPattern pattern = pathSequence.get(i);
+    //             patterns.add(pattern);
+            
+    //             // add our subpattern, ending at the current pattern
+    //             if (pattern.intersection() || i == pathSequence.size() - 1)
+    //             {
+    //                 // can join on edges no cases because we're not targeting shortest
+    //                 // paths or anything
+                    
+    //                 matchPatterns.add(patterns);
+
+    //                 firstPattern = pattern;
+    //                 patterns = new ArrayList<>();
+    //                 patterns.add(pattern);
+    //             }
+    //         }
+    //     }
+
+    //     return matchPatterns;
+    // }
 
 }

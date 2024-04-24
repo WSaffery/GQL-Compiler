@@ -1,5 +1,7 @@
 package ast.visitors;
 
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.optional;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +20,7 @@ import antlr.GqlParser.WhereClauseContext;
 import exceptions.SemanticErrorException;
 import ast.expressions.Expression;
 import ast.GqlProgram;
+import ast.patterns.PathPattern;
 import ast.patterns.QualifiedPathPattern;
 import enums.EvaluationMode;
 import enums.QueryConjunctor;
@@ -71,10 +74,15 @@ public class AstListener extends GqlParserBaseListener {
         ArrayList<QualifiedPathPattern> pathPatterns = new ArrayList<>();
 
         for (PathPatternContext pathPatternCtx : ctx.pathPatternList().pathPattern()) {
-            pathPatterns.add(
-                new QualifiedPathPattern(
-                    pathPatternExpressionVisitor.visitPathPatternExpression(pathPatternCtx.pathPatternExpression()),
-                    getEvaluationMode(pathPatternCtx.pathPatternPrefix())));
+            
+            EvaluationMode mode = getEvaluationMode(pathPatternCtx.pathPatternPrefix());
+            Optional<String> var = pathPatternCtx.pathVariable() == null ?
+                Optional.empty() :
+                Optional.of(pathPatternCtx.pathVariable().getText());
+            
+            PathPattern path = pathPatternExpressionVisitor.visitPathPatternExpression(pathPatternCtx.pathPatternExpression());
+
+            pathPatterns.add(new QualifiedPathPattern(var, mode, path));
         }
 
         Optional<String> graphName = Optional.empty();

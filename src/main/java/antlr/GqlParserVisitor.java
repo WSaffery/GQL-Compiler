@@ -91,17 +91,17 @@ public interface GqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPathPatternExpression(GqlParser.PathPatternExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link GqlParser#pathTerm}.
+	 * Visit a parse tree produced by {@link GqlParser#pointPattern}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPathTerm(GqlParser.PathTermContext ctx);
+	T visitPointPattern(GqlParser.PointPatternContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link GqlParser#path}.
+	 * Visit a parse tree produced by {@link GqlParser#parenthesizedPathPatternExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPath(GqlParser.PathContext ctx);
+	T visitParenthesizedPathPatternExpression(GqlParser.ParenthesizedPathPatternExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link GqlParser#nodePattern}.
 	 * @param ctx the parse tree
@@ -138,6 +138,12 @@ public interface GqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitElementPatternFiller(GqlParser.ElementPatternFillerContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link GqlParser#elementPatternPredicate}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitElementPatternPredicate(GqlParser.ElementPatternPredicateContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link GqlParser#propertyList}.
 	 * @param ctx the parse tree

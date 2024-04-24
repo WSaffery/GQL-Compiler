@@ -6,7 +6,7 @@ import java.util.Optional;
 import ast.expressions.Value;
 import ast.patterns.label.LabelExpression;
 
-public abstract sealed class ElementPattern permits EdgePattern, NodePattern {
+public abstract sealed class ElementPattern implements PathComponent permits EdgePattern, NodePattern {
     public Optional<String> variableName;
     public LabelExpression labelExpression;
     public HashMap<String, Value> properties;

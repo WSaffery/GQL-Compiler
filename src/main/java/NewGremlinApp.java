@@ -77,6 +77,9 @@ public class NewGremlinApp {
         graph.setLocalGraph("g");
         g = graph.currentGraph;
 
+        System.out.println("Match Sanity Check");
+        matchSanityCheck(g);
+
         if (true)
         {
             return;
@@ -751,6 +754,106 @@ public class NewGremlinApp {
     // can use union and unfold to merge selection of singleton variables with Pop.single and group variables with Pop.all
     }
 
+    public static void matchSanityCheck(GraphTraversalSource g) 
+    {
+        // graph
+        // (a) -> (b) -> (c) 
+        // (c) -> (c)    
+
+        @SuppressWarnings("unchecked")
+        List<?> table = g.V().as("start").match(
+            as("a").both().both().simplePath().from("a").as("b"),
+            as("b").both().both().simplePath().from("b").as("a")
+        ).select("start","a","b").toList();
+
+        System.out.println("1");
+        table.forEach(p -> System.out.println(p.toString()));
+
+
+        @SuppressWarnings("unchecked")
+        List<?> table2 = g.V().as("start").match(
+            as("a").coalesce(
+                 out().out().simplePath().fold(),
+                 in().in().simplePath().fold()).unfold().as("b"),
+            as("b").coalesce(out().out().simplePath(), in().in().simplePath()).as("a")
+        ).select("start","a","b").toList();
+
+        System.out.println("2");
+        table2.forEach(p -> System.out.println(p.toString()));
+
+        @SuppressWarnings("unchecked")
+        List<?> table3 = g.V().as("start").match(
+            as("a").or(out().out(), in().in()).as("b"),
+            as("b").or(out().out(), in().in()).as("a")
+        ).select("start","a","b").toList();
+
+        System.out.println("3");
+        table3.forEach(p -> System.out.println(p.toString()));
+
+        @SuppressWarnings("unchecked")
+        List<?> table4 = g.V().as("start").
+            as("a").coalesce(out().out(), in().in()).as("b").select("start","a","b").toList();
+
+        System.out.println("4");
+        table4.forEach(p -> System.out.println(p.toString()));
+
+
+        @SuppressWarnings("unchecked")
+        List<?> table5 = g.V().as("start").
+            as("a").choose(out().out(), out().out(), in().in()).as("b").
+            select("b").
+                choose(in().in(), in().in(), out().out()).
+                sideEffect(t -> System.out.println(t.path())).where(P.eq("a")).
+            select("start","a","b").toList();
+
+        System.out.println("5");
+        table5.forEach(p -> System.out.println(p.toString()));
+
+
+        @SuppressWarnings("unchecked")
+        List<?> table6 = g.V().as("start").
+            as("a").both().both().as("c1").simplePath().from("a").to("c1").as("b").
+            select("b").as("c2").both().both().as("c3").simplePath().from("c2").to("c3").where(P.eq("a")).
+            select("start","a","b").toList();
+
+        System.out.println("6");
+        table6.forEach(p -> System.out.println(p.toString()));
+
+
+        @SuppressWarnings("unchecked")
+        List<?> table7 = g.V().as("start").            
+            as("b").
+            as("b2").both().both().as("a2").simplePath().
+            from("b2").to("a2").
+            as("a").
+            
+            select("a").
+            as("a1").both().both().as("b1").simplePath().
+            from("a1").to("b1").
+            where(P.eq("b")).
+            
+            select("start","a","b").toList();
+
+        System.out.println("7");
+        table7.forEach(p -> System.out.println(p.toString()));
+
+
+        @SuppressWarnings("unchecked")
+        List<?> table8 = g.V().as("start").
+            match( 
+                as("b").identity().
+                as("b2").both().both().as("a2").simplePath().
+                from("b2").to("a2").
+                as("a"),
+                as("a").identity().
+                as("a1").both().both().as("b1").simplePath().
+                from("a1").to("b1").
+                as("b")
+            ).select("start","a","b").toList();
+
+        System.out.println("8");
+        table8.forEach(p -> System.out.println(p.toString()));
+    }
 
     // public static void mapTestDemo(GraphTraversalSource g) 
     // {

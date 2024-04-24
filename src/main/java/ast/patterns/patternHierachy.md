@@ -27,3 +27,17 @@ point = node | parenPath
 (A) [()->()]{1,k} (B)
 ===
 [(A) -> ()]{1,k-1} -> (B)
+
+
+# Node-Link*-Path
+
+() -> -> ... -> ()
+() -> [() ... ()] -> ()
+
+```
+path = point edge* path
+point = node | parenPath
+parenPath = LEFT path RIGHT
+```
+
+// support standalone edges but not standalone nodes

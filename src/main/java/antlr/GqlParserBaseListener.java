@@ -174,25 +174,25 @@ public class GqlParserBaseListener implements GqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPathTerm(GqlParser.PathTermContext ctx) { }
+	@Override public void enterPointPattern(GqlParser.PointPatternContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPathTerm(GqlParser.PathTermContext ctx) { }
+	@Override public void exitPointPattern(GqlParser.PointPatternContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPath(GqlParser.PathContext ctx) { }
+	@Override public void enterParenthesizedPathPatternExpression(GqlParser.ParenthesizedPathPatternExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPath(GqlParser.PathContext ctx) { }
+	@Override public void exitParenthesizedPathPatternExpression(GqlParser.ParenthesizedPathPatternExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -265,6 +265,18 @@ public class GqlParserBaseListener implements GqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitElementPatternFiller(GqlParser.ElementPatternFillerContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterElementPatternPredicate(GqlParser.ElementPatternPredicateContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitElementPatternPredicate(GqlParser.ElementPatternPredicateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -64,16 +64,15 @@ pathPatternPrefix
     ;
 
 pathPatternExpression
-    : pathTerm //(VERTICAL_BAR pathTerm)*
+    : pointPattern (edgePattern+ pointPattern)*
     ;
 
-pathTerm
-    : path
-//    | LEFT_PAREN pathPattern whereClause? RIGHT_PAREN len?
+pointPattern
+    : nodePattern | parenthesizedPathPatternExpression
     ;
 
-path
-    : nodePattern (edgePattern nodePattern)*
+parenthesizedPathPatternExpression
+    : LEFT_PAREN pathPatternExpression whereClause? RIGHT_PAREN len?
     ;
 
 nodePattern
@@ -96,9 +95,13 @@ fullEdgePointingRight
     : MINUS_LEFT_BRACKET elementPatternFiller BRACKET_RIGHT_ARROW
     ;
 
-// TODO: change to syntax in report
 elementPatternFiller
-    : elementVariable? isLabelExpr? (LEFT_BRACE propertyList RIGHT_BRACE)?
+    : elementVariable? isLabelExpr? elementPatternPredicate?
+    ;
+
+elementPatternPredicate
+    : (LEFT_BRACE propertyList RIGHT_BRACE)
+    | whereClause
     ;
 
 propertyList

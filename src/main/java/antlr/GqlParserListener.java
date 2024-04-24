@@ -140,25 +140,25 @@ public interface GqlParserListener extends ParseTreeListener {
 	 */
 	void exitPathPatternExpression(GqlParser.PathPatternExpressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link GqlParser#pathTerm}.
+	 * Enter a parse tree produced by {@link GqlParser#pointPattern}.
 	 * @param ctx the parse tree
 	 */
-	void enterPathTerm(GqlParser.PathTermContext ctx);
+	void enterPointPattern(GqlParser.PointPatternContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link GqlParser#pathTerm}.
+	 * Exit a parse tree produced by {@link GqlParser#pointPattern}.
 	 * @param ctx the parse tree
 	 */
-	void exitPathTerm(GqlParser.PathTermContext ctx);
+	void exitPointPattern(GqlParser.PointPatternContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link GqlParser#path}.
+	 * Enter a parse tree produced by {@link GqlParser#parenthesizedPathPatternExpression}.
 	 * @param ctx the parse tree
 	 */
-	void enterPath(GqlParser.PathContext ctx);
+	void enterParenthesizedPathPatternExpression(GqlParser.ParenthesizedPathPatternExpressionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link GqlParser#path}.
+	 * Exit a parse tree produced by {@link GqlParser#parenthesizedPathPatternExpression}.
 	 * @param ctx the parse tree
 	 */
-	void exitPath(GqlParser.PathContext ctx);
+	void exitParenthesizedPathPatternExpression(GqlParser.ParenthesizedPathPatternExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link GqlParser#nodePattern}.
 	 * @param ctx the parse tree
@@ -219,6 +219,16 @@ public interface GqlParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitElementPatternFiller(GqlParser.ElementPatternFillerContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GqlParser#elementPatternPredicate}.
+	 * @param ctx the parse tree
+	 */
+	void enterElementPatternPredicate(GqlParser.ElementPatternPredicateContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GqlParser#elementPatternPredicate}.
+	 * @param ctx the parse tree
+	 */
+	void exitElementPatternPredicate(GqlParser.ElementPatternPredicateContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link GqlParser#propertyList}.
 	 * @param ctx the parse tree

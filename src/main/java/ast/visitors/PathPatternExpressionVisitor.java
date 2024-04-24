@@ -27,6 +27,8 @@ import ast.expressions.atomic.GqlIdentifier;
 import ast.patterns.EdgePattern;
 import ast.patterns.ElementPattern;
 import ast.patterns.NodePattern;
+import ast.patterns.ParenPathPattern;
+import ast.patterns.PathComponent;
 import ast.patterns.PathPattern;
 import ast.patterns.label.Label;
 import ast.patterns.label.LabelExpression;
@@ -35,50 +37,84 @@ import enums.Direction;
 import exceptions.SemanticErrorException;
 import exceptions.SyntaxErrorException;
 
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang.NotImplementedException;
+
+import com.ibm.icu.impl.locale.LocaleValidityChecker.Where;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
+public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {    
     ExpressionVisitor expressionVisitor = new ExpressionVisitor();
 
     @Override
     public PathPattern visitPathPatternExpression(PathPatternExpressionContext ctx) {
-        return visitPathTerm(ctx.pathTerm());
-    }
+        ArrayList<PathComponent> pathSequence = new ArrayList<>();
 
-    @Override
-    public PathPattern visitPathTerm(PathTermContext ctx) {
-        if (ctx.path() == null) throw new NotImplementedException("A parenthesized path pattern expression should be rewritten.");
-
-        return visitPath(ctx.path());
-    }
-
-    @Override
-    public PathPattern visitPath(PathContext ctx) {
-        ArrayList<ElementPattern> pathSequence = new ArrayList<>();
+        int actual_idx = 0;
+        // the index of the element when added to pathSequence
+        // consecutive edges will add anonymous nodes 
+        // inbetween themselves, making this differ from i
 
         for (int i = 0; i < ctx.getChildCount(); i++) {
-            if (ctx.getChild(i) instanceof NodePatternContext) {
-                pathSequence.add(visitNodePattern((NodePatternContext) ctx.getChild(i)));
-            } else if (ctx.getChild(i) instanceof EdgePatternContext) {
-                pathSequence.add(visitEdgePattern((EdgePatternContext) ctx.getChild(i)));
+            
+            boolean pointIndex = actual_idx % 2 == 0; // nodes and paren paths (points) are at even indexes (zeroth, second, fourth, etc)
+
+            ParseTree child = ctx.getChild(i);
+
+            if (child instanceof NodePatternContext) {
+                if (!pointIndex)
+                {
+                    throw new SemanticErrorException("Duplicate nodes in path without edges inbetween");
+                }
+    
+                pathSequence.add(visitNodePattern((NodePatternContext) child));
+            } else if (child instanceof ParenthesizedPathPatternExpressionContext)
+            {
+                if (!pointIndex)
+                {
+                    throw new SemanticErrorException("Node followed by parenthesised path without edges inbetween");
+                }
+
+                pathSequence.add(visitParenthesizedPathPatternExpression((ParenthesizedPathPatternExpressionContext) child));
+
+            } else if (child instanceof EdgePatternContext) {
+                if (pointIndex)
+                {
+                    pathSequence.add(NodePattern.getAnon());
+                    actual_idx++;
+                }
+
+                pathSequence.add(visitEdgePattern((EdgePatternContext) child));
             }
+
+            actual_idx++;
         }
 
-        // TODO: implement path variable name correctly
-        return new PathPattern(Optional.empty(), pathSequence);
+        return new PathPattern(pathSequence);
+    }
+
+    @Override
+    public ParenPathPattern visitParenthesizedPathPatternExpression(ParenthesizedPathPatternExpressionContext ctx)
+    {
+        return null;
     }
 
     @Override
     public NodePattern visitNodePattern(NodePatternContext ctx) {
         Optional<String> variableName = visitElementVariable(ctx.elementPatternFiller().elementVariable());
         LabelExpression labels = visitIsLabelExpr(ctx.elementPatternFiller().isLabelExpr());
-        HashMap<String, Value> properties = visitPropertyList(ctx.elementPatternFiller().propertyList());
+
+        if (ctx.elementPatternFiller().elementPatternPredicate().whereClause() != null)
+        {
+            throw new SyntaxErrorException("Where Clause in node patterns is unsupported");
+        }
+
+        HashMap<String, Value> properties = visitPropertyList(ctx.elementPatternFiller().elementPatternPredicate().propertyList());
 
         return new NodePattern(variableName, labels, properties);
     }
@@ -121,7 +157,13 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
     private EdgePattern getEdgePattern(ElementPatternFillerContext ctx, Direction direction) {
         Optional<String> variableName = visitElementVariable(ctx.elementVariable());
         LabelExpression labels = visitIsLabelExpr(ctx.isLabelExpr());
-        HashMap<String, Value> properties = visitPropertyList(ctx.propertyList());
+
+        if (ctx.elementPatternPredicate().whereClause() != null)
+        {
+            throw new SyntaxErrorException("Where Clause in edge patterns is unsupported");
+        }
+
+        HashMap<String, Value> properties = visitPropertyList(ctx.elementPatternPredicate().propertyList());
 
         return new EdgePattern(variableName, labels, properties, direction);
     }
