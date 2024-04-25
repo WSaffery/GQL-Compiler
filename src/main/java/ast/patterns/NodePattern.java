@@ -17,4 +17,9 @@ public final class NodePattern extends ElementPattern {
     {
         return new NodePattern(Optional.empty(), new WildcardLabel(), new HashMap<>());
     }
+
+    public String toString()
+    {
+        return "(%s: %s %s)".formatted(variableName, labelExpression, properties);
+    }
 }

@@ -18,9 +18,15 @@ public class PathPattern {
         return pathSequence;
     }
 
+    public String toString()
+    {
+        return pathSequence.toString();
+    }
+
     public static void validatePathSequence(ArrayList<PathComponent> pathSequence)
     {
         if (pathSequence.size() % 2 == 0) {
+            System.out.println(pathSequence);   
             throw new SemanticErrorException("A path is an alternating sequence between nodes and edges, and must " +
                     "start and end with a node, hence, there must be an uneven number of element patterns in the list.");
         }

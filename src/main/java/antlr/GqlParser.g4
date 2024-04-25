@@ -72,7 +72,7 @@ pointPattern
     ;
 
 parenthesizedPathPatternExpression
-    : LEFT_PAREN pathPatternExpression whereClause? RIGHT_PAREN len?
+    : LEFT_BRACKET pathPatternExpression whereClause? RIGHT_BRACKET len?
     ;
 
 nodePattern
@@ -239,4 +239,5 @@ elementVariable
 
 key
     : ID
+    | ASTERISK
     ;

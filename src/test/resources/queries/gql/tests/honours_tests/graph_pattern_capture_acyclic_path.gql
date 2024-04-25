@@ -1,0 +1,3 @@
+FROM g6
+MATCH p = ACYCLIC (a)-[]->(b)-[]->(c), g = WALK (b) -[]-> (d)
+RETURN p, g

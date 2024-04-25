@@ -3,6 +3,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Path;
 import org.apache.tinkerpop.gremlin.process.traversal.Pop;
@@ -19,6 +21,7 @@ import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.checkerframework.checker.units.qual.A;
 import org.javatuples.Pair;
 
 import graphs.GremlinGraph;
@@ -318,8 +321,13 @@ public class NewGremlinApp {
     // lambda steps can use traverser.sack() for easier manipulation
     public static void lambdaTrailTraversalDemo(GraphTraversalSource g, int num)
     {
+        // both method <A>withSack(java.util.function.Supplier<A>,java.util.function.UnaryOperator<A>) in org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource and 
+        // method <A>withSack(A,java.util.function.UnaryOperator<A>)
+        Supplier<HashSet<Element>> supplier = () -> new HashSet<>();
+        UnaryOperator<HashSet<Element>> splitOperator = (s) -> new HashSet<>(s);
+
         List<Path> table = g.
-        withSack(() -> new HashSet<Element>(), (s) -> new HashSet<>(s)).
+        withSack(supplier, splitOperator).
         V().
         repeat(
             outE().

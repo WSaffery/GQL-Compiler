@@ -41,6 +41,8 @@ public class GqlAstApp {
         GqlParser parser = new GqlParser(tokens);
         
         ParseTree antlrAST = parser.query();
+        System.out.println(antlrAST.toStringTree(parser));
+
         AstListener listener = new AstListener();
         ParseTreeWalker.DEFAULT.walk(listener, antlrAST);
         GqlProgram program = listener.GetResult();

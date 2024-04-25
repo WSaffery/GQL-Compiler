@@ -15,4 +15,20 @@ public final class EdgePattern extends ElementPattern {
         super(variableName, labelExpression, properties);
         this.direction = direction;
     }
+
+    public String toString()
+    {
+        if (direction == Direction.LEFT_TO_RIGHT)
+        {
+            return "-[%s: %s %s]->".formatted(variableName, labelExpression, properties);
+        } 
+        else if (direction == Direction.RIGHT_TO_LEFT)
+        {
+            return "<-[%s: %s %s]-".formatted(variableName, labelExpression, properties);
+        }
+        else if (direction == Direction.UNDIRECTED) {
+            return "-[%s: %s %s]-".formatted(variableName, labelExpression, properties);
+        }
+        return null;
+    }
 }

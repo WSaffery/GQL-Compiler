@@ -93,7 +93,9 @@ public class ExpressionVisitor extends GqlParserBaseVisitor<Expression> {
 
     @Override
     public Expression visitPropertyReference(PropertyReferenceContext ctx) {
-        return new PropertyReference(ctx.name().ID().getText(), ctx.key().ID().getText());
+        return new PropertyReference(
+            ctx.name().ID().getText(), 
+            ctx.key().ID() == null ? "*" : ctx.key().ID().getText());
     }
 
     @Override

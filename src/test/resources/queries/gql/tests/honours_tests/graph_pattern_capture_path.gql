@@ -1,0 +1,3 @@
+FROM g6
+MATCH p = (a)-[]->(b)-[]->(c), g = (b) -[]-> (d)
+RETURN p, g

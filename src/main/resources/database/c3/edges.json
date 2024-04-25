@@ -1,0 +1,8 @@
+{
+    "e": { "identity": "e0", "start": "a", "end": "b", "isDirected": 1}, 
+    "e": { "identity": "e1", "start": "a", "end": "c", "isDirected": 1}, 
+    "e": { "identity": "e2", "start": "b", "end": "a", "isDirected": 1}, 
+    "e": { "identity": "e3", "start": "b", "end": "c", "isDirected": 1}, 
+    "e": { "identity": "e4", "start": "c", "end": "a", "isDirected": 1}, 
+    "e": { "identity": "e5", "start": "c", "end": "b", "isDirected": 1}
+}

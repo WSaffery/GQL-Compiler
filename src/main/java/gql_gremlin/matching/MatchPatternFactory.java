@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import ast.patterns.ElementPattern;
 import ast.patterns.ParenPathPattern;
@@ -24,7 +25,7 @@ public class MatchPatternFactory {
 
     // should probably drop enum map and just split into restricted vs non-restricted
 
-    public static void addVariables(PathPattern path, Set<String> variables)
+    static void addVariables(PathPattern path, Set<String> variables)
     {
         for (PathComponent component : path.pathSequence())
         {
@@ -43,7 +44,7 @@ public class MatchPatternFactory {
     }
 
     // verifies there is no variables in parenthesised subpaths that are used outside of their core path.
-    public void verifyNesting(List<QualifiedPathPattern> pathPatterns)
+    public static void verifyNesting(List<QualifiedPathPattern> pathPatterns)
     {
         HashSet<String> nestedVariables = new HashSet<>();
         HashSet<String> variables = new HashSet<>();
@@ -97,64 +98,34 @@ public class MatchPatternFactory {
         }
     }
 
-    // TODO! this
-    public static Map<String, VariableReferences> getVariableReferenceMap(
-        List<QualifiedPathPattern> restrictedPathPatterns,
-        List<PathPattern> unrestrictedPathPatterns)
+    public static Map<String, Boolean> getIntersectionMap(List<QualifiedPathPattern> paths)
     {
-        HashMap<String, VariableReferences> variableReferenceMap = new HashMap<>();
-        // variables nested in parenthesied paths ought not to have cross references at all
+        Map<String, Boolean> intersectionMap = new HashMap<>();
 
-        for (int i = 0; i < restrictedPathPatterns.size(); i++)
-        {
-            QualifiedPathPattern pattern = restrictedPathPatterns.get(i);
-
-            for (PathComponent component : pattern.pathPattern().pathSequence())
-            {
+        for (QualifiedPathPattern path : paths) {
+            for (PathComponent component : path.pathPattern().pathSequence())
+            { 
                 if (component instanceof ElementPattern)
                 {
                     ElementPattern elem = (ElementPattern) component;
-                    Optional<String> varName = elem.variableName();
-                    if (varName.isPresent())
+                    if (elem.variableName().isPresent())
                     {
-                        String name = varName.get();
-                        variableReferenceMap.putIfAbsent(name, new VariableReferences(new ArrayList<>()));
-                        variableReferenceMap.get(name).restrictedReferenceIndices().add(i);
+                        String name = elem.variableName().get();
+                        if (intersectionMap.containsKey(name))
+                        {
+                            intersectionMap.put(name, true);
+                        }
+                        else 
+                        {
+                            intersectionMap.put(name, false);
+                        }
                     }
                 }
-                else 
-                {
-                    assert component instanceof ParenPathPattern;
-                }
             }
         }
 
-        for (PathPattern pathPattern : unrestrictedPathPatterns)
-        {
-            for (PathComponent component : pathPattern.pathSequence())
-            {
-                if (component instanceof ElementPattern)
-                {
-                    ElementPattern elem = (ElementPattern) component;
-                    Optional<String> varName = elem.variableName();
-                    varName.ifPresent(
-                        name -> {
-                            variableReferenceMap.putIfAbsent(name, new VariableReferences(new ArrayList<>()));
-                            // variableReferenceMap.get(name).restrictedReferenceIndices().add(i);
-                            variableReferenceMap.compute(name, (n, r) -> r.addUnrestrictedReference());
-                        }
-                    );
-                }
-                else 
-                {
-                    assert component instanceof ParenPathPattern;
-                }
-            }
-        }
-
-        return variableReferenceMap;
-    }
-
+        return intersectionMap;
+    } 
 
     public static Optional<String> getJointVariable(
         Map<String, VariableOccurenceCounter> variableOccurences
@@ -188,8 +159,7 @@ public class MatchPatternFactory {
     // this removes all path context from execution so paths must be
     // * Unrestricted
     // * Uncaptured
-
-    public static List<PathPattern> makeMatchPatterns(List<PathPattern> pathPatterns, Map<String, VariableReferences> referenceMap)
+    public static List<PathPattern> makeMatchPatterns(List<PathPattern> pathPatterns, Map<String, Boolean> intersectionMap)
     {
         final List<PathPattern> matchPatterns = new ArrayList<>();
 
@@ -207,8 +177,8 @@ public class MatchPatternFactory {
                     final ElementPattern elem = (ElementPattern) component;
                     final boolean intersection = 
                         elem.variableName().isPresent() && 
-                        referenceMap.containsKey(elem.variableName().get()) &&
-                        referenceMap.get(elem.variableName().get()).intersection();
+                        intersectionMap.containsKey(elem.variableName().get()) &&
+                        intersectionMap.get(elem.variableName().get());
                     
                     if (intersection)
                     {
@@ -244,8 +214,8 @@ public class MatchPatternFactory {
                     final ElementPattern elem = (ElementPattern) component;
                     intersection = 
                         elem.variableName().isPresent() && 
-                        referenceMap.containsKey(elem.variableName().get()) &&
-                        referenceMap.get(elem.variableName().get()).intersection();
+                        intersectionMap.containsKey(elem.variableName().get()) &&
+                        intersectionMap.get(elem.variableName().get());
 
                 }
 
@@ -268,42 +238,5 @@ public class MatchPatternFactory {
         return matchPatterns;
     }
 
-
-    // public static List<List<OrderedElementPattern>> makeMatchPatterns(List<OrderedPathPattern> pathPatterns)
-    // {
-    //     final List<List<OrderedElementPattern>> matchPatterns = new ArrayList<>();
-
-    //     for (OrderedPathPattern pathPattern : pathPatterns)
-    //     {
-    //         assert(!pathPattern.captured());
-
-    //         final List<OrderedElementPattern> pathSequence = pathPattern.pathSequence();
-            
-    //         OrderedElementPattern firstPattern = pathSequence.get(0);
-    //         List<OrderedElementPattern> patterns = new ArrayList<>();
-    //         patterns.add(firstPattern);
-
-    //         for (int i = 1; i < pathSequence.size(); i++)
-    //         {
-    //             final OrderedElementPattern pattern = pathSequence.get(i);
-    //             patterns.add(pattern);
-            
-    //             // add our subpattern, ending at the current pattern
-    //             if (pattern.intersection() || i == pathSequence.size() - 1)
-    //             {
-    //                 // can join on edges no cases because we're not targeting shortest
-    //                 // paths or anything
-                    
-    //                 matchPatterns.add(patterns);
-
-    //                 firstPattern = pattern;
-    //                 patterns = new ArrayList<>();
-    //                 patterns.add(pattern);
-    //             }
-    //         }
-    //     }
-
-    //     return matchPatterns;
-    // }
 
 }

@@ -22,6 +22,7 @@ package ast.visitors;
 import antlr.GqlParser;
 import antlr.GqlParser.*;
 import antlr.GqlParserBaseVisitor;
+import ast.atoms.Quantifier;
 import ast.expressions.Value;
 import ast.expressions.atomic.GqlIdentifier;
 import ast.patterns.EdgePattern;
@@ -66,22 +67,23 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
 
             ParseTree child = ctx.getChild(i);
 
-            if (child instanceof NodePatternContext) {
+            if (child instanceof PointPatternContext) {
                 if (!pointIndex)
                 {
                     throw new SemanticErrorException("Duplicate nodes in path without edges inbetween");
                 }
-    
-                pathSequence.add(visitNodePattern((NodePatternContext) child));
-            } else if (child instanceof ParenthesizedPathPatternExpressionContext)
-            {
-                if (!pointIndex)
+
+                ParseTree pointChild = child.getChild(0);
+
+                if (pointChild instanceof NodePatternContext)
                 {
-                    throw new SemanticErrorException("Node followed by parenthesised path without edges inbetween");
+                    pathSequence.add(visitNodePattern((NodePatternContext) pointChild));
                 }
-
-                pathSequence.add(visitParenthesizedPathPatternExpression((ParenthesizedPathPatternExpressionContext) child));
-
+                else if (pointChild instanceof ParenthesizedPathPatternExpressionContext)
+                {
+                    pathSequence.add(visitParenthesizedPathPatternExpression((ParenthesizedPathPatternExpressionContext) pointChild));
+                }
+                
             } else if (child instanceof EdgePatternContext) {
                 if (pointIndex)
                 {
@@ -101,7 +103,15 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
     @Override
     public ParenPathPattern visitParenthesizedPathPatternExpression(ParenthesizedPathPatternExpressionContext ctx)
     {
-        return null;
+        if (ctx.whereClause() != null)
+        {
+            throw new SemanticErrorException("Where clause currently unsupported");
+        }
+
+        return new ParenPathPattern(
+            visitPathPatternExpression(ctx.pathPatternExpression()), 
+            null, 
+            visitLen(ctx.len()));
     }
 
     @Override
@@ -109,12 +119,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
         Optional<String> variableName = visitElementVariable(ctx.elementPatternFiller().elementVariable());
         LabelExpression labels = visitIsLabelExpr(ctx.elementPatternFiller().isLabelExpr());
 
-        if (ctx.elementPatternFiller().elementPatternPredicate().whereClause() != null)
-        {
-            throw new SyntaxErrorException("Where Clause in node patterns is unsupported");
-        }
-
-        HashMap<String, Value> properties = visitPropertyList(ctx.elementPatternFiller().elementPatternPredicate().propertyList());
+        HashMap<String, Value> properties = getProperties(ctx.elementPatternFiller());
 
         return new NodePattern(variableName, labels, properties);
     }
@@ -158,23 +163,54 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
         Optional<String> variableName = visitElementVariable(ctx.elementVariable());
         LabelExpression labels = visitIsLabelExpr(ctx.isLabelExpr());
 
-        if (ctx.elementPatternPredicate().whereClause() != null)
-        {
-            throw new SyntaxErrorException("Where Clause in edge patterns is unsupported");
-        }
-
-        HashMap<String, Value> properties = visitPropertyList(ctx.elementPatternPredicate().propertyList());
+        HashMap<String, Value> properties = getProperties(ctx);
 
         return new EdgePattern(variableName, labels, properties, direction);
     }
 
-    @Override
-    public Integer visitQuantifier(QuantifierContext ctx) {
-         List<TerminalNode> quantifier = ctx.UNSIGNED_INTEGER();
-         if (quantifier.size() == 1)  return Integer.parseInt(quantifier.get(0).getText());
-         if (quantifier.get(0).getText().equals(quantifier.get(1).getText())) return Integer.parseInt(quantifier.get(0).getText());
+    private HashMap<String, Value> getProperties(ElementPatternFillerContext ctx)
+    {
+        if (ctx.elementPatternPredicate() == null)
+        {
+            return new HashMap<>();
+        }
 
-         throw new SemanticErrorException("A quantifier for an edge must be a single number or two numbers that are equal to each other.");
+        if (ctx.elementPatternPredicate().whereClause() != null)
+        {
+            throw new SyntaxErrorException("Where Clause in element patterns is unsupported");
+        }
+
+        return visitPropertyList(ctx.elementPatternPredicate().propertyList());
+    }
+
+    @Override 
+    public Quantifier visitLen(LenContext ctx)
+    {
+        if (ctx == null)
+        {
+            return new Quantifier(1, 1);
+        }
+        else 
+        {
+            return visitQuantifier(ctx.quantifier());
+        }
+    }
+
+    @Override
+    public Quantifier visitQuantifier(QuantifierContext ctx) {
+
+        List<TerminalNode> quantifier = ctx.UNSIGNED_INTEGER();
+         
+        if (quantifier.size() == 1) {
+            int k = Integer.parseInt(quantifier.get(0).getText());
+            return new Quantifier(k, k);
+        }
+        else 
+        {
+            int a = Integer.parseInt(quantifier.get(0).getText());
+            int b = Integer.parseInt(quantifier.get(1).getText());
+            return new Quantifier(a, b);
+        }
     }
 
     @Override

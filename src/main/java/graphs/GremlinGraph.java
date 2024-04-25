@@ -116,7 +116,7 @@ public class GremlinGraph extends graphs.Graph {
         if (!(node.properties == null)) {
             Map<String, Object> properties = node.properties;
             properties.forEach((propertyId, value) -> {
-                pipe.property(propertyId.toString(), "\"" + value.toString() + "\"");
+                pipe.property(propertyId.toString(), value);
             });
         }
 
@@ -156,7 +156,7 @@ public class GremlinGraph extends graphs.Graph {
         if (!(edge.properties == null)) {
             Map<String, Object> properties = edge.properties;
             properties.forEach((propertyId, value) -> {
-                pipe.property(propertyId.toString(), value.toString());
+                pipe.property(propertyId.toString(), value);
             });
         }
 
