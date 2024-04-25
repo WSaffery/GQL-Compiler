@@ -595,7 +595,6 @@ public class GremlinCompiler {
         String startLabel = "#COMPILER_s%s".formatted(pathHashCode);
         String endLabel = "#COMPILER_e%s".formatted(pathHashCode);
         System.out.println(startLabel);
-        // String endLabel = "#COMPILER_e%s".format(pathHashCode);
         
 
         PathComponent head = components.get(0);
