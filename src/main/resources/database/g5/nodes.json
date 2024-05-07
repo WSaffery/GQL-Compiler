@@ -1,11 +1,11 @@
-{
-  "n": {
+[
+  {
     "identity": "n1"
   },
-  "n": {
+  {
     "identity": "n2"
   },
-  "n": {
+  {
     "identity": "n3"
   }
-}
+]

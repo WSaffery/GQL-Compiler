@@ -23,6 +23,8 @@ import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import exceptions.InvalidEdgeFormatException;
 
@@ -46,10 +48,14 @@ public class EdgeParser {
     }
 
     public ArrayList<JsonEdge> getEdges() throws InvalidEdgeFormatException {
-        JsonEdgeList edgeList = null;
+        ArrayList<JsonEdge> edges = null;
+
+        TypeFactory typeFactory = objectMapper.getTypeFactory();
+        CollectionType type = typeFactory.constructCollectionType(ArrayList.class, JsonEdge.class);
+
 
         try {
-            edgeList = objectMapper.readValue(fileToParse, JsonEdgeList.class);
+            edges = objectMapper.readValue(fileToParse, type);
         } catch (JsonMappingException exception) {
             System.err.println("edge.json is not formatted correctly at " + fileToParse.getAbsolutePath() + ".");
             System.err.println(exception.getMessage());
@@ -62,7 +68,11 @@ public class EdgeParser {
             e.printStackTrace();
         }
 
-        assert edgeList != null;
-        return edgeList.edges;
+        return edges;
+    }
+
+    public void validateEdges(ArrayList<JsonEdge> edges)
+    {
+        return;
     }
 }

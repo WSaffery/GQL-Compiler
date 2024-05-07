@@ -23,10 +23,16 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class JsonNode {
     public String identity;
     public ArrayList<String> labels;
     public Map<String, Object> properties;
+
+    // allow jackson to build up JsonNode incrementally
+    public JsonNode() {}
 
     public JsonNode(String identity) {
         this.identity = identity;

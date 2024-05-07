@@ -1,5 +1,5 @@
-{
-  "e": {
+[
+  {
     "identity": "e2",
     "start": "n85",
     "end": "n5",
@@ -8,7 +8,7 @@
     ],
     "isDirected": 1
   },
-  "e": {
+  {
     "identity": "e3",
     "start": "n85",
     "end": "n19",
@@ -17,7 +17,7 @@
     ],
     "isDirected": 1
   },
-  "e": {
+  {
     "identity": "e12",
     "start": "n19",
     "end": "n85",
@@ -26,7 +26,7 @@
     ],
     "isDirected": 1
   },
-  "e": {
+  {
     "identity": "e21",
     "start": "n29",
     "end": "n19",
@@ -35,7 +35,7 @@
     ],
     "isDirected": 0
   },
-  "e": {
+  {
     "identity": "e86",
     "start": "n19",
     "end": "n5",
@@ -44,4 +44,4 @@
     ],
     "isDirected": 1
   }
-}
+]

@@ -1,38 +1,38 @@
-{
-  "e": {
+[
+  {
     "identity": "e1",
     "start": "a",
     "end": "b",
     "isDirected": 1
   },
-  "e": {
+  {
     "identity": "e2",
     "start": "b",
     "end": "c",
     "isDirected": 1
   },
-  "e": {
+  {
     "identity": "e3",
     "start": "c",
     "end": "d",
     "isDirected": 1
   },
-  "e": {
+  {
     "identity": "e4",
     "start": "b",
     "end": "e",
     "isDirected": 1
   },
-  "e": {
+  {
     "identity": "e5",
     "start": "c",
     "end": "f",
     "isDirected": 1
   },
-  "e": {
+  {
     "identity": "e6",
     "start": "e",
     "end": "f",
     "isDirected": 1
   }
-}
+]

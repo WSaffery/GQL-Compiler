@@ -1,11 +1,11 @@
-{
-  "n": {
+[
+  {
     "identity": "n5",
     "labels": [
       "Internship"
     ]
   },
-  "n": {
+  {
     "identity": "n19",
     "labels": [
       "Person",
@@ -16,7 +16,7 @@
       "employer": "TU/e"
     }
   },
-  "n": {
+  {
     "identity": "n29",
     "labels": [
       "Person"
@@ -26,7 +26,7 @@
       "employer": "Amazon"
     }
   },
-  "n": {
+  {
     "identity": "n85",
     "labels": [
       "Person"
@@ -36,4 +36,4 @@
       "studies": "Data Science"
     }
   }
-}
+]

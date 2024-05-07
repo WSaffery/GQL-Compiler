@@ -20,9 +20,13 @@
 package json.gremlin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class JsonEdge {
     public String identity;
     public String start;
@@ -31,6 +35,11 @@ public class JsonEdge {
     public Map<String, Object> properties;
     public Boolean isDirected;
 
+    // allow jackson to build up JsonEdge incrementally
+    public JsonEdge() 
+    {
+    }
+    
     public JsonEdge(String identity,
                     String start,
                     String end,

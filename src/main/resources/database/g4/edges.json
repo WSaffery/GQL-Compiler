@@ -1,16 +1,16 @@
-{
-  "e": {
+[
+  {
     "identity": "e1",
     "start": "n1",
     "end": "n2",
     "labels": ["Knows"],
     "isDirected": 0
   },
-  "e": {
+  {
     "identity": "e2",
     "start": "n1",
     "end": "n3",
     "labels": ["Knows"],
     "isDirected": 0
   }
-}
+]

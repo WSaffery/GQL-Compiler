@@ -1,26 +1,26 @@
-{
-  "n": {
+[
+  {
     "identity": "n5",
     "labels": [
       "Internship"
     ]
   },
-  "n": {
+  {
     "identity": "n19",
     "labels": [
       "Person"
     ]
   },
-  "n": {
+  {
     "identity": "n29",
     "labels": [
       "Person"
     ]
   },
-  "n": {
+  {
     "identity": "n85",
     "labels": [
       "Person"
     ]
   }
-}
+]

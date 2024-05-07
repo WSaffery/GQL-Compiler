@@ -23,6 +23,8 @@ import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import exceptions.InvalidNodeFormatException;
 
@@ -47,10 +49,13 @@ public class NodeParser {
     }
 
     public ArrayList<JsonNode> getNodes() throws InvalidNodeFormatException {
-        JsonNodeList nodeList = null;
+        ArrayList<JsonNode> nodes = null;
+        TypeFactory typeFactory = objectMapper.getTypeFactory();
+        CollectionType type = typeFactory.constructCollectionType(ArrayList.class, JsonNode.class);
 
         try {
-            nodeList = objectMapper.readValue(fileToParse, JsonNodeList.class);
+            nodes = objectMapper.readValue(fileToParse, type);
+            validateNodes(nodes);
         } catch (JsonMappingException exception) {
             System.err.println("node.json is not formatted correctly at " + fileToParse.getAbsolutePath() + ".");
             System.err.println(exception.getMessage());
@@ -63,7 +68,11 @@ public class NodeParser {
             e.printStackTrace();
         }
 
-        assert nodeList != null;
-        return nodeList.nodes;
+        return nodes;
+    }
+
+    public void validateNodes(ArrayList<JsonNode> nodes)
+    {
+        return;
     }
 }

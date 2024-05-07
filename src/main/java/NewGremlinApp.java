@@ -80,13 +80,24 @@ public class NewGremlinApp {
         graph.setLocalGraph("g");
         g = graph.currentGraph;
 
-        System.out.println("Match Sanity Check");
-        matchSanityCheck(g);
+        // System.out.println("Match Sanity Check");
+        // matchSanityCheck(g);
 
-        if (true)
-        {
-            return;
-        }
+        // TRAIL
+        // g.V().as("a").
+        // outE().as("e1", "e").inV().as("b").
+        // outE().as("e2", "e").inV().as("c").
+        // outE().as("e3", "e").inV().as("d").
+        // select(Pop.all, "e").count(Scope.local).as("c1").
+        // select(Pop.all, "e").dedup(Scope.local).count(Scope.local).as("c2").
+        // select(Pop.all, "e").count(Scope.local).as("c3").
+        // select("c1", "c2", "c3")
+
+
+        // if (true)
+        // {
+        //     return;
+        // }
 
         System.out.println("Inward traversal");
         directedTraversalDemo(g, Direction.IN, 2);

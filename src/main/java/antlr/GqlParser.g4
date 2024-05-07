@@ -136,6 +136,7 @@ setQuantifier
 
 len
     : LEFT_BRACE quantifier RIGHT_BRACE
+    | ASTERISK
     ;
 
 quantifier

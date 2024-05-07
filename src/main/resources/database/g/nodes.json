@@ -1,14 +1,14 @@
-{
-  "n": {
+[
+  {
     "identity": "n1",
     "labels": ["a"]
   },
-  "n": {
+  {
     "identity": "n2",
     "labels": ["b"]
   },
-  "n": {
+  {
     "identity": "n3",
     "labels": ["c"]
   }
-}
+]
