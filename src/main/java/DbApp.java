@@ -8,6 +8,8 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import exceptions.InvalidEdgeFormatException;
 import exceptions.InvalidNodeFormatException;
 import graphs.GremlinGraph;
+import graphs.GremlinGraphFactory;
+import graphs.ResourcePaths;
 
 public class DbApp {
     public static void main(String[] args) throws FileNotFoundException, InvalidNodeFormatException, InvalidEdgeFormatException {
@@ -22,9 +24,10 @@ public class DbApp {
     {
         System.out.println("Loading graph: " + name);
 
-        GremlinGraph graph = GremlinGraph.getInstance();
-        graph.setLocalGraph(name);
+        GremlinGraphFactory factory = new GremlinGraphFactory(ResourcePaths.getGraphFolder());
+        GremlinGraph graph = factory.makeGremlinGraph(name);
         GraphTraversalSource g = graph.currentGraph;
+
         List<Edge> edges = g.E().toList();
         edges.forEach(e -> System.out.println(e.toString()));
         List<Vertex> vertexs = g.V().toList();

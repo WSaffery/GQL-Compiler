@@ -33,12 +33,8 @@ import exceptions.SemanticErrorException;
 import exceptions.SyntaxErrorException;
 import gql_gremlin.helpers.VariableOccurenceCounter;
 import gql_gremlin.matching.MatchExpression;
-// import gql_gremlin.matching.MatchPattern;
 import gql_gremlin.matching.MatchPatternFactory;
-// import gql_gremlin.matching.OrderedElementPattern;
-// import gql_gremlin.matching.OrderedPathPattern;
-// import gql_gremlin.matching.OrderedPathResult;
-import graphs.Graph;
+
 
 // import com.tinkerpop.blueprints.Direction;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;

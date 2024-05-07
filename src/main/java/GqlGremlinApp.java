@@ -19,6 +19,7 @@
 
 import static gql_gremlin.helpers.GremlinHelpers.appendTraversal;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.util.HashMap;
@@ -42,9 +43,11 @@ import ast.GqlProgram;
 import ast.visitors.AstListener;
 import gql_gremlin.GremlinCompiler;
 import graphs.GremlinGraph;
+import graphs.GremlinGraphFactory;
+import graphs.ResourcePaths;
 
 public class GqlGremlinApp {
-    static String testQueryFolder = "/src/test/resources/queries/";
+    static final String testQueryFolder = "/src/test/resources/queries/";
 
     public static void main(String[] args) throws Exception {
         assert(args.length >= 1);        
@@ -77,8 +80,7 @@ public class GqlGremlinApp {
 
         System.out.println("Graph name: " + program.graph);
 
-        GremlinGraph graph = GremlinGraph.getInstance();
-        graph.setLocalGraph(program.graph);
+        GremlinGraph graph = new GremlinGraphFactory(ResourcePaths.getGraphFolder()).makeGremlinGraph(program.graph);
         GraphTraversalSource g = graph.currentGraph;
 
         printGraph(g);

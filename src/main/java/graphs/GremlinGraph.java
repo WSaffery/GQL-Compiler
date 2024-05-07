@@ -1,23 +1,9 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 package graphs;
+
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.V;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -25,78 +11,33 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 
 import exceptions.InvalidEdgeFormatException;
-import exceptions.InvalidNodeFormatException;
-import json.gremlin.EdgeParser;
 import json.gremlin.JsonEdge;
 import json.gremlin.JsonNode;
-import json.gremlin.NodeParser;
-
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Map;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
-
-public class GremlinGraph extends graphs.Graph {
-    private static GremlinGraph instance;
+public class GremlinGraph {
     public GraphTraversalSource currentGraph;
 
-    private GremlinGraph() {
-        String graphName = getFirstGraphName();
-        try {
-            setLocalGraph(graphName);
-            currentGraphName = graphName;
-        } catch (FileNotFoundException | InvalidEdgeFormatException | InvalidNodeFormatException exception) {
-            setEmptyGraph();
-            currentGraphName = "The empty graph";
-            System.out.println("First graph is not complete, so initialize to an empty graph");
-        }
-    }
-
-    public static GremlinGraph getInstance() {
-        if (instance == null) {
-            instance = new GremlinGraph();
-        }
-
-        return instance;
-    }
-
-    @Override
-    public void setRemoteGraph() {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
-    protected void setEmptyGraph() {
-        Graph graph = TinkerGraph.open();
+    protected GremlinGraph(Graph graph) {
         this.currentGraph = traversal().withEmbedded(graph);
     }
 
-    @Override
-    protected void initializeNodes(String graphName) throws FileNotFoundException, InvalidNodeFormatException {
-        NodeParser nodeParser = new NodeParser(getGraphDirectory(graphName) + "/nodes.json");
-        ArrayList<JsonNode> jsonNodes = nodeParser.getNodes();
+    public static GremlinGraph makGremlinGraph(
+        Graph tinkerGraph, ArrayList<JsonNode> nodes, ArrayList<JsonEdge> edges) throws InvalidEdgeFormatException
+    {
+        GremlinGraph graph = new GremlinGraph(tinkerGraph);
+        nodes.forEach(graph::addNodeToCurrentGraph);
+        edges.forEach(graph::addEdgeToCurrentGraph);
 
-        for (JsonNode node:jsonNodes) {
-            addNodeToCurrentGraph(node);
-        }
-    }
-
-    @Override
-    protected void intializeEdges(String graphName) throws FileNotFoundException, InvalidEdgeFormatException {
-        EdgeParser edgeParser = new EdgeParser(getGraphDirectory(graphName) + "/edges.json");
-        ArrayList<JsonEdge> jsonEdges = edgeParser.getEdges();
-
-        for (JsonEdge edge: jsonEdges) {
-            checkIfEdgeIsConnected(edge);
+        for (JsonEdge edge: edges)
+        {
+            graph.checkIfEdgeIsConnected(edge);
         }
 
-        jsonEdges.forEach(this::addEdgeToCurrentGraph);
+        return graph;
     }
 
     private void addNodeToCurrentGraph(JsonNode node) {
@@ -123,16 +64,16 @@ public class GremlinGraph extends graphs.Graph {
         pipe.iterate();
     }
 
+    private boolean nodeDoesNotExist(String start) {
+        return !this.currentGraph.V(start).hasNext();
+    }
+
     private void checkIfEdgeIsConnected(JsonEdge edge) throws InvalidEdgeFormatException {
         if (nodeDoesNotExist(edge.start)) {
             throw new InvalidEdgeFormatException("Edge " + edge.identity + " start node does not exist.");
         } else if (nodeDoesNotExist(edge.end)) {
             throw new InvalidEdgeFormatException("Edge " + edge.identity + " start node does not exist.");
         }
-    }
-
-    private boolean nodeDoesNotExist(String start) {
-        return !this.currentGraph.V(start).hasNext();
     }
 
     private void addEdgeToCurrentGraph(JsonEdge edge) {

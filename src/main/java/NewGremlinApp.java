@@ -25,6 +25,8 @@ import org.checkerframework.checker.units.qual.A;
 import org.javatuples.Pair;
 
 import graphs.GremlinGraph;
+import graphs.GremlinGraphFactory;
+import graphs.ResourcePaths;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 
@@ -34,9 +36,13 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 public class NewGremlinApp {    
      public static void main(String[] args) throws Exception {
         // Connection to local graph
-        GremlinGraph graph = GremlinGraph.getInstance();
-        graph.setLocalGraph("g");
+        GremlinGraphFactory factory = new GremlinGraphFactory(ResourcePaths.getGraphFolder());
+        GremlinGraph graph = factory.makeGremlinGraph("g");
         GraphTraversalSource g = graph.currentGraph;
+
+        // oldGremlinGraph graph = oldGremlinGraph.getInstance();
+        // graph.setLocalGraph("g");
+        // GraphTraversalSource g = graph.currentGraph;
         // (a) -> (b) -> (c) 
         // (c) -> (c)
 
@@ -52,7 +58,7 @@ public class NewGremlinApp {
         System.out.println("Trail traversal");
         trailTraversalDemo(g, 2);
 
-        graph.setLocalGraph("g5");
+        graph = factory.makeGremlinGraph("g5");
         g = graph.currentGraph;
         // (a) -> (b) -> (c) 
         // (c) -> (c)
@@ -77,7 +83,7 @@ public class NewGremlinApp {
         System.out.println("Lambda Trail traversal (3)");
         lambdaTrailTraversalDemo(g, 3);
 
-        graph.setLocalGraph("g");
+        graph = factory.makeGremlinGraph("g");
         g = graph.currentGraph;
 
         // System.out.println("Match Sanity Check");
@@ -132,7 +138,7 @@ public class NewGremlinApp {
         System.out.println("Where Match traversal");
         whereMatchDemo(g);
 
-        graph.setLocalGraph("g5");
+        graph = factory.makeGremlinGraph("g5");
         // (a) -> (b) -> (c) 
         // (c) -> (c)
         // (c) -> (b)
