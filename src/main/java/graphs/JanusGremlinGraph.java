@@ -3,12 +3,12 @@ package graphs;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.V;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
@@ -16,11 +16,13 @@ import exceptions.InvalidEdgeFormatException;
 import json.gremlin.JsonEdge;
 import json.gremlin.JsonNode;
 
-public class GremlinGraph implements GraphLoader {
+public class JanusGremlinGraph implements GraphLoader {
     public GraphTraversalSource currentGraph;
+    public Map<String, Object> idMap;
 
-    public GremlinGraph(GraphTraversalSource gts) {
+    public JanusGremlinGraph(GraphTraversalSource gts) {
         this.currentGraph = gts;
+        this.idMap = new HashMap<>();
     }
 
     public void loadJsonGraph(ArrayList<JsonNode> nodes, ArrayList<JsonEdge> edges)
@@ -36,17 +38,18 @@ public class GremlinGraph implements GraphLoader {
     }
 
     private void addNodeToCurrentGraph(JsonNode node) {
-        String id = node.identity;
+        String jsonId = node.identity;
+        // custom vertex ids are dropped and then locally mapped to the generated id
         
         if (node.labels != null)
             assert(node.labels.size() >= 1);
 
         GraphTraversal<Vertex, Vertex> pipe = node.labels != null ?
-            this.currentGraph.addV(node.labels.get(0)).property(T.id, id) : 
-            this.currentGraph.addV().property(T.id, id);
+            this.currentGraph.addV(node.labels.get(0)) : 
+            this.currentGraph.addV();
 
         if (!(node.labels == null)) {
-            pipe.property("labels", node.labels.clone());
+            // pipe.property("labels", node.labels.clone());
         }
 
         if (!(node.properties == null)) {
@@ -56,11 +59,17 @@ public class GremlinGraph implements GraphLoader {
             });
         }
 
-        pipe.iterate();
+        Object actualId = pipe.id().next();
+        
+        idMap.put(jsonId, actualId);
     }
 
-    private boolean nodeDoesNotExist(String start) {
-        return !this.currentGraph.V(start).hasNext();
+    private boolean nodeDoesNotExist(Object id) {
+        return !this.currentGraph.V(id).hasNext();
+    }
+
+    private boolean nodeDoesNotExist(String id) {
+        return nodeDoesNotExist(idMap.get(id));
     }
 
     private void checkIfEdgeIsConnected(JsonEdge edge) throws InvalidEdgeFormatException {
@@ -72,21 +81,23 @@ public class GremlinGraph implements GraphLoader {
     }
 
     private void addEdgeToCurrentGraph(JsonEdge edge) {
-        String id = edge.identity;
+        // String id = edge.identity;
+        // custom edge ids are just dropped 
 
         if (edge.labels != null)
             assert(edge.labels.size() >= 1);
 
         GraphTraversal<Edge, Edge> pipe = edge.labels != null ?
-            this.currentGraph.addE(edge.labels.get(0)).property(T.id, id) :
-            this.currentGraph.addE("edge").property(T.id, id);
+            this.currentGraph.addE(edge.labels.get(0)) :
+            this.currentGraph.addE("nolabel");
 
-        String sourceNodeId = edge.start;
-        String targetNodeId = edge.end;
+        Object sourceNodeId = idMap.get(edge.start);
+        Object targetNodeId = idMap.get(edge.end);
+
         pipe.from(V(sourceNodeId)).to(V(targetNodeId));
 
         if (!(edge.labels == null)) {
-            pipe.property("labels", edge.labels.clone());
+            // pipe.property("labels", edge.labels.clone());
         }
 
         if (!(edge.properties == null)) {

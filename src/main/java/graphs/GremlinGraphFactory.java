@@ -3,8 +3,10 @@ package graphs;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
+import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
 import exceptions.InvalidEdgeFormatException;
 import exceptions.InvalidNodeFormatException;
@@ -24,21 +26,43 @@ public class GremlinGraphFactory {
         this.graphDir = graphDir;
     }
 
-    public GremlinGraph makeGremlinGraph(Graph graph, String name) 
+    public void readJsonToGraph(GraphLoader graph, String fileName) 
         throws FileNotFoundException, InvalidNodeFormatException, InvalidEdgeFormatException
     {
-        assert(name.charAt(name.length()-1) != '/'); // ensure no trailing slash
-        String path = graphDir + name;
+        assert(fileName.charAt(fileName.length()-1) != '/'); // ensure no trailing slash
+        String path = graphDir + fileName;
 
         ArrayList<JsonNode> nodes = new NodeParser(path + "/" + NODE_FILE).getNodes();
         ArrayList<JsonEdge> edges = new EdgeParser(path + "/" + EDGE_FILE).getEdges();
 
-        return GremlinGraph.makGremlinGraph(graph, nodes, edges);
+        graph.loadJsonGraph(nodes, edges);
     }
 
-    public GremlinGraph makeGremlinGraph(String name) 
+    public GremlinGraph makeGremlinGraph(GraphTraversalSource source, String fileName) 
         throws FileNotFoundException, InvalidNodeFormatException, InvalidEdgeFormatException
     {
-        return makeGremlinGraph(TinkerGraph.open(), name);
+        GremlinGraph gremlinGraph = new GremlinGraph(source);
+        readJsonToGraph(gremlinGraph, fileName);
+        return gremlinGraph;
     }
+
+    public GremlinGraph makeGremlinGraph(Graph graph, String fileName) 
+        throws FileNotFoundException, InvalidNodeFormatException, InvalidEdgeFormatException
+    {
+        return makeGremlinGraph(traversal().withEmbedded(graph), fileName);
+    }
+
+    public GremlinGraph makeGremlinGraph(String configFile, String fileName) 
+        throws Exception
+    {
+        return makeGremlinGraph(traversal().withRemote(configFile), fileName);
+    }
+    
+
+    public GremlinGraph makeGremlinGraph(String fileName) 
+        throws FileNotFoundException, InvalidNodeFormatException, InvalidEdgeFormatException
+    {
+        return makeGremlinGraph(TinkerGraph.open(), fileName);
+    }
+
 }
