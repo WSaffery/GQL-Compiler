@@ -22,3 +22,6 @@ src/antlr/*.interp
 src/antlr/*.tokens
 
 .vscode
+
+edge_stream.json
+node_stream.json

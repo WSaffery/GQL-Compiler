@@ -27,11 +27,14 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import exceptions.InvalidEdgeFormatException;
+import exceptions.InvalidNodeFormatException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 public class EdgeParser {
     ObjectMapper objectMapper;
@@ -69,6 +72,20 @@ public class EdgeParser {
         }
 
         return edges;
+    }
+
+    public Stream<JsonEdge> getEdgeStream() throws InvalidEdgeFormatException, IOException
+    {
+        return Files.lines(fileToParse.toPath()).map((s) -> {
+            try {
+                return objectMapper.readValue(s, JsonEdge.class);
+            }
+            catch (Exception e) // todo! make this stricter
+            {
+                System.err.println(e.getMessage());
+                return (JsonEdge) null;
+            }
+        });
     }
 
     public void validateEdges(ArrayList<JsonEdge> edges)

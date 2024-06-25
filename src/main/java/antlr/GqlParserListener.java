@@ -210,6 +210,16 @@ public interface GqlParserListener extends ParseTreeListener {
 	 */
 	void exitFullEdgePointingRight(GqlParser.FullEdgePointingRightContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link GqlParser#fullEdgeAnyOrientation}.
+	 * @param ctx the parse tree
+	 */
+	void enterFullEdgeAnyOrientation(GqlParser.FullEdgeAnyOrientationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GqlParser#fullEdgeAnyOrientation}.
+	 * @param ctx the parse tree
+	 */
+	void exitFullEdgeAnyOrientation(GqlParser.FullEdgeAnyOrientationContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link GqlParser#elementPatternFiller}.
 	 * @param ctx the parse tree
 	 */

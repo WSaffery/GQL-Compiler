@@ -335,10 +335,6 @@ public class GremlinCompiler {
     // }
 
 
-    // TODO!
-    // We don't actually need to use where intersections!
-    // start and end points of match patterns are also checked against history to ensure equality
-    // can just split on any intersection variable (restrictedCount + unrestrictedCount > 1) 
     public GraphTraversal<?, ?> compileToMatchTraversal(List<ElementPattern> matchPattern)
     {
         ElementPattern head = matchPattern.get(0);

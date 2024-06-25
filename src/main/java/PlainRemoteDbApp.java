@@ -1,8 +1,3 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,13 +6,11 @@ import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
-import org.apache.tinkerpop.gremlin.process.remote.RemoteConnection;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
-import graphs.GremlinGraph;
 import graphs.GremlinGraphFactory;
 import graphs.JanusGremlinGraph;
 import graphs.ResourcePaths;
@@ -39,8 +32,8 @@ public class PlainRemoteDbApp {
         System.out.println("graphs: " + graphs);
 
         // File f = new File("conf/remote-graph.properties");
-        Path path = FileSystems.getDefault().getPath("conf", "remote-objects.yaml");
-        System.out.println(Files.lines(path).toList());
+        // Path path = FileSystems.getDefault().getPath("conf", "remote-objects.yaml");
+        // System.out.println(Files.lines(path).toList());
         
         DriverRemoteConnection connection = DriverRemoteConnection.using(
             Cluster.open("conf/remote-objects.yaml")
@@ -83,7 +76,7 @@ public class PlainRemoteDbApp {
         System.out.println("Loading graph " + graphName + " to remote.");
         GremlinGraphFactory factory = new GremlinGraphFactory(ResourcePaths.getGraphFolder());
         JanusGremlinGraph graph = new JanusGremlinGraph(gts);
-        factory.readJsonToGraph(graph, graphName);
+        factory.streamJsonToGraph(graph, graphName);
 
         // this loads the file's data into our remote graph
         // we don't actually use the resulting GremlinGraph object

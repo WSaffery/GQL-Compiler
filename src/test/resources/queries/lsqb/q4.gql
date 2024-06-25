@@ -1,0 +1,4 @@
+MATCH (:Tag)<-[:hasTag]-(message:Message)-[:hasCreator]-(creator:Person),
+    (message)<-[:likes]-(liker:Person),
+    (message)<-[:replyOf]-(comment:Comment)
+RETURN count(*) AS count

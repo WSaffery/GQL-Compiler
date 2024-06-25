@@ -133,6 +133,12 @@ public interface GqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFullEdgePointingRight(GqlParser.FullEdgePointingRightContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link GqlParser#fullEdgeAnyOrientation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFullEdgeAnyOrientation(GqlParser.FullEdgeAnyOrientationContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link GqlParser#elementPatternFiller}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

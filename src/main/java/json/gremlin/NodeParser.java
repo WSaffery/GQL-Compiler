@@ -31,7 +31,9 @@ import exceptions.InvalidNodeFormatException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 public class NodeParser {
     ObjectMapper objectMapper;
@@ -69,6 +71,20 @@ public class NodeParser {
         }
 
         return nodes;
+    }
+
+    public Stream<JsonNode> getNodeStream() throws InvalidNodeFormatException, IOException
+    {
+        return Files.lines(fileToParse.toPath()).map((s) -> {
+            try {
+                return objectMapper.readValue(s, JsonNode.class);
+            }
+            catch (Exception e) // todo! make this stricter
+            {
+                System.err.println(e.getMessage());
+                return (JsonNode) null;
+            }
+        });
     }
 
     public void validateNodes(ArrayList<JsonNode> nodes)

@@ -45,7 +45,7 @@ public enum Direction {
     UNDIRECTED {
         @Override
         public String toString() {
-            return "-";
+            return "~";
         }
     };
 

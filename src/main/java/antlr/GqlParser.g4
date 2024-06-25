@@ -80,7 +80,7 @@ nodePattern
     ;
 
 edgePattern
-    : (fullEdgePointingLeft | fullEdgeUndirected | fullEdgePointingRight) len?
+    : (fullEdgePointingLeft | fullEdgeUndirected | fullEdgePointingRight | fullEdgeAnyOrientation) len?
     ;
 
 fullEdgePointingLeft
@@ -93,6 +93,10 @@ fullEdgeUndirected
 
 fullEdgePointingRight
     : MINUS_LEFT_BRACKET elementPatternFiller BRACKET_RIGHT_ARROW
+    ;
+
+fullEdgeAnyOrientation
+    : MINUS_LEFT_BRACKET elementPatternFiller RIGHT_BRACKET_MINUS
     ;
 
 elementPatternFiller

@@ -19,7 +19,6 @@
 
 import static gql_gremlin.helpers.GremlinHelpers.appendTraversal;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.util.HashMap;

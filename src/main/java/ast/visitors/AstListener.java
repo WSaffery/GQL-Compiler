@@ -1,7 +1,5 @@
 package ast.visitors;
 
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.optional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

@@ -258,6 +258,18 @@ public class GqlParserBaseListener implements GqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterFullEdgeAnyOrientation(GqlParser.FullEdgeAnyOrientationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFullEdgeAnyOrientation(GqlParser.FullEdgeAnyOrientationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterElementPatternFiller(GqlParser.ElementPatternFillerContext ctx) { }
 	/**
 	 * {@inheritDoc}

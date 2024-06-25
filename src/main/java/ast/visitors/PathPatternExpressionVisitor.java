@@ -24,9 +24,7 @@ import antlr.GqlParser.*;
 import antlr.GqlParserBaseVisitor;
 import ast.atoms.Quantifier;
 import ast.expressions.Value;
-import ast.expressions.atomic.GqlIdentifier;
 import ast.patterns.EdgePattern;
-import ast.patterns.ElementPattern;
 import ast.patterns.NodePattern;
 import ast.patterns.ParenPathPattern;
 import ast.patterns.PathComponent;
@@ -40,10 +38,6 @@ import exceptions.SyntaxErrorException;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang.NotImplementedException;
-
-import com.ibm.icu.impl.locale.LocaleValidityChecker.Where;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -127,7 +121,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
     @Override
     public EdgePattern visitEdgePattern(EdgePatternContext ctx) {
         // default unlabelled right pointing edge
-        EdgePattern edge = new EdgePattern(Optional.empty(), null, null, Direction.LEFT_TO_RIGHT);
+        EdgePattern edge = new EdgePattern(Optional.empty(), null, null, Optional.empty());
 
         if (ctx.getChild(0) instanceof FullEdgeUndirectedContext) {
             edge = visitFullEdgeUndirected((FullEdgeUndirectedContext) ctx.getChild(0));
@@ -135,6 +129,9 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
             edge = visitFullEdgePointingLeft((FullEdgePointingLeftContext) ctx.getChild(0));
         } else if (ctx.getChild(0) instanceof FullEdgePointingRightContext) {
             edge = visitFullEdgePointingRight((FullEdgePointingRightContext) ctx.getChild(0));
+        } else if (ctx.getChild(0) instanceof FullEdgeAnyOrientationContext)
+        {
+            edge = visitFullEdgeAnyOrientation((FullEdgeAnyOrientationContext) ctx.getChild(0));
         }
 
         if (ctx.len() != null) {
@@ -146,20 +143,25 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
 
     @Override
     public EdgePattern visitFullEdgePointingLeft(FullEdgePointingLeftContext ctx) {
-        return getEdgePattern(ctx.elementPatternFiller(), Direction.RIGHT_TO_LEFT);
+        return getEdgePattern(ctx.elementPatternFiller(), Optional.of(Direction.RIGHT_TO_LEFT));
     }
 
     @Override
     public EdgePattern visitFullEdgePointingRight(FullEdgePointingRightContext ctx) {
-        return getEdgePattern(ctx.elementPatternFiller(), Direction.LEFT_TO_RIGHT);
+        return getEdgePattern(ctx.elementPatternFiller(), Optional.of(Direction.LEFT_TO_RIGHT));
     }
 
     @Override
     public EdgePattern visitFullEdgeUndirected(FullEdgeUndirectedContext ctx) {
-        return getEdgePattern(ctx.elementPatternFiller(), Direction.UNDIRECTED);
+        return getEdgePattern(ctx.elementPatternFiller(), Optional.of(Direction.UNDIRECTED));
     }
 
-    private EdgePattern getEdgePattern(ElementPatternFillerContext ctx, Direction direction) {
+    @Override
+    public EdgePattern visitFullEdgeAnyOrientation(FullEdgeAnyOrientationContext ctx) {
+        return getEdgePattern(ctx.elementPatternFiller(), Optional.empty());
+    }
+
+    private EdgePattern getEdgePattern(ElementPatternFillerContext ctx, Optional<Direction> direction) {
         Optional<String> variableName = visitElementVariable(ctx.elementVariable());
         LabelExpression labels = visitIsLabelExpr(ctx.isLabelExpr());
 

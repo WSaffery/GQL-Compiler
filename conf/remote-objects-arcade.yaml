@@ -1,0 +1,7 @@
+hosts: [localhost]
+username: root
+password: root1234
+port: 8182
+serializer: { 
+    className: org.apache.tinkerpop.gremlin.util.ser.GraphBinaryMessageSerializerV1,
+    config: { ioRegistries: [org.apache.tinkerpop.gremlin.orientdb.io.OrientIoRegistry] }}

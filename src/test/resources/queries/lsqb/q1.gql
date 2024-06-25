@@ -1,0 +1,5 @@
+MATCH (:Country)<-[:isPartOf]-(:City)
+      <-[:isLocatedIn]-(:Person)<-[:hasMember]-(:Forum)
+      -[:containerOf]->(:Post)<-[:replyOf]-(:Comment)
+      -[:hasTag]->(:Tag)-[:hasType]->(:TagClass)
+RETURN count(*) AS count
