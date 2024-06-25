@@ -1,0 +1,10 @@
+-- Ran on completely connected 3 node graph
+-- Should return 6
+-- three start nodes
+-- Each start node has two possible final nodes for their traversal
+-- and only one way to reach a final node from a start node
+-- 3*2*1 = 6
+
+FROM c3
+MATCH ACYCLIC (a) -[]-> (b) -[]-> (c)
+RETURN COUNT(*)
