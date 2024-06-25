@@ -41,6 +41,8 @@ select("b")
 V().outE().<cond>().inV()
 ```
 
+// if we are applying the
+
 As such in our GQL
 
 * `-[]-` is a mutual direction.
@@ -49,3 +51,23 @@ As such in our GQL
 # Implementing count
 
 - simple as cuz
+- actually not so simple
+
+when we want to count (or in anyway aggergate) a particular variable we need to use aggregate rather than as.
+
+as has a canonical value for each traverser, while aggregate builds up a list shared by all traversers.
+
+- aggregate has two modes
+    - Global:
+        - Add to the list by key
+        - Wait for all other traversers to reach this point and add their element to the list
+    - Local:
+        - Add to the list by key
+        - Continue
+If using aggregate local and select, we must preceed the select with a barrier, to ensure all elements have been added to the list during the select step.
+
+However just adding
+`COUNT(*)`
+is very simple
+- what we'll do for now
+

@@ -19,6 +19,7 @@
 
 package ast.visitors;
 
+import antlr.GqlParser.CountAsteriskContext;
 import antlr.GqlParser.ReturnItemContext;
 import antlr.GqlParser.ReturnListContext;
 import antlr.GqlParser.ReturnStatementContext;
@@ -26,6 +27,7 @@ import antlr.GqlParser.SetQuantifierContext;
 import ast.expressions.Expression;
 import ast.expressions.references.NameExpression;
 import ast.returns.Asterisk;
+import ast.returns.CountAsterisk;
 import ast.returns.ReturnExpression;
 import ast.returns.ReturnItem;
 import ast.returns.ReturnStatement;
@@ -47,12 +49,21 @@ public class ReturnStatementVisitor extends GqlParserBaseVisitor {
 
     @Override
     public ReturnStatement visitReturnStatement(ReturnStatementContext ctx) {
-        ArrayList<ReturnItem> returnItems = new ArrayList<>();
-        returnItems.add(new Asterisk());
-        if (ctx.ASTERISK() != null) return new ReturnStatement(visitSetQuantifier(ctx.setQuantifier()), returnItems);
+        if (ctx.ASTERISK() != null)
+        {
+            ArrayList<ReturnItem> returnItems = new ArrayList<>();
+            returnItems.add(new Asterisk());
+            return new ReturnStatement(
+                visitSetQuantifier(ctx.setQuantifier()), returnItems);
+        }
+        else if (ctx.countAsterisk() != null)
+        {
+            return new ReturnStatement(
+                visitSetQuantifier(ctx.setQuantifier()), visitCountAsterisk(ctx.countAsterisk()));
+        }
 
-        returnItems = visitReturnList(ctx.returnList());
-        return new ReturnStatement(visitSetQuantifier(ctx.setQuantifier()), returnItems);
+        return new ReturnStatement(
+            visitSetQuantifier(ctx.setQuantifier()), visitReturnList(ctx.returnList()));
     }
 
     @Override
@@ -60,6 +71,23 @@ public class ReturnStatementVisitor extends GqlParserBaseVisitor {
         if (ctx == null) return SetQuantifier.ALL;
         if (ctx.ALL() != null) return SetQuantifier.ALL;
         return SetQuantifier.DISTINCT;
+    }
+
+    @Override
+    public ArrayList<ReturnItem> visitCountAsterisk(CountAsteriskContext ctx)
+    {
+        ArrayList<ReturnItem> returnItems = new ArrayList<>();
+        
+        if (ctx.name() != null)
+        {
+            returnItems.add(new CountAsterisk(ctx.name().ID().getText()));
+        }
+        else 
+        {
+            returnItems.add(new CountAsterisk());
+        }
+
+        return returnItems;
     }
 
     @Override

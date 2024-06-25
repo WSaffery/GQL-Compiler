@@ -1,0 +1,3 @@
+FROM g6
+MATCH (a)-[]->[(b)-[]->(c)]{1,4}
+RETURN COUNT(*)

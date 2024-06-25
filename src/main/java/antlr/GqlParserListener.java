@@ -100,6 +100,16 @@ public interface GqlParserListener extends ParseTreeListener {
 	 */
 	void exitReturnStatement(GqlParser.ReturnStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link GqlParser#countAsterisk}.
+	 * @param ctx the parse tree
+	 */
+	void enterCountAsterisk(GqlParser.CountAsteriskContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GqlParser#countAsterisk}.
+	 * @param ctx the parse tree
+	 */
+	void exitCountAsterisk(GqlParser.CountAsteriskContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link GqlParser#pathPatternList}.
 	 * @param ctx the parse tree
 	 */

@@ -45,7 +45,11 @@ whereClause
     ;
 
 returnStatement
-    : RETURN setQuantifier? (ASTERISK | returnList)
+    : RETURN setQuantifier? (ASTERISK | returnList | countAsterisk)
+    ;
+
+countAsterisk
+    : COUNT LEFT_PAREN ASTERISK RIGHT_PAREN (AS name)?
     ;
 
 pathPatternList

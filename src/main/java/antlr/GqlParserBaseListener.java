@@ -126,6 +126,18 @@ public class GqlParserBaseListener implements GqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterCountAsterisk(GqlParser.CountAsteriskContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCountAsterisk(GqlParser.CountAsteriskContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterPathPatternList(GqlParser.PathPatternListContext ctx) { }
 	/**
 	 * {@inheritDoc}

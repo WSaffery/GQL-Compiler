@@ -67,6 +67,12 @@ public interface GqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitReturnStatement(GqlParser.ReturnStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link GqlParser#countAsterisk}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCountAsterisk(GqlParser.CountAsteriskContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link GqlParser#pathPatternList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
