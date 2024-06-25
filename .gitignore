@@ -22,6 +22,7 @@ src/antlr/*.interp
 src/antlr/*.tokens
 
 .vscode
+*.kate-swp
 
 edge_stream.json
 node_stream.json
