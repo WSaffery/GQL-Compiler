@@ -3,8 +3,14 @@
         - Basic (q1-7)
             - Undirected Edges
             - Count function
+            - Simple Negation (of variables) (q5, q6)
+                - i.e. `tag1 != tag2`, `person1 != person3`
         - Complex (q8-9)
             - Negation
+                - i.e. where `!(comment -[:hastag]-> tag)`
+
+- implement graph selection override
+    - so don't have to write FROM lsqb_0.1 and can hotswap graphs easily.
 
 # Implementing Undirected Edges
 
@@ -70,4 +76,28 @@ However just adding
 `COUNT(*)`
 is very simple
 - what we'll do for now
+
+
+# Problem
+
+Because semantics of a "path" is different between GQL and Cypher it is not generally possible to compare results
+
+- Cypher prohibits repeated edges in all cases
+- GQL doesn't
+
+However, because we have access to the schema and query we can determine whether the result may differ directly, on a query by query basis.
+
+## Query Status
+
+- q1: safe, no repeated edge types, so no edges will be repeated by either
+- q2: likely safe, hasCreator is repeated, but the heads are two person nodes connected by a knows edge, unlikely for a person to "know" themself, so unlikely for a non-trail to be valid
+- q3: not safe, if 3 people know each other and in the same city, three isPartOf edges could be duplicated, going from that city to its country
+    - need to ensure distinctness of cities
+        - Per schema, each city is in one country, so given that no person know's themself and each city is distinct we will not match non-trails
+- q3 actually: is safe
+    - We actually see the cypher query uses multiple match statements to allow isPartOf edges to overlap, we can leave the query as is
+- q4: safe, no repeated edge types
+- q5: safe, duplicate hasTag edges come from different sources (labels are different)
+- q6: safe, duplicated knows edges made up of different pairs
+- q7: safe, no repeated edge type
 
