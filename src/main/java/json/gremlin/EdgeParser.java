@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import exceptions.InvalidEdgeFormatException;
-import exceptions.InvalidNodeFormatException;
 
 import java.io.File;
 import java.io.FileNotFoundException;

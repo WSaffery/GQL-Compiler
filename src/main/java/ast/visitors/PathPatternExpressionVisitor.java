@@ -32,6 +32,8 @@ import ast.patterns.PathPattern;
 import ast.patterns.label.Label;
 import ast.patterns.label.LabelExpression;
 import ast.patterns.label.WildcardLabel;
+import ast.variables.GqlVariables;
+import ast.variables.VariableType;
 import enums.Direction;
 import exceptions.SemanticErrorException;
 import exceptions.SyntaxErrorException;
@@ -45,15 +47,22 @@ import java.util.Optional;
 
 public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {    
     ExpressionVisitor expressionVisitor = new ExpressionVisitor();
+    GqlVariables variables;
+
+    public PathPatternExpressionVisitor(GqlVariables variables)
+    {
+        this.variables = variables;
+    }
 
     @Override
     public PathPattern visitPathPatternExpression(PathPatternExpressionContext ctx) {
+
         ArrayList<PathComponent> pathSequence = new ArrayList<>();
 
         int actual_idx = 0;
         // the index of the element when added to pathSequence
         // consecutive edges will add anonymous nodes 
-        // inbetween themselves, making this differ from i
+        // in-between themselves, making this differ from i
 
         for (int i = 0; i < ctx.getChildCount(); i++) {
             
@@ -64,7 +73,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
             if (child instanceof PointPatternContext) {
                 if (!pointIndex)
                 {
-                    throw new SemanticErrorException("Duplicate nodes in path without edges inbetween");
+                    throw new SemanticErrorException("Duplicate nodes in path without edges in-between");
                 }
 
                 ParseTree pointChild = child.getChild(0);
@@ -111,10 +120,11 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
     @Override
     public NodePattern visitNodePattern(NodePatternContext ctx) {
         Optional<String> variableName = visitElementVariable(ctx.elementPatternFiller().elementVariable());
+        variableName.ifPresent(name -> variables.addVariable(name, VariableType.NODE));
+
         LabelExpression labels = visitIsLabelExpr(ctx.elementPatternFiller().isLabelExpr());
-
         HashMap<String, Value> properties = getProperties(ctx.elementPatternFiller());
-
+        
         return new NodePattern(variableName, labels, properties);
     }
 
@@ -163,6 +173,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
 
     private EdgePattern getEdgePattern(ElementPatternFillerContext ctx, Optional<Direction> direction) {
         Optional<String> variableName = visitElementVariable(ctx.elementVariable());
+        variableName.ifPresent(name -> variables.addVariable(name, VariableType.EDGE));
         LabelExpression labels = visitIsLabelExpr(ctx.isLabelExpr());
 
         HashMap<String, Value> properties = getProperties(ctx);

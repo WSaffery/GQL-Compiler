@@ -1,7 +1,6 @@
 package gql_gremlin.matching;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,14 +8,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import ast.patterns.ElementPattern;
 import ast.patterns.ParenPathPattern;
 import ast.patterns.PathComponent;
 import ast.patterns.PathPattern;
 import ast.patterns.QualifiedPathPattern;
-import enums.EvaluationMode;
 import enums.EvaluationModeCategory;
 import exceptions.SemanticErrorException;
 import gql_gremlin.helpers.VariableOccurenceCounter;

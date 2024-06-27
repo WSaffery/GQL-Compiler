@@ -22,17 +22,16 @@ import ast.patterns.QualifiedPathPattern;
 import ast.patterns.label.Label;
 import ast.patterns.label.LabelExpression;
 import ast.patterns.label.WildcardLabel;
+import ast.queries.GqlQuery;
+import ast.queries.QueryConjunctor;
 import ast.returns.Asterisk;
 import ast.returns.CountAsterisk;
 import ast.returns.ReturnExpression;
 import ast.returns.ReturnItem;
 import enums.EvaluationMode;
-import enums.EvaluationModeCategory;
-import enums.QueryConjunctor;
 import enums.SetQuantifier;
 import exceptions.SemanticErrorException;
 import exceptions.SyntaxErrorException;
-import gql_gremlin.helpers.VariableOccurenceCounter;
 import gql_gremlin.matching.MatchExpression;
 import gql_gremlin.matching.MatchPatternFactory;
 
@@ -41,11 +40,9 @@ import gql_gremlin.matching.MatchPatternFactory;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 import static gql_gremlin.helpers.GremlinHelpers.*;
 
-import java.lang.reflect.Constructor;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -339,7 +336,7 @@ public class GremlinCompiler {
         if (uncaptured && unroll)
         {
             // if the iteration is degenerate (a = 1, b = 1), don't include captured post variables in outerSet    
-            // just add them to the current captured set and continue after adding the subtraversal
+            // just add them to the current captured set and continue after adding the sub-traversal
                 // see uncaptured && !unroll case below
 
             // assume quantifier is valid (0 < a <= b)
@@ -563,7 +560,7 @@ public class GremlinCompiler {
     {        
         GraphTraversal<Vertex, Vertex> traversal = start();
 
-        // verifies there are no variables in parenthesised subpaths that are used outside of their core path. 
+        // verifies there are no variables in parenthesised sub-paths that are used outside of their core path. 
         // MatchPatternFactory.verifyNesting(matchExpression.pathPatterns);
 
         Map<String, Boolean> intersectionMap = MatchPatternFactory.getIntersectionMap(matchExpression.pathPatterns);
@@ -623,9 +620,9 @@ public class GremlinCompiler {
         
         // Map<EvaluationMode, List<OrderedPathPattern>> orderedPathPatterns = 
         //     orderedPathResult.orderedPaths();
-        // Map<String, VariableOccurenceCounter> variableOccurences = orderedPathResult.variableOccurences();
+        // Map<String, VariableOccurrenceCounter> variableOccurrences = orderedPathResult.variableOccurences();
 
-        // Optional<String> jointVariable = MatchPatternFactory.getJointVariable(variableOccurences);
+        // Optional<String> jointVariable = MatchPatternFactory.getJointVariable(variableOccurrences);
 
         // boolean restrictedRan = 
         //     orderedPathPatterns.get(EvaluationMode.SIMPLE).size() > 0 || 
@@ -858,13 +855,13 @@ public class GremlinCompiler {
     // discards graphName information from focused match clauses
     public GraphTraversal<Vertex, Map<String,Object>> compileToTraversal(GqlProgram program)
     {
-        if (program.queries.size() == 1)
+        if (program.body.isSingular())
         {
-            return compileToTraversal(program.queries.get(0));
+            return compileToTraversal(program.body.getQuery(0));
         }
 
         ArrayList<GraphTraversal<Vertex, Map<String,Object>>> queryTraversals = new ArrayList<>();
-        for (GqlQuery query : program.queries) 
+        for (GqlQuery query : program.body.getQueries()) 
         {
             queryTraversals.add(compileToTraversal(query));
         }
@@ -874,8 +871,8 @@ public class GremlinCompiler {
         {
             fullTraversal = conjoinTraversals(
                 fullTraversal, 
-                program.conjunctions.get(i-1), 
-                queryTraversals.get(1));
+                program.body.getConjunctor(i-1), 
+                queryTraversals.get(i));
         }
 
         return fullTraversal;

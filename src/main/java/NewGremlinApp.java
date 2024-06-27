@@ -46,8 +46,8 @@ public class NewGremlinApp {
 
         List<Edge> edges = g.E().toList();
         edges.forEach(e -> System.out.println(e.toString()));
-        List<Vertex> vertexs = g.V().toList();
-        vertexs.forEach(v -> System.out.println(v.toString()));
+        List<Vertex> vertexes = g.V().toList();
+        vertexes.forEach(v -> System.out.println(v.toString()));
 
         // SIMPLE Traversal
         System.out.println("Simple traversal");
@@ -248,7 +248,6 @@ public class NewGremlinApp {
     public static void outTrailTraversalDemo(GraphTraversalSource g, int num) 
     {
         // see https://tinkerpop.apache.org/docs/current/reference/#dedup-step
-        @SuppressWarnings("unchecked")
         List<Path> table = g.V().
             repeat(
                 outE().
@@ -341,6 +340,7 @@ public class NewGremlinApp {
         Supplier<HashSet<Element>> supplier = () -> new HashSet<>();
         UnaryOperator<HashSet<Element>> splitOperator = (s) -> new HashSet<>(s);
 
+        @SuppressWarnings("unchecked")
         List<Path> table = g.
         withSack(supplier, splitOperator).
         V().
@@ -783,7 +783,6 @@ public class NewGremlinApp {
         // (a) -> (b) -> (c) 
         // (c) -> (c)    
 
-        @SuppressWarnings("unchecked")
         List<?> table = g.V().as("start").match(
             as("a").both().both().simplePath().from("a").as("b"),
             as("b").both().both().simplePath().from("b").as("a")
@@ -804,7 +803,6 @@ public class NewGremlinApp {
         System.out.println("2");
         table2.forEach(p -> System.out.println(p.toString()));
 
-        @SuppressWarnings("unchecked")
         List<?> table3 = g.V().as("start").match(
             as("a").or(out().out(), in().in()).as("b"),
             as("b").or(out().out(), in().in()).as("a")
@@ -821,7 +819,6 @@ public class NewGremlinApp {
         table4.forEach(p -> System.out.println(p.toString()));
 
 
-        @SuppressWarnings("unchecked")
         List<?> table5 = g.V().as("start").
             as("a").choose(out().out(), out().out(), in().in()).as("b").
             select("b").
@@ -833,7 +830,6 @@ public class NewGremlinApp {
         table5.forEach(p -> System.out.println(p.toString()));
 
 
-        @SuppressWarnings("unchecked")
         List<?> table6 = g.V().as("start").
             as("a").both().both().as("c1").simplePath().from("a").to("c1").as("b").
             select("b").as("c2").both().both().as("c3").simplePath().from("c2").to("c3").where(P.eq("a")).
@@ -842,8 +838,6 @@ public class NewGremlinApp {
         System.out.println("6");
         table6.forEach(p -> System.out.println(p.toString()));
 
-
-        @SuppressWarnings("unchecked")
         List<?> table7 = g.V().as("start").            
             as("b").
             as("b2").both().both().as("a2").simplePath().
@@ -860,8 +854,6 @@ public class NewGremlinApp {
         System.out.println("7");
         table7.forEach(p -> System.out.println(p.toString()));
 
-
-        @SuppressWarnings("unchecked")
         List<?> table8 = g.V().as("start").
             match( 
                 as("b").identity().

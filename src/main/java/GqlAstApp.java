@@ -52,11 +52,11 @@ public class GqlAstApp {
 
     public static void printProgram(GqlProgram program)
     {
-        program.queries.get(0).print();
-        for (int i = 1; i < program.queries.size(); i++)
+        program.body.getQuery(0).print();
+        for (int i = 1; i < program.body.getQueryCount(); i++)
         {
-            System.out.println(program.conjunctions.get(i-1));
-            program.queries.get(i).print();
+            System.out.println(program.body.getConjunctor(i-1));
+            program.body.getQuery(i).print();
         }
     }
 

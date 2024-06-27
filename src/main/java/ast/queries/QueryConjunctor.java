@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package enums;
+package ast.queries;
 
 public enum QueryConjunctor {
     UNION_ALL {

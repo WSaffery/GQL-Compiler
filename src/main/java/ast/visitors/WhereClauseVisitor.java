@@ -24,7 +24,7 @@ import antlr.GqlParserBaseVisitor;
 import ast.expressions.Expression;
 
 
-public class WhereClauseVisitior extends GqlParserBaseVisitor<Expression> {
+public class WhereClauseVisitor extends GqlParserBaseVisitor<Expression> {
     ExpressionVisitor expressionVisitor = new ExpressionVisitor();
 
     @Override

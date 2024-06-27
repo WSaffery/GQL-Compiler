@@ -77,9 +77,11 @@ public class GqlGremlinApp {
         System.out.println("Final Traversal:");
         System.out.println(expl.prettyPrint());
 
-        System.out.println("Graph name: " + program.graph);
+        assert(program.graphName.isPresent());
+        
+        System.out.println("Graph name: " + program.graphName.get());
 
-        GremlinGraph graph = new GremlinGraphFactory(ResourcePaths.getGraphFolder()).makeGremlinGraph(program.graph);
+        GremlinGraph graph = new GremlinGraphFactory(ResourcePaths.getGraphFolder()).makeGremlinGraph(program.graphName.get());
         GraphTraversalSource g = graph.currentGraph;
 
         printGraph(g);
@@ -91,18 +93,16 @@ public class GqlGremlinApp {
 
         printTable(res);
 
-        // System.out.println("result: " + res);
-
         
     }
 
     public static void printProgram(GqlProgram program)
     {
-        program.queries.get(0).print();
-        for (int i = 1; i < program.queries.size(); i++)
+        program.body.getQuery(0).print();
+        for (int i = 1; i < program.body.getQueryCount(); i++)
         {
-            System.out.println(program.conjunctions.get(i-1));
-            program.queries.get(i).print();
+            System.out.println(program.body.getConjunctor(i-1));
+            program.body.getQuery(i).print();
         }
     }
 

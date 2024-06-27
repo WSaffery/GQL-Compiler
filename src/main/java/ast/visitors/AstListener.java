@@ -20,19 +20,20 @@ import ast.expressions.Expression;
 import ast.GqlProgram;
 import ast.patterns.PathPattern;
 import ast.patterns.QualifiedPathPattern;
+import ast.queries.GqlQuery;
+import ast.queries.QueryConjunctor;
+import ast.variables.VariableType;
 import enums.EvaluationMode;
-import enums.QueryConjunctor;
-import gql_gremlin.GqlQuery;
 import gql_gremlin.matching.MatchExpression;
 
 // Ast Visitor for single graph query
 // builds up the program result using local state, visitors below visit query all return Null.
 public class AstListener extends GqlParserBaseListener {
     public List<String> semanticErrors = new ArrayList<>();
-    private WhereClauseVisitior whereClauseVisitior = new WhereClauseVisitior();
-    private PathPatternExpressionVisitor pathPatternExpressionVisitor = new PathPatternExpressionVisitor();
+    private WhereClauseVisitor whereClauseVisitor = new WhereClauseVisitor();
     private ReturnStatementVisitor returnStatementVisitor = new ReturnStatementVisitor();
     private GqlProgram result = new GqlProgram();
+    private PathPatternExpressionVisitor pathPatternExpressionVisitor = new PathPatternExpressionVisitor(result.variables);
     private GqlQuery currentQuery = null;
 
     public GqlProgram GetResult()
@@ -43,7 +44,7 @@ public class AstListener extends GqlParserBaseListener {
     public void enterQueryExpression(QueryExpressionContext ctx)
     {
         currentQuery = new GqlQuery();
-        result.queries.add(currentQuery);
+        result.body.addQuery(currentQuery);
     }
 
     public void exitQueryExpression(QueryExpressionContext ctx)
@@ -53,11 +54,11 @@ public class AstListener extends GqlParserBaseListener {
 
     public void enterFocusedMatchClause(FocusedMatchClauseContext ctx)
     {
-        if (!(result.graph == null || result.graph == ctx.graphName().getText()))
+        if (result.graphName.isPresent())
         {
             throw new SemanticErrorException("Queries with multiple FROM statement's aren't supported");
         }
-        result.graph = ctx.graphName().getText();
+        result.graphName = Optional.of(ctx.graphName().getText());
     }
 
     public void enterMatchClause(MatchClauseContext ctx)
@@ -66,7 +67,7 @@ public class AstListener extends GqlParserBaseListener {
         boolean isMandatory = ctx.MANDATORY() != null;
         WhereClauseContext whereClause = ctx.whereClause();
         Optional<Expression> whereClauseExpression = whereClause != null ? 
-            Optional.of(whereClauseVisitior.visitWhereClause(whereClause)) : 
+            Optional.of(whereClauseVisitor.visitWhereClause(whereClause)) : 
             Optional.empty();
         
         ArrayList<QualifiedPathPattern> pathPatterns = new ArrayList<>();
@@ -81,6 +82,7 @@ public class AstListener extends GqlParserBaseListener {
             PathPattern path = pathPatternExpressionVisitor.visitPathPatternExpression(pathPatternCtx.pathPatternExpression());
 
             pathPatterns.add(new QualifiedPathPattern(var, mode, path));
+            var.ifPresent((name) -> result.variables.addVariable(name, VariableType.PATH));
         }
 
         Optional<String> graphName = Optional.empty();
@@ -95,7 +97,7 @@ public class AstListener extends GqlParserBaseListener {
 
     public void enterQueryConjunction(QueryConjunctionContext ctx) 
     {
-        result.conjunctions.add(getQueryConjunctor(ctx));
+        result.body.addConjunctor(getQueryConjunctor(ctx));
     }
 
     public void enterReturnStatement(ReturnStatementContext ctx)
