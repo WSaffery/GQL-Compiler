@@ -1,0 +1,1 @@
+g.V().hasLabel("Country").as("country").as("#COMPILER_s-1738111765").select(Pop.mixed,"country").project("country").by()

@@ -3,6 +3,7 @@ package graphs;
 public class ResourcePaths {
     static final String testGraphFolder = "/src/test/resources/database/";
     static final String mainGraphFolder = "/src/main/resources/database/";
+    static final String testQueryFolder = "/src/test/resources/queries/";
 
     public static String getResourceFolder()
     {
@@ -17,5 +18,10 @@ public class ResourcePaths {
     public static String getGraphString(boolean isTest)
     {
         return getResourceFolder() + (isTest ? testGraphFolder : mainGraphFolder );
+    }
+
+    public static String getQueryFolder()
+    {
+        return getResourceFolder() + testQueryFolder;
     }
 }

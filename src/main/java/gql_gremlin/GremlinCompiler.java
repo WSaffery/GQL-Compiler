@@ -374,7 +374,6 @@ public class GremlinCompiler {
         String pathHashCode = Integer.toString(qualifiedPathPattern.hashCode());
         String startLabel = "#COMPILER_s%s".formatted(pathHashCode);
         String endLabel = "#COMPILER_e%s".formatted(pathHashCode);
-        System.out.println(startLabel);
         
 
         PathComponent head = components.get(0);
@@ -695,7 +694,7 @@ public class GremlinCompiler {
 
         if (array.length == 1)
         {
-            return traversal.select(Pop.mixed, array[0]);
+            return traversal.select(Pop.mixed, array[0]).project(array[0]);
         }
         else if (array.length == 2)
         {

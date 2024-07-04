@@ -1,4 +1,4 @@
-package gql_gremlin;
+package ast.queries;
 
 import java.util.ArrayList;
 import ast.returns.ReturnStatement;

@@ -1,0 +1,6 @@
+-- doesn't work because there is no message table 
+-- MESSAGE = COMMENT UNION POST
+MATCH (:Tag)<-[:hasTag]-(message:Message)-[:hasCreator]-(creator:Person),
+    (message)<-[:likes]-(liker:Person),
+    (message)<-[:replyOf]-(comment:Comment)
+RETURN COUNT(*)

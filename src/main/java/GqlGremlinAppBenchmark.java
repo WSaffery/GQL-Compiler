@@ -47,22 +47,12 @@ import graphs.GremlinGraph;
 import graphs.GremlinGraphFactory;
 import graphs.ResourcePaths;
 
-public class GqlGremlinApp {
+public class GqlGremlinAppBenchmark {
     static final String testQueryFolder = "/src/test/resources/queries/";
 
     public static void main(String[] args) throws Exception {
         assert(args.length >= 1);        
         System.out.println(args[0]);
-        // System.out.println(Files.size(Paths.get(System.getProperty("user.dir") + testQueryFolder + args[0])));
-        // System.out.println(testQueryFolder.substring(0, testQueryFolder.length()-1));
-        // System.out.println(
-        //     Files.list(
-        //         Paths.get(
-        //             System.getProperty("user.dir") + testQueryFolder + "gql"
-        //             )
-        //         )
-        //     .map(path -> path.toString()).toList()
-        // );
 
         assert Paths.get(System.getProperty("user.dir") + testQueryFolder + args[0]).toAbsolutePath().toFile().exists() : "File doesn't exist";
 
@@ -77,6 +67,11 @@ public class GqlGremlinApp {
 
         printProgram(program);
 
+        if (args.length >= 2 && args[1].equals("-p"))
+        {
+            return;
+        }
+
         GremlinCompiler compiler = new GremlinCompiler();
 
         GraphTraversal<Vertex, Map<String,Object>> traversal = compiler.compileToTraversal(program);
@@ -86,23 +81,14 @@ public class GqlGremlinApp {
         System.out.println("Final Traversal:");
         System.out.println(expl.prettyPrint());
 
-        if (args.length >= 2 && args[1].equals("-p"))
-        {
-            return;
-        }
-
         assert(program.graphName.isPresent());
         
         System.out.println("Graph name: " + program.graphName.get());
 
-        GremlinGraph graph = new GremlinGraphFactory(
-            ResourcePaths.getGraphFolder()).
-                makeGremlinGraph(
-                    program.graphName.get()
-                    );
+        GremlinGraph graph = new GremlinGraphFactory(ResourcePaths.getGraphFolder()).makeGremlinGraph(program.graphName.get());
         GraphTraversalSource g = graph.currentGraph;
 
-        // printGraph(g);
+        printGraph(g);
 
         // takes anonymous traversal and applies it to our target graph
         traversal = appendTraversal(g, traversal.asAdmin().getBytecode());

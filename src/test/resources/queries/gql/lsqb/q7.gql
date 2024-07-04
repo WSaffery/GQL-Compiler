@@ -1,4 +1,4 @@
 MATCH (:Tag)<-[:HAS_TAG]-(message:Message)-[:HAS_CREATOR]-(creator:Person),
       [(message)<-[:LIKES]-(liker:Person)]{0,1},
       [(message)<-[:REPLY_OF]-(comment:Comment)]{0,1}
-RETURN count(*) AS count
+RETURN COUNT(*)

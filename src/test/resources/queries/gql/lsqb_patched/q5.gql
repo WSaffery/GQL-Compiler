@@ -1,0 +1,4 @@
+MATCH (tag1:Tag)<-[:hasTag]-(message:Message)<-[:replyOf]-(comment:Comment)
+      -[:hasTag]->(tag2:Tag)
+WHERE tag1 <> tag2
+RETURN COUNT(*)

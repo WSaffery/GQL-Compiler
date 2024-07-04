@@ -1,6 +1,7 @@
+FROM lsqb01
 MATCH (country:Country),
     (person1:Person)-[:isLocatedIn]->(city1:City)-[:isPartOf]->(country),
     (person2:Person)-[:isLocatedIn]->(city2:City)-[:isPartOf]->(country),
     (person3:Person)-[:isLocatedIn]->(city3:City)-[:isPartOf]->(country),
     (person1)-[:knows]-(person2)-[:knows]-(person3)-[:knows]-(person1)
-RETURN count(*) AS count
+RETURN COUNT(*)

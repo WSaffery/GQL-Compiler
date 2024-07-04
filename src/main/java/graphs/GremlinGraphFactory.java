@@ -75,15 +75,15 @@ public class GremlinGraphFactory {
     }
 
     public GremlinGraph makeGremlinGraph(GraphTraversalSource source, String fileName) 
-        throws FileNotFoundException, InvalidNodeFormatException, InvalidEdgeFormatException
+        throws InvalidNodeFormatException, InvalidEdgeFormatException, IOException
     {
         GremlinGraph gremlinGraph = new GremlinGraph(source);
-        readJsonToGraph(gremlinGraph, fileName);
+        loadJsonToGraph(gremlinGraph, fileName);
         return gremlinGraph;
     }
 
     public GremlinGraph makeGremlinGraph(Graph graph, String fileName) 
-        throws FileNotFoundException, InvalidNodeFormatException, InvalidEdgeFormatException
+        throws InvalidNodeFormatException, InvalidEdgeFormatException, IOException
     {
         return makeGremlinGraph(traversal().withEmbedded(graph), fileName);
     }
@@ -96,9 +96,11 @@ public class GremlinGraphFactory {
     
 
     public GremlinGraph makeGremlinGraph(String fileName) 
-        throws FileNotFoundException, InvalidNodeFormatException, InvalidEdgeFormatException
+        throws InvalidNodeFormatException, InvalidEdgeFormatException, IOException
     {
         return makeGremlinGraph(TinkerGraph.open(), fileName);
     }
+
+
 
 }

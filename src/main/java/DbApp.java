@@ -1,4 +1,4 @@
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -12,7 +12,7 @@ import graphs.GremlinGraphFactory;
 import graphs.ResourcePaths;
 
 public class DbApp {
-    public static void main(String[] args) throws FileNotFoundException, InvalidNodeFormatException, InvalidEdgeFormatException {
+    public static void main(String[] args) throws InvalidNodeFormatException, InvalidEdgeFormatException, IOException {
         for (String arg : args)
         {
             System.out.println();
@@ -20,7 +20,7 @@ public class DbApp {
         }    
     }
 
-    static void testGraph(String name) throws FileNotFoundException, InvalidNodeFormatException, InvalidEdgeFormatException 
+    static void testGraph(String name) throws InvalidNodeFormatException, InvalidEdgeFormatException, IOException 
     {
         System.out.println("Loading graph: " + name);
 
