@@ -13,7 +13,9 @@ MATCH
 (message_post)<-[:replyOf]-(:Comment)
 
 -- won't work
--- will just output cardinality of Post 
--- need to union the results (or just sum counts), or make a union table
+-- sum not supported
+-- probably breaks key assumptions to have the two aggregates
+	-- ought to cartesian product each line, creating a blow out of matched posts
+-- simply not correct
 
-RETURN COUNT(*)
+RETURN COUNT(message_comment) + COUNT(message_post)
