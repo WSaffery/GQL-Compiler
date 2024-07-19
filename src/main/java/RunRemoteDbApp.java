@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -7,22 +5,16 @@ import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import ast.GqlProgram;
 import cli.Arg;
-import cli.ArgType;
 import cli.CliArgParser;
 import gql_gremlin.GremlinCompiler;
 
 import static cli.display.DisplayHelpers.printTable;
 import static gql_gremlin.helpers.GremlinHelpers.appendTraversal;
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
-import graphs.GremlinGraph;
-import graphs.GremlinGraphFactory;
-import graphs.GraphLoader;
-import graphs.JanusGremlinGraph;
 import graphs.ResourcePaths;
 
 // for some reason can't get remote-graph.properties files working

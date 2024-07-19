@@ -17,14 +17,10 @@
  * under the License.
  */
 
-import static gql_gremlin.helpers.GremlinHelpers.appendTraversal;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.CharStream;
@@ -34,8 +30,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.tinkerpop.gremlin.process.traversal.Script;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import antlr.GqlLexer;
