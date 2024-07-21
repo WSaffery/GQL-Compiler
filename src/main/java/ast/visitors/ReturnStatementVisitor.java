@@ -33,12 +33,6 @@ import ast.returns.ReturnItem;
 import ast.returns.ReturnStatement;
 import enums.SetQuantifier;
 import exceptions.SyntaxErrorException;
-// import archive.gql.enums.SetQuantifier;
-// import archive.gql.expressions.Expression;
-// import archive.gql.returns.Asterisk;
-// import archive.gql.returns.ReturnExpression;
-// import archive.gql.returns.ReturnItem;
-// import archive.gql.returns.ReturnStatement;
 import antlr.GqlParserBaseVisitor;
 
 import java.util.ArrayList;

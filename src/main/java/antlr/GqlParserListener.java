@@ -434,12 +434,12 @@ public interface GqlParserListener extends ParseTreeListener {
 	 */
 	void exitIsLabelExpr(GqlParser.IsLabelExprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link GqlParser#labelExpression}.
+	 * Enter a parse tree produced by {@link GqlParser#labelPattern}.
 	 * @param ctx the parse tree
 	 */
 	void enterLabelExpression(GqlParser.LabelExpressionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link GqlParser#labelExpression}.
+	 * Exit a parse tree produced by {@link GqlParser#labelPattern}.
 	 * @param ctx the parse tree
 	 */
 	void exitLabelExpression(GqlParser.LabelExpressionContext ctx);

@@ -1,3 +1,3 @@
 package ast.patterns.label;
 
-public final class WildcardLabel extends LabelExpression {}
+public final class WildcardLabel extends LabelPattern {}

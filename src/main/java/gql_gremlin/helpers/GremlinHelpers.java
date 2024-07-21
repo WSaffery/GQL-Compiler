@@ -2,6 +2,8 @@ package gql_gremlin.helpers;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 
+import java.util.Set;
+
 import org.apache.tinkerpop.gremlin.jsr223.JavaTranslator;
 import org.apache.tinkerpop.gremlin.process.traversal.Bytecode;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
@@ -9,6 +11,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import ast.queries.QueryConjunctor;
 
 public class GremlinHelpers {
     
@@ -42,5 +46,44 @@ public class GremlinHelpers {
             JavaTranslator.of(source);
 
         return translator.translate(bytecode);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <A, B> GraphTraversal<A, B> conjoinTraversals(GraphTraversal<A, B> x, QueryConjunctor conjunctor, GraphTraversal<A, B> y)
+    {
+        GraphTraversal<A, A> traversal = start();
+        switch (conjunctor)
+        {
+            case UNION_ALL:
+                return traversal.union(x, y);
+            default:
+                System.out.println("Only union all is currently supported");
+                assert(false);
+            
+        }
+        return null;
+    }
+
+    public static GraphTraversal<Vertex, Vertex> vertexStart()
+    {
+        return start();
+    }
+
+    public static GraphTraversal<Edge, Edge> edgeStart()
+    {
+        return start();
+    }
+
+    public static <T> boolean intersects(Set<T> a, Set<T> b)
+    {
+        Set<T> c = a.size() < b.size() ? a : b;
+        for (T e : c) 
+        {
+            if (b.contains(e))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

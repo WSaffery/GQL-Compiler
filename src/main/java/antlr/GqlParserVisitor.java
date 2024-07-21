@@ -266,7 +266,7 @@ public interface GqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitIsLabelExpr(GqlParser.IsLabelExprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link GqlParser#labelExpression}.
+	 * Visit a parse tree produced by {@link GqlParser#labelPattern}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */

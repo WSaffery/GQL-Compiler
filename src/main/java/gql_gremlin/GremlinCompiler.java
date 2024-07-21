@@ -2,8 +2,8 @@ package gql_gremlin;
 
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.Pop;
+import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
-import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import ast.GqlProgram;
@@ -19,11 +19,12 @@ import ast.patterns.ParenPathPattern;
 import ast.patterns.PathComponent;
 import ast.patterns.PathPattern;
 import ast.patterns.QualifiedPathPattern;
+import ast.patterns.label.BinaryLabelExpression;
 import ast.patterns.label.Label;
 import ast.patterns.label.LabelExpression;
+import ast.patterns.label.LabelPattern;
 import ast.patterns.label.WildcardLabel;
 import ast.queries.GqlQuery;
-import ast.queries.QueryConjunctor;
 import ast.returns.Asterisk;
 import ast.returns.CountAsterisk;
 import ast.returns.ReturnExpression;
@@ -34,11 +35,9 @@ import exceptions.SemanticErrorException;
 import exceptions.SyntaxErrorException;
 import gql_gremlin.matching.MatchExpression;
 import gql_gremlin.matching.MatchPatternFactory;
-
-
-// import com.tinkerpop.blueprints.Direction;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 import static gql_gremlin.helpers.GremlinHelpers.*;
+import static gql_gremlin.helpers.JavaHelpers.*;
 
 import java.util.AbstractCollection;
 import java.util.ArrayList;
@@ -65,81 +64,161 @@ record PropertyResult(
 )
 {}
 
+
+class CompilerHelpers
+{
+    // reorders restricted path patterns so that for each of the contained connected components
+    // its path patterns are contiguous in the resulting list and in the order of some dfs through the component
+    //
+    // i.e. [(a -> b), (d -> a), (b -> c), (c -> d)] becomes [(a -> b), (b -> c), (c -> d), (d -> a)]
+    // note this function doesn't care about the direction of edges in patterns, assumption being querying is bidirectional
+    public static List<QualifiedPathPattern> orderRestrictedPathPatterns(List<QualifiedPathPattern> restrictedPathPatterns)
+    {
+        ArrayList<QualifiedPathPattern> reorderedPathPatterns = new ArrayList<>();
+
+        List<HashSet<String>> variablesList = 
+            restrictedPathPatterns.stream().map(pathPattern -> pathPatternVariables(pathPattern)).toList();
+
+        
+        while (restrictedPathPatterns.size() > 0)
+        {
+            int i = restrictedPathPatterns.size()-1;
+
+            while (i != -1) 
+            {
+                reorderedPathPatterns.add(restrictedPathPatterns.remove(i));
+                Set<String> variables = variablesList.remove(i);
+                i = -1;
+
+                for (int j = 0; j < restrictedPathPatterns.size(); j++)
+                {
+                    Set<String> testVariables = variablesList.get(j);
+                    if (intersects(variables, testVariables))
+                    {
+                        i = j;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return reorderedPathPatterns;
+    }
+    
+    public static Stream<String> pathPatternVariablesAllLayersStream(List<PathComponent> pathSequence)
+    {
+        return pathSequence.stream().flatMap(component -> {
+            Stream<String> stream = null;
+            if (component instanceof ParenPathPattern)
+            {
+                stream = pathPatternVariablesAllLayersStream(((ParenPathPattern) component).pathPattern().pathSequence());
+            }
+            else 
+            {
+                stream = Stream.ofNullable(((ElementPattern) component).variableName.orElse(null));
+            }
+            return stream;
+        });
+    }
+
+    public static HashSet<String> pathPatternVariablesAllLayers(List<PathComponent> pathSequence)
+    {
+        return new HashSet<>(pathPatternVariablesAllLayersStream(pathSequence).toList());
+    }
+
+    public static HashSet<String> pathPatternVariables(List<PathComponent> pathSequence)
+    {
+        return new HashSet<>(pathSequence.stream().flatMap(component -> {
+            Stream<String> stream = null;
+            if (component instanceof ParenPathPattern)
+            {
+                stream = Stream.of();
+            }
+            else 
+            {
+                stream = Stream.ofNullable(((ElementPattern) component).variableName.orElse(null));
+            }
+            return stream;
+        }).toList());
+    }
+
+    public static HashSet<String> pathPatternVariables(QualifiedPathPattern pathPattern)
+    {
+        return pathPatternVariables(pathPattern.pathPattern().pathSequence());
+    }
+
+}
+
 // essentially takes the place of GqlFileQueryEvaluator
 public class GremlinCompiler {
 
-    @SuppressWarnings("unchecked")
-    public <A, B> GraphTraversal<A, B> conjoinTraversals(GraphTraversal<A, B> x, QueryConjunctor conjunctor, GraphTraversal<A, B> y)
+    // left deep nesting of and operation to get around inability to access an array of graph traversals
+    public GraphTraversal<Object, Object> recurseAndOperands(List<LabelExpression> operands)
     {
-        GraphTraversal<A, A> traversal = start();
-        switch (conjunctor)
-        {
-            case UNION_ALL:
-                return traversal.union(x, y);
-            default:
-                System.out.println("Only union all is currently supported");
-                assert(false);
-            
-        }
-        return null;
+        if (operands.size() == 1) return filterByLabelExpression(operands.get(0));
+        return and(filterByLabelExpression(operands.get(0)), recurseAndOperands(operands.subList(1, operands.size())));
     }
 
-    
-    public String[] getLabelStrings(ArrayList<ArrayList<Label>> labels)
+    // left deep nesting of or operation to get around inability to access an array of graph traversals
+    public GraphTraversal<Object, Object> recurseOrOperands(List<LabelExpression> operands)
     {
-        if (labels.size() == 0)
-        {
-            System.out.println("Fully empty label set");
-            return new String[0];
-        }
-        else if (labels.get(0).size() == 0)
-        {
-            System.out.println("Inner empty label set");
-            return new String[0];
-        }
-        else if (labels.size() != 1 || labels.get(0).size() != 1)
-        {
-            System.out.println("Too many label sets");
-            return null;
-        }
-        else 
-        {
-            return new String[] { labels.get(0).get(0).toString() };
-        }
+        if (operands.size() == 1) return filterByLabelExpression(operands.get(0));
+        return or(filterByLabelExpression(operands.get(0)), recurseAndOperands(operands.subList(1, operands.size())));
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T[] safeToArray(List<T> list)
+    public GraphTraversal<Object, Object> filterByLabelExpression(LabelExpression labelExpression)
     {
-        if (list == null)
+        if (labelExpression instanceof Label)
         {
-            Object[] empty = new Object[0];
-            return (T[]) empty;
+            Label label = (Label) labelExpression;
+            return hasLabel(label.getValue());
         }
-        else {
-            return (T[]) list.toArray();
+        else if (labelExpression instanceof BinaryLabelExpression)
+        {
+            final BinaryLabelExpression binaryExpression = (BinaryLabelExpression) labelExpression;
+            List<LabelExpression> operands = binaryExpression.operandExpressions();    
+            // @SuppressWarnings("unchecked")
+            // GraphTraversal<Object,Object>[] subTraversals = (GraphTraversal<Object,Object>[]) operands.stream().map((operand) -> filterByLabelExpression(operand)).toArray();
+
+            switch (binaryExpression.operator())
+            {
+                case AND:                   
+                    return recurseAndOperands(operands);
+
+                case OR:
+                    return recurseOrOperands(operands);
+            }
         }
+        throw new SemanticErrorException("Bad label expression");
     }
 
     public <S, T> GraphTraversal<S, T> filterByPattern(GraphTraversal<S, T> traversal, ElementPattern pattern)
     {
 
-        final LabelExpression labelExpression = pattern.labelExpression();
+        final LabelPattern labelPattern = pattern.labelPattern();
 
-        if (labelExpression != null) 
+        // TODO! add compound label expressions
+        if (labelPattern != null) 
         {         
-            if (labelExpression instanceof Label)
+            if (labelPattern instanceof WildcardLabel)
             {
-                Label label = (Label) labelExpression;
-                traversal = traversal.hasLabel(label.getValue());
+                // simply don't filter
             }
-            else if (labelExpression instanceof WildcardLabel)
+            else if (labelPattern instanceof LabelExpression)
             {
-                // System.out.println("Too many labels!");
+                final LabelExpression labelExpression = (LabelExpression) labelPattern;
+                if (labelExpression instanceof Label)
+                {
+                    traversal.hasLabel(((Label) labelExpression).getValue());
+                }
+                else 
+                {
+                    traversal = traversal.and(filterByLabelExpression(labelExpression));    
+                }
             }
             else 
             {
-                throw new SemanticErrorException("Only basic label expressions are implemented");
+                throw new SemanticErrorException("Unsupported label expression");
             }
         }
 
@@ -171,16 +250,6 @@ public class GremlinCompiler {
         }
 
         return traversal;
-    }
-
-    public GraphTraversal<Vertex, Vertex> vertexStart()
-    {
-        return start();
-    }
-
-    public GraphTraversal<Edge, Edge> edgeStart()
-    {
-        return start();
     }
 
     public <E> GraphTraversal<Vertex, E> compileElementPattern(GraphTraversal<Vertex, E> traversal, ElementPattern pattern, HashSet<String> capturedSet)
@@ -232,9 +301,8 @@ public class GremlinCompiler {
         return traversal;
     }
 
-
-    public GraphTraversal<Vertex, Vertex> compileStartingElementPattern(
-        GraphTraversal<Vertex, Vertex> traversal, ElementPattern pattern, HashSet<String> capturedSet)
+    public GraphTraversal<Vertex, Vertex> compileStartingElementPattern(GraphTraversal<Vertex, Vertex> traversal, 
+        ElementPattern pattern, HashSet<String> capturedSet)
     {
         Optional<String> variableName = pattern.variableName();
         boolean captured = variableName.isPresent() && capturedSet.contains(variableName.get());
@@ -270,7 +338,7 @@ public class GremlinCompiler {
     public GraphTraversal<Vertex, Vertex> compileRestrictedPatternContinued(GraphTraversal<Vertex, Vertex> traversal, List<PathComponent> components, Set<String> outerCapturedSet)
     {
         HashSet<String> capturedSet = new HashSet<>();
-        HashSet<String> variables = pathPatternVariables(components);
+        HashSet<String> variables = CompilerHelpers.pathPatternVariables(components);
 
         GraphTraversal<Vertex, ?> intermediary = null;
 
@@ -307,9 +375,8 @@ public class GremlinCompiler {
         return traversal;
     }
 
-    public GraphTraversal<Vertex, Vertex> compileParenPathPattern(
-        GraphTraversal<Vertex, Vertex> traversal, ParenPathPattern parenPathPattern, 
-        Set<String> capturedVariables, Set<String> outerVariables)
+    public GraphTraversal<Vertex, Vertex> compileParenPathPattern(GraphTraversal<Vertex, Vertex> traversal, 
+        ParenPathPattern parenPathPattern, Set<String> capturedVariables, Set<String> outerVariables)
     {
         List<PathComponent> parenComponents = parenPathPattern.pathPattern().pathSequence();
         
@@ -321,7 +388,7 @@ public class GremlinCompiler {
         // potentially expensive inner variable calculation, avoid if possible
         if (uncapturedOuterVariables.size() > 0)
         {
-            HashSet<String> innerVariables = pathPatternVariablesAllLayers(parenComponents);
+            HashSet<String> innerVariables = CompilerHelpers.pathPatternVariablesAllLayers(parenComponents);
             uncapturedInnerVariables = intersection(uncapturedOuterVariables, innerVariables);
         }
         else 
@@ -369,7 +436,7 @@ public class GremlinCompiler {
 
         PathPattern pathPattern = qualifiedPathPattern.pathPattern();
         List<PathComponent> components = pathPattern.pathSequence();
-        HashSet<String> variables = pathPatternVariables(components);
+        HashSet<String> variables = CompilerHelpers.pathPatternVariables(components);
 
         String pathHashCode = Integer.toString(qualifiedPathPattern.hashCode());
         String startLabel = "#COMPILER_s%s".formatted(pathHashCode);
@@ -451,110 +518,6 @@ public class GremlinCompiler {
         return traversal;
     }
 
-    public Stream<String> pathPatternVariablesAllLayersStream(List<PathComponent> pathSequence)
-    {
-        return pathSequence.stream().flatMap(component -> {
-            Stream<String> stream = null;
-            if (component instanceof ParenPathPattern)
-            {
-                stream = pathPatternVariablesAllLayersStream(((ParenPathPattern) component).pathPattern().pathSequence());
-            }
-            else 
-            {
-                stream = Stream.ofNullable(((ElementPattern) component).variableName.orElse(null));
-            }
-            return stream;
-        });
-    }
-
-    public HashSet<String> pathPatternVariablesAllLayers(List<PathComponent> pathSequence)
-    {
-        return new HashSet<>(pathPatternVariablesAllLayersStream(pathSequence).toList());
-    }
-
-    public HashSet<String> pathPatternVariables(List<PathComponent> pathSequence)
-    {
-        return new HashSet<>(pathSequence.stream().flatMap(component -> {
-            Stream<String> stream = null;
-            if (component instanceof ParenPathPattern)
-            {
-                stream = Stream.of();
-            }
-            else 
-            {
-                stream = Stream.ofNullable(((ElementPattern) component).variableName.orElse(null));
-            }
-            return stream;
-        }).toList());
-    }
-
-    public HashSet<String> pathPatternVariables(QualifiedPathPattern pathPattern)
-    {
-        return pathPatternVariables(pathPattern.pathPattern().pathSequence());
-    }
-
-    public <T> boolean intersects(Set<T> a, Set<T> b)
-    {
-        Set<T> c = a.size() < b.size() ? a : b;
-        for (T e : c) 
-        {
-            if (b.contains(e))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public <T> HashSet<T> intersection(Set<T> a, Set<T> b)
-    {
-        HashSet<T> c = new HashSet<T>(a);
-
-        c.retainAll(b);
-        return c;
-    }
-
-    public <T> HashSet<T> subtraction(Set<T> a, Set<T> b)
-    {
-        HashSet<T> c = new HashSet<T>(a);
-        c.removeAll(b);
-
-        return c;
-    }
-
-    public List<QualifiedPathPattern> orderRestrictedPathPatterns(List<QualifiedPathPattern> restrictedPathPatterns)
-    {
-        ArrayList<QualifiedPathPattern> reorderedPathPatterns = new ArrayList<>();
-
-        List<HashSet<String>> variablesList = 
-            restrictedPathPatterns.stream().map(pathPattern -> pathPatternVariables(pathPattern)).toList();
-
-        
-        while (restrictedPathPatterns.size() > 0)
-        {
-            int i = restrictedPathPatterns.size()-1;
-
-            while (i != -1) 
-            {
-                reorderedPathPatterns.add(restrictedPathPatterns.remove(i));
-                Set<String> variables = variablesList.remove(i);
-                i = -1;
-
-                for (int j = 0; j < restrictedPathPatterns.size(); j++)
-                {
-                    Set<String> testVariables = variablesList.get(j);
-                    if (intersects(variables, testVariables))
-                    {
-                        i = j;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return reorderedPathPatterns;
-    }
-    
     public GraphTraversal<Vertex, ?> compileToTraversal(MatchExpression matchExpression)
     {        
         GraphTraversal<Vertex, Vertex> traversal = start();
@@ -680,7 +643,6 @@ public class GremlinCompiler {
 
         return resultTraversal;
     }
-
 
     // use pop mixed for now
     // should later use variable metadata to pop all for groups and one for singles

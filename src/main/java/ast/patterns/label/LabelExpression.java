@@ -1,3 +1,4 @@
 package ast.patterns.label;
 
-public abstract sealed class LabelExpression permits Label, WildcardLabel {}
+public abstract sealed class LabelExpression extends LabelPattern 
+    permits Label, BinaryLabelExpression {}

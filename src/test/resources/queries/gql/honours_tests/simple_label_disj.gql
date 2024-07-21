@@ -1,0 +1,3 @@
+FROM g
+MATCH (x:a | b)
+RETURN x

@@ -29,8 +29,11 @@ import ast.patterns.NodePattern;
 import ast.patterns.ParenPathPattern;
 import ast.patterns.PathComponent;
 import ast.patterns.PathPattern;
+import ast.patterns.label.BinaryLabelExpression;
+import ast.patterns.label.BinaryLabelOperator;
 import ast.patterns.label.Label;
 import ast.patterns.label.LabelExpression;
+import ast.patterns.label.LabelPattern;
 import ast.patterns.label.WildcardLabel;
 import ast.variables.GqlVariables;
 import ast.variables.VariableType;
@@ -122,7 +125,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
         Optional<String> variableName = visitElementVariable(ctx.elementPatternFiller().elementVariable());
         variableName.ifPresent(name -> variables.addVariable(name, VariableType.NODE));
 
-        LabelExpression labels = visitIsLabelExpr(ctx.elementPatternFiller().isLabelExpr());
+        LabelPattern labels = visitIsLabelExpr(ctx.elementPatternFiller().isLabelExpr());
         HashMap<String, Value> properties = getProperties(ctx.elementPatternFiller());
         
         return new NodePattern(variableName, labels, properties);
@@ -174,7 +177,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
     private EdgePattern getEdgePattern(ElementPatternFillerContext ctx, Optional<Direction> direction) {
         Optional<String> variableName = visitElementVariable(ctx.elementVariable());
         variableName.ifPresent(name -> variables.addVariable(name, VariableType.EDGE));
-        LabelExpression labels = visitIsLabelExpr(ctx.isLabelExpr());
+        LabelPattern labels = visitIsLabelExpr(ctx.isLabelExpr());
 
         HashMap<String, Value> properties = getProperties(ctx);
 
@@ -232,27 +235,66 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
         return Optional.of(ctx.ID().getText());
     }
 
-    @Override
-    public LabelExpression visitIsLabelExpr(GqlParser.IsLabelExprContext ctx) {
-        if (ctx == null) return new WildcardLabel();
+    public boolean isStarLabelExpr(LabelExpressionContext ctx)
+    {
+        return ctx.labelTerm().size() == 1 && 
+        ctx.labelTerm(0).labelFactor().size() == 1 &&
+        ctx.labelTerm(0).labelFactor(0).labelNegation() == null &&
+        ctx.labelTerm(0).labelFactor(0).labelPrimary() != null &&
+        ctx.labelTerm(0).labelFactor(0).labelPrimary().labelWildcard() != null;
+    }
 
+    @Override
+    public LabelPattern visitIsLabelExpr(GqlParser.IsLabelExprContext ctx) {
+        if (ctx == null || isStarLabelExpr(ctx.labelExpression())) return new WildcardLabel();
         return visitLabelExpression(ctx.labelExpression());
     }
 
+    // can't be a single wildcard, checked above
     @Override
     public LabelExpression visitLabelExpression(LabelExpressionContext ctx) {
         // ArrayList<ArrayList<Label>> labels = new ArrayList<>();
         if (ctx == null) throw new SyntaxErrorException("Bad label expression");
 
         List<LabelTermContext> terms = ctx.labelTerm();
-        if (terms.size() > 1) throw new SyntaxErrorException("Complex Label Expressions Unsupported");
-
         List<LabelFactorContext> factors = terms.get(0).labelFactor();
-        if (factors.size() > 1) throw new SyntaxErrorException("Complex Label Expressions Unsupported");
 
-        LabelFactorContext factor = factors.get(0);
+        if (terms.size() == 1 && factors.size() == 1)
+        {
+            LabelFactorContext factor = factors.get(0);
+            return visitLabelFactor(factor);
+        }
+        else 
+        {
+            ArrayList<LabelExpression> labelExpressions = new ArrayList<>();
+            for (LabelTermContext term: terms)
+            {
+                labelExpressions.add(visitLabelTerm(term));
+            }
+            return new BinaryLabelExpression(labelExpressions, BinaryLabelOperator.OR);
+        }
+    }
 
-        return visitLabelFactor(factor);
+    public LabelExpression visitLabelTerm(LabelTermContext ctx) {
+        // ArrayList<ArrayList<Label>> labels = new ArrayList<>();
+        if (ctx == null) throw new SyntaxErrorException("Bad label expression");
+
+        List<LabelFactorContext> factors = ctx.labelFactor();
+
+        if (factors.size() == 1)
+        {
+            LabelFactorContext factor = factors.get(0);
+            return visitLabelFactor(factor);
+        }
+        else 
+        {
+            ArrayList<LabelExpression> labelExpressions = new ArrayList<>();
+            for (LabelFactorContext factor: factors)
+            {
+                labelExpressions.add(visitLabelFactor(factor));
+            }
+            return new BinaryLabelExpression(labelExpressions, BinaryLabelOperator.AND);
+        }
     }
 
     @Override
@@ -265,7 +307,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
     @Override
     public LabelExpression visitLabelPrimary(LabelPrimaryContext ctx) {
         if (ctx.label() != null) return new Label(ctx.label().ID().getText());
-        if (ctx.labelWildcard() != null) return new WildcardLabel();
+        if (ctx.labelWildcard() != null) throw new SemanticErrorException("Wildcard in complex label expression");
 
         throw new SemanticErrorException("Parenthesized label expressions are not yet implemented, hence, rewrite the query.");
     }

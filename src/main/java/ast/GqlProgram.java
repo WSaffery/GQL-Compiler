@@ -1,8 +1,6 @@
 package ast;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.antlr.v4.runtime.CharStreams;
@@ -13,8 +11,6 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import antlr.GqlLexer;
 import antlr.GqlParser;
 import ast.queries.GqlBody;
-import ast.queries.GqlQuery;
-import ast.queries.QueryConjunctor;
 import ast.variables.GqlVariables;
 import ast.visitors.AstListener;
 

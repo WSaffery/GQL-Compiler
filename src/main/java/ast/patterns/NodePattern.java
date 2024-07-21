@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import ast.expressions.Value;
-import ast.patterns.label.LabelExpression;
+import ast.patterns.label.LabelPattern;
 import ast.patterns.label.WildcardLabel;
 
 public final class NodePattern extends ElementPattern {
-    public NodePattern(Optional<String> variableName, LabelExpression labelExpression, HashMap<String, Value> properties)
+    public NodePattern(Optional<String> variableName, LabelPattern labelExpression, HashMap<String, Value> properties)
     {
         super(variableName, labelExpression, properties);
     }
@@ -20,6 +20,6 @@ public final class NodePattern extends ElementPattern {
 
     public String toString()
     {
-        return "(%s: %s %s)".formatted(variableName, labelExpression, properties);
+        return "(%s: %s %s)".formatted(variableName, labelPattern, properties);
     }
 }
