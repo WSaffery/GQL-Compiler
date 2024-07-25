@@ -8,9 +8,8 @@
 - run setupAntlr.sh
 - run `mvn clean install`
     - run `mvn clean install -Dmaven.test.skip=true` if you're on linux (fix pending)
-- run `mvn exec:java -Dexec.mainClass="GqlApp" -e -Dexec.args="/gql/tests/conjunctions/union_all.gql"` to test the query in `src/test/resources/queries/gql/tests/conjunctions/union_all.gql`
+- run `mvn exec:java -Dexec.mainClass="GremlinGqlApp" -e -Dexec.args="/gql/honours_tests/property_pattern.gql"` to test the query in `src/test/resources/queries/gql/honours_tests/property_pattern.gql`
     - this may not work despite a successful build if you skipped the antlr4 dependency
-
 
 Notes on quirks of the current codebase for quick reference
 

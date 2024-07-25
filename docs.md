@@ -2,11 +2,25 @@
 
 Commands for different tasks.
 
-# Remote testing
+## Setup from zero
 
-## With Janus graph setup
+- Install maven
+- Install antlr4 dependencies
+    - For Fedora `antlr4-maven-plugin` covers everything
+    - Targeting latest Fedora antlr4 version over development period (2024)
+        - This could change if there's a significant breaking change 
+- run setupAntlr.sh
+- run `mvn clean install`
+    - run `mvn clean install -Dmaven.test.skip=true` if you're on linux (fix pending)
+- run `mvn exec:java -Dexec.mainClass="GqlGremlinApp" -e -Dexec.args="/gql/honours_tests/property_pattern.gql"` to test the query in `src/test/resources/queries/gql/honours_tests/property_pattern.gql`
+    - this may not work despite a successful build if you skipped the antlr4 dependency
+    - this will run using test data local to the repo, and an in-memory tinkergraph to interpret the generated gremlin
 
-- run with g
+## Testing Remote Providers
+
+### With Janus graph setup
+
+- run to test loading and deleting test graph g
 	`mvn exec:java -Dexec.mainClass="RemoteDbApp" -e`
 
 - run with basic graphs

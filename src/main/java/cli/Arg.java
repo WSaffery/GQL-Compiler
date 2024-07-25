@@ -14,6 +14,11 @@ public record Arg(ArgType type, List<String> defaultValue) {
         return new Arg(ArgType.MULTI, defaultValue);
     }
 
+    public static Arg multi(String defaultValue)
+    {
+        return new Arg(ArgType.MULTI, List.of(defaultValue));
+    }
+
     public static Arg multi()
     {
         return new Arg(ArgType.MULTI, List.of());

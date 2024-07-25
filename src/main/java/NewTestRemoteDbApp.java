@@ -20,76 +20,75 @@ import graphs.ResourcePaths;
 // for some reason can't get remote-graph.properties files working
 // have to instantiate connection directly using remote-objects.yaml files
 
-public class NewRemoteDbApp {
-    // usage: -mode mode [-customKeys] -conf conf -graph graph
-    // where mode is either: print, load, or test
-    // customKeys is false by default, and should be false if the database doesn't support custom keys (i.e. Janus) 
-    // where conf is cluster yaml config files, ala remote-objects.yaml
-    // and graph is graph names
+public class NewTestRemoteDbApp {
+    // usage: -customKeys val1 val2 ... -confs conf1 conf2 ... -graph graph1 graph2 ...
+    // customKeys is "false" by default, and should be false if the database doesn't support custom keys (i.e. Janus) 
+    // setting a single value of customKeys broadcasts to all configs, otherwise they are applied pairwise 
+    // confs are cluster yaml config files, ala remote-objects.yaml
+    // and graphs are graph names
+    // default config file is just "conf/remote-objects.yaml", default graph is just "g"
 
-    public static final String defaultMode = "test";
-    public static final boolean defaultCustomKeys = false;
+    public static final String defaultCustomKeys = "false";
     public static final String defaultConfigFile = "conf/remote-objects.yaml";
     public static final String defaultGraph = "g";
 
     public static final CliArgParser argParser = new CliArgParser(Map.of(
-        "mode", Arg.single(defaultMode),
-        "customKeys", Arg.flag(),
-        "conf", Arg.single(defaultConfigFile),
-        "graph", Arg.single(defaultGraph)
+        "customKeys", Arg.multi(defaultCustomKeys),
+        "conf", Arg.multi(defaultConfigFile),
+        "graphs", Arg.multi(defaultGraph)
     ));
 
     public static void main(String[] args) throws Exception {
         argParser.parseArgs(args);
 
-        String mode = argParser.getArgSingle("mode");
-        boolean customKeys = argParser.checkFlagged("customKeys");
-        String conf = argParser.getArgSingle("conf");
-        String graph = argParser.getArgSingle("graph");
+        List<String> confs = argParser.getArgs("conf");
+        List<String> graphs = argParser.getArgs("graphs");
+        List<String> customKeys = argParser.getArgs("customKeys");
 
-        System.out.println("conf: " + conf);
-        System.out.println("graph: " + graph);
+        System.out.println("conf: " + confs);
+        System.out.println("graphs: " + graphs);
 
-        DriverRemoteConnection connection = DriverRemoteConnection.using(
-            Cluster.open(conf), "g"
-            );
+        if (customKeys.size() == 1 && confs.size() > 1)
+        {
+            String base = customKeys.get(0);
+            for (int i = 0; i < confs.size() - 1; i++)
+            {
+                customKeys.add(base);
+            }
+        }
 
-        GraphTraversalSource gts = traversal().withRemote(connection);
+        for (int i = 0; i < confs.size(); i++)
+        {
+            String conf = confs.get(i);
+            boolean customKeyConf = Boolean.valueOf(customKeys.get(i));
+            DriverRemoteConnection connection = DriverRemoteConnection.using(
+                Cluster.open(conf), "g"
+                );
             
-        // graph independent operation modes
-        if (mode.equals("print"))
-        {
-            System.out.println("Showing graph with config: " + conf);
-            showGraph(gts);
-        }
-        else if (mode.equals("drop"))
-        {
-            System.out.println("Dropping graph with config: " + conf);
+            GraphTraversalSource gts = traversal().withRemote(connection);
+            
+            System.out.println("Clearing db with config: " + conf);
             dropGraph(gts);
-        }
-        else 
-        {
-            System.out.println();
-            if (mode.equals("test"))
+            System.out.println("Showing Clear Result");
+            showGraph(gts);
+
+            for (String graph : graphs)
             {
                 System.out.println("Loading graph " + graph + " with config: " + conf);
-                loadGraph(gts, graph, customKeys);
+                loadGraph(gts, graph, customKeyConf);
                 System.out.println("Showing Load Result");
                 showGraph(gts);
                 System.out.println("Clearing graph");
                 dropGraph(gts);
                 System.out.println("Showing Clear Result");
                 showGraph(gts);
+
+                System.out.println("Finished for graph " + graph + " with config: " + conf);
             }
-            else if (mode.equals("load"))
-            {
-                System.out.println("Loading graph " + graph + " with config: " + conf);
-                loadGraph(gts, graph, customKeys);
-            }
-            
-            System.out.println("Finished for graph " + graph + " with config: " + conf);
+
+            gts.close();
+
         }
-        gts.close();
         
         // for some reason the program always hangs at the end, (it passes gts.close and all actual code)
         // probably something to do with maven not completing until all processes and subprocesses are done
