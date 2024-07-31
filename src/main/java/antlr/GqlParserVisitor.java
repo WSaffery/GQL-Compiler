@@ -253,6 +253,13 @@ public interface GqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpressionComparison(GqlParser.ExpressionComparisonContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code GraphExistsExpression}
+	 * labeled alternative in {@link GqlParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGraphExistsExpression(GqlParser.GraphExistsExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code NegatedExpression}
 	 * labeled alternative in {@link GqlParser#expr}.
 	 * @param ctx the parse tree

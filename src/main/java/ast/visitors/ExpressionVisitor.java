@@ -54,8 +54,13 @@ public class ExpressionVisitor extends GqlParserBaseVisitor<Expression> {
         if (ctx instanceof NegatedExpressionContext) return visitNegatedExpression((NegatedExpressionContext) ctx);
         if (ctx instanceof BooleanComparisonContext) return visitBooleanComparison((BooleanComparisonContext) ctx);
         if (ctx instanceof ValueComparisonContext) return visitValueComparison((ValueComparisonContext) ctx);
-
+        if (ctx instanceof GraphExistsExpressionContext) return visitGraphExists((GraphExistsExpressionContext) ctx);
         throw new SemanticErrorException("Invalid expression given at line " + ctx.getStart().getLine() + " column " + ctx.getStart().getCharPositionInLine() + ".");
+    }
+
+    private Expression visitGraphExists(GraphExistsExpressionContext ctx) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visitGraphExists'");
     }
 
     public Value visitPropertyExpr(ExprContext ctx) {

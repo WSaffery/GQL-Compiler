@@ -486,6 +486,18 @@ public class GqlParserBaseListener implements GqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterGraphExistsExpression(GqlParser.GraphExistsExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGraphExistsExpression(GqlParser.GraphExistsExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterNegatedExpression(GqlParser.NegatedExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
