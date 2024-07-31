@@ -1,0 +1,8 @@
+-- MESSAGE = COMMENT UNION POST
+-- (:Message) -> (:Comment | Post)
+-- note that the validation of this test presented in LSQB isn't sound 
+-- the optional matches has no impact on the result cardinality
+-- technically a sound optimiser could drop the optional matches
+
+MATCH (:Tag)<-[:HAS_TAG]-(message:Comment | Post)-[:HAS_CREATOR]-(creator:Person)
+RETURN COUNT(*)

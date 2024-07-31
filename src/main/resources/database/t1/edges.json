@@ -1,0 +1,32 @@
+[
+  {
+    "identity": "e1",
+    "start": "a",
+    "end": "b",
+    "isDirected": 1
+  },
+  {
+    "identity": "e2",
+    "start": "b",
+    "end": "c",
+    "isDirected": 1
+  },
+  {
+    "identity": "e3",
+    "start": "c",
+    "end": "d",
+    "isDirected": 1
+  },
+  {
+    "identity": "e4",
+    "start": "d",
+    "end": "b",
+    "isDirected": 1
+  },
+  {
+    "identity": "e5",
+    "start": "a",
+    "end": "a",
+    "isDirected": 1
+  }
+]

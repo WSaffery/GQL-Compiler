@@ -1,0 +1,7 @@
+-- using message doesn't work because there is no message table 
+-- MESSAGE = COMMENT UNION POST
+-- ensure this works
+
+MATCH 
+(message:Comment|Post)<-[:hasTag]-(:Tag)
+RETURN COUNT(*)

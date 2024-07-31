@@ -1,0 +1,25 @@
+g.V().
+  and(__.or(__.hasLabel("Comment"), __.hasLabel("Post"))).
+  as("message").
+  as("#COMPILER_s1839215860").
+  toE(Direction.IN).
+  hasLabel("hasTag").
+  otherV().
+  hasLabel("Tag").
+  select("message").as("#COMPILER_s-1834003173").
+  bothE().
+  hasLabel("hasCreator").
+  otherV().
+  hasLabel("Person").
+  select("message").as("#COMPILER_s1772147568").
+  toE(Direction.IN).
+  hasLabel("likes").
+  otherV().
+  hasLabel("Person").
+  select("message").as("#COMPILER_s2063946624").
+  toE(Direction.IN).
+  hasLabel("replyOf").
+  otherV().
+  hasLabel("Comment").
+  count().
+  project("COUNT(*)").by()

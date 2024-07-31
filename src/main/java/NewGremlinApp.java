@@ -151,6 +151,9 @@ public class NewGremlinApp {
         System.out.println("Aggriter traversal");
         aggrIterDemo(g_cyclic);
 
+        System.out.println("Choice test");
+        choiceDemo(g_cyclic);
+
         // System.out.println("Map tests");
         // mapTestDemo(g_cyclic);
     }
@@ -698,6 +701,97 @@ public class NewGremlinApp {
 
         // pattern
         // (x) -> [(y) -> (z)]{1,3}
+
+        // result (wrong this is concatenative and not right there either)
+        // (a) -> (b:y) -1> (c: z)
+        // (a) -> (b:y) -2> (c: z)
+        // (a) -> (b:y) -1> (c: z) -> (c:y) -> (c: z)
+        // (a) -> (b:y) -2> (c: z) -> (c:y) -> (c: z)
+        // (a) -> (b:y) -1> (c: z) -> (c:y) -> (c: z) -> (c:y) -> (c: z)
+        // (a) -> (b:y) -2> (c: z) -> (c:y) -> (c: z) -> (c:y) -> (c: z)
+        // (a) -> (b:y) -1> (c: z) -> (b:y) -1> (c:z)
+        // (a) -> (b:y) -1> (c: z) -> (b:y) -2> (c:z) 
+        // (a) -> (b:y) -2> (c: z) -> (b:y) -1> (c:z)
+        // (a) -> (b:y) -2> (c: z) -> (b:y) -2> (c:z) 
+
+        // pattern
+        // (x) -> [(y) -> (z)]{1,2}
+
+        // result
+        // (a) -> (b:y) -1> (c: z)
+        // (a) -> (b:y) -2> (c: z)
+        // (a) -> (b:y) -1> (c: z) -> (c:y)
+        // (a) -> (b:y) -2> (c: z) -> (c:y)
+        // (a) -> (b:y) -1> (c: z) -> (b:y)
+        // (a) -> (b:y) -2> (c: z) -> (b:y)
+
+        System.out.println("Aggr Iter");
+        
+        // WORKS
+        List<Map<String,Object>> table1 = g.V("n1").
+            as("x").
+            sideEffect(e -> System.out.println("a: " + e)).
+            outE(). 
+            as("e1").
+            otherV().
+            repeat(
+                as("y").
+                outE(). 
+                as("e2").
+                otherV().
+                as("z")
+            ).
+            times(2).
+            emit(loops().is(P.gt(0))).
+            select(Pop.all,"x", "e1", "y", "e2", "z").
+            toList();
+        table1.forEach(p -> System.out.println(p.toString()));
+
+        System.out.println("Union join");
+        @SuppressWarnings("unchecked")
+        List<?> table2 = g.V("n1").
+            as("x").
+            sideEffect(e -> System.out.println("a: " + e)).
+            outE(). 
+            as("e1").
+            otherV().
+            repeat(
+                as("y").
+                outE(). 
+                as("e2").
+                otherV().
+                as("z")
+            ).
+            times(2).
+            emit(loops().is(P.gt(0))).
+            local(
+                union(
+                    select(Pop.last,"x").project("x"),
+                    select(Pop.all, "e1", "y", "e2", "z")
+                ).
+                unfold(). 
+                group(). 
+                by(select(Column.keys)).
+                by(select(Column.values))
+            ).
+            toList();
+        table2.forEach(p -> System.out.println(p.toString()));
+
+    // can use union and unfold to merge selection of singleton variables with Pop.single and group variables with Pop.all
+    }
+
+
+    public static void choiceDemo(GraphTraversalSource g) 
+    {
+        // graph
+        // (a) -> (b) -> (c) 
+        // (c) -> (c)
+        // (c) -> (b)
+        // (b) -> (c)
+
+        // pattern
+        // (x) -> (y),
+        // [(y) <- (x)]{0,1}
 
         // result (wrong this is concatenative and not right there either)
         // (a) -> (b:y) -1> (c: z)

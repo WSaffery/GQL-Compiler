@@ -1,0 +1,22 @@
+[
+  {
+    "identity": "a",
+    "labels": ["A"],
+    "properties": { "v": 1}
+  },
+  {
+    "identity": "b",
+    "labels": ["B"],
+    "properties": { "v": 2 }
+  },
+  {
+    "identity": "c",
+    "labels": ["C"],
+    "properties": { "v": 3 }
+  },
+  {
+    "identity": "d",
+    "labels": ["D"],
+    "properties": { "v": 1 }
+  }
+]

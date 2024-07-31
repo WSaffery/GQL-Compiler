@@ -2,7 +2,6 @@ package gql_gremlin;
 
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.Pop;
-import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
@@ -10,6 +9,8 @@ import ast.GqlProgram;
 import ast.atoms.Quantifier;
 import ast.expressions.Expression;
 import ast.expressions.Value;
+import ast.expressions.atomic.TruthValue;
+import ast.expressions.composite.ComparisonExpression;
 import ast.expressions.references.NameExpression;
 import ast.expressions.references.PropertyReference;
 import ast.patterns.EdgePattern;
@@ -31,6 +32,7 @@ import ast.returns.ReturnExpression;
 import ast.returns.ReturnItem;
 import enums.EvaluationMode;
 import enums.SetQuantifier;
+import enums.ValueComparator;
 import exceptions.SemanticErrorException;
 import exceptions.SyntaxErrorException;
 import gql_gremlin.matching.MatchExpression;
@@ -50,6 +52,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import javax.management.RuntimeErrorException;
 
 
 enum GQLDirection {
@@ -197,7 +201,6 @@ public class GremlinCompiler {
 
         final LabelPattern labelPattern = pattern.labelPattern();
 
-        // TODO! add compound label expressions
         if (labelPattern != null) 
         {         
             if (labelPattern instanceof WildcardLabel)
@@ -400,6 +403,7 @@ public class GremlinCompiler {
         boolean uncaptured = uncapturedInnerVariables.size() > 0; 
         boolean unroll =  quantifier.b() > 1; 
 
+        // TODO! add support for 0 length iteration
         if (uncaptured && unroll)
         {
             // if the iteration is degenerate (a = 1, b = 1), don't include captured post variables in outerSet    
@@ -559,8 +563,18 @@ public class GremlinCompiler {
         // restrictedPathPatterns = orderRestrictedPathPatterns(restrictedPathPatterns);
 
         traversal = compileRestrictedPatterns(traversal, restrictedPathPatterns);
+
+        // TODO! actually use the where clause of the MatchExpression if it exists
+        // see matchExpression.whereClause
         
+
         List<PathPattern> matchPathPatterns = MatchPatternFactory.makeMatchPatterns(unrestrictedPathPatterns, intersectionMap);
+
+        if (matchPathPatterns.size() == 0 && matchExpression.whereClause.isPresent())
+        {
+            assert Expression.isBooleanExpression(matchExpression.whereClause.get()) : "Where clause must be boolean expression";  
+            traversal = traversal.and(filterByWhereClause(matchExpression.whereClause.get()));
+        }
 
         if (matchPathPatterns.size() == 0)
         {
@@ -620,6 +634,7 @@ public class GremlinCompiler {
 
         ArrayList<GraphTraversal<?,?>> matchTraversals = new ArrayList<>();
         
+        // TODO! add match pattern support or remove old code
         for (PathPattern matchPathPattern : matchPathPatterns)
         {
             throw new SyntaxErrorException("Match pattern based execution currently unsupported");
@@ -642,6 +657,90 @@ public class GremlinCompiler {
 
 
         return resultTraversal;
+    }
+
+
+
+    private GraphTraversal<Object, Object> filterByWhereClause(Expression expression) {
+        if (expression instanceof TruthValue)
+        {
+            TruthValue truthValue = (TruthValue) expression;
+            Boolean value = truthValue.value();
+            // traversal.and();
+            throw new SyntaxErrorException("Truth Value Where Clause not supported.");
+        }
+        else if (expression instanceof ComparisonExpression)
+        {
+            ComparisonExpression comp = (ComparisonExpression) expression;
+            // TODO! support val comps
+            assert Expression.isReferenceExpression(comp.left()) : "Only currently support reference operands of comparisons";
+            assert Expression.isReferenceExpression(comp.right())  : "Only currently support reference operands of comparisons";
+
+            if (comp.left() instanceof NameExpression && comp.right() instanceof NameExpression)
+            {
+                String a = ((NameExpression) comp.left()).name();
+                String b = ((NameExpression) comp.right()).name();
+                
+                if (comp.comparator() == ValueComparator.EQ)
+                {
+                    return select(a).where(P.eq(b));
+                }
+                else if (comp.comparator() == ValueComparator.NEQ)
+                {
+                    return select(a).where(P.neq(b));
+                }
+                else 
+                {
+                    throw new SemanticErrorException("Can only check equality of identity references");
+                }
+                
+            }
+            else if (comp.left() instanceof PropertyReference && comp.right() instanceof PropertyReference)
+            {
+                // TODO! test this
+                PropertyReference aProp = (PropertyReference) comp.left();
+                PropertyReference bProp = (PropertyReference) comp.right();
+                
+                String bHashCode = Integer.toString(bProp.hashCode());
+                String bLabel = "#COMPILER_b%s".formatted(bHashCode);
+                
+                P<String> predicate = null;
+                switch (comp.comparator())
+                {
+                    case EQ:
+                        predicate = P.eq(bLabel);
+                        break;
+                    case NEQ:
+                        predicate = P.neq(bLabel);
+                        break;
+                    case GEQ:
+                        predicate = P.gte(bLabel);
+                        break;
+                    case GT:
+                        predicate = P.gt(bLabel);
+                        break;
+                    case LEQ:
+                        predicate = P.lte(bLabel);
+                        break;
+                    case LT:
+                        predicate = P.lt(bLabel);
+                        break;
+                }   
+
+                return select(bProp.name()).values(bProp.key()).as(bLabel).
+                       select(aProp.name()).values(aProp.key()).
+                       where(predicate);
+            }
+            else 
+            {
+                throw new SyntaxErrorException("Bad comparison expression");
+            }
+
+        }
+        else 
+        {
+            throw new RuntimeException("Unsupported Where Clause Expression");
+        }
     }
 
     // use pop mixed for now

@@ -2,12 +2,12 @@
 -- MESSAGE = COMMENT UNION POST
 
 MATCH 
-(message_comment:Comment)<-[:hasTag]-(:Tag),
+(message_comment:Comment)-[:hasTag]->(:Tag),
 (message_comment)-[:hasCreator]-(:Person), -- creator
 (message_comment)<-[:likes]-(:Person), -- liker
 (message_comment)<-[:replyOf]-(:Comment),
 
-(message_post:Post)<-[:hasTag]-(:Tag),
+(message_post:Post)-[:hasTag]->(:Tag),
 (message_post)-[:hasCreator]-(:Person), -- creator
 (message_post)<-[:likes]-(:Person), -- liker
 (message_post)<-[:replyOf]-(:Comment)

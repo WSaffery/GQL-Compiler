@@ -6,8 +6,9 @@ public record Quantifier(
 ) {
     public Quantifier(int a, int b)
     {
-        assert a > 0;
-        assert b >= a;
+        // TODO! add support for 0 length iteration
+        assert a >= 1 : "first part of quantifier is less than 1";
+        assert b >= a : "second part of quantifier is less than first";
         this.a = a;
         this.b = b;
     }

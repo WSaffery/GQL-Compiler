@@ -1,0 +1,1 @@
+g.V().as("#COMPILER_s-1406586542").toE(Direction.OUT).otherV().count().project("COUNT(*)").by()

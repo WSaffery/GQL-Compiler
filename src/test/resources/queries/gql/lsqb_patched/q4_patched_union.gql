@@ -2,12 +2,8 @@
 -- MESSAGE = COMMENT UNION POST
 
 MATCH 
-(message:Comment|Post)<-[:hasTag]-(:Tag),
+(message:Comment|Post)-[:hasTag]->(:Tag),
 (message)-[:hasCreator]-(:Person), -- creator
 (message)<-[:likes]-(:Person), -- liker
-(message)<-[:replyOf]-(:Comment),
-
--- won't work right now
--- need to add support for boolean label expressions
-
+(message)<-[:replyOf]-(:Comment)
 RETURN COUNT(*)

@@ -1,0 +1,4 @@
+FROM t1
+MATCH (a), (b)
+WHERE a.v > b.v
+RETURN a, b

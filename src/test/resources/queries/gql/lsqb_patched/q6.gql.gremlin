@@ -1,0 +1,1 @@
+g.V().hasLabel("Person").as("person1").as("#COMPILER_s156999763").bothE().hasLabel("KNOWS").otherV().hasLabel("Person").as("person2").bothE().hasLabel("KNOWS").otherV().hasLabel("Person").as("person3").toE(Direction.OUT).hasLabel("HAS_INTEREST").otherV().hasLabel("Tag").as("tag").count().project("COUNT(*)").by()

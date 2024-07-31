@@ -1,0 +1,2 @@
+MATCH (s:A|B)-[]->(:C), (:D)-[]->(s)
+RETURN COUNT(*)

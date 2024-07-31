@@ -1,0 +1,3 @@
+-- should equal 432235 for loaded lsqb 0.1 sf
+MATCH ()
+RETURN COUNT(*)

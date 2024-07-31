@@ -1,0 +1,6 @@
+-- MESSAGE = COMMENT UNION POST
+-- (:Message) -> (:Comment | Post)
+MATCH (tag1:Tag)<-[:hasTag]-(:Comment | Post)
+      <-[:replyOf]-(:Comment)-[:hasTag]->(tag2:Tag)
+WHERE tag1 <> tag2
+RETURN COUNT(*)

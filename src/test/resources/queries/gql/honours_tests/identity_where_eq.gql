@@ -1,0 +1,4 @@
+FROM t1
+MATCH (a) -[]-> (b)
+WHERE a = b
+RETURN b
