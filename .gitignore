@@ -27,3 +27,4 @@ src/antlr/*.tokens
 edge_stream.json
 node_stream.json
 src/main/resources/database/lsqb01/*.json
+*.gql.gremlin

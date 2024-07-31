@@ -1,1 +1,0 @@
-g.V().hasLabel("Tag").as("tag1").as("#COMPILER_s-1158424635").toE(Direction.IN).hasLabel("hasTag").otherV().and(__.or(__.hasLabel("Comment"),__.hasLabel("Post"))).toE(Direction.IN).hasLabel("replyOf").otherV().hasLabel("Comment").toE(Direction.OUT).hasLabel("hasTag").otherV().hasLabel("Tag").as("tag2").count().project("COUNT(*)").by()

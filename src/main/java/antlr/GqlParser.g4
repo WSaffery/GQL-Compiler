@@ -37,7 +37,7 @@ focusedMatchClause
     ;
 
 matchClause
-    : (OPTIONAL | MANDATORY)? MATCH pathPatternList whereClause?
+    : (OPTIONAL)? MATCH pathPatternList whereClause?
     ;
 
 whereClause

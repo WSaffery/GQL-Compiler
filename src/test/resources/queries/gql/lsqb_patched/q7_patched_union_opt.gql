@@ -4,5 +4,5 @@
 -- the optional matches has no impact on the result cardinality
 -- technically a sound optimiser could drop the optional matches
 
-MATCH (:Tag)<-[:HAS_TAG]-(message:Comment | Post)-[:HAS_CREATOR]-(creator:Person)
+MATCH (:Tag)<-[:hasTag]-(message:Comment | Post)-[:hasCreator]-(creator:Person)
 RETURN COUNT(*)

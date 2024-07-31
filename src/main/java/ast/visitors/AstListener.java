@@ -63,8 +63,8 @@ public class AstListener extends GqlParserBaseListener {
 
     public void enterMatchClause(MatchClauseContext ctx)
     {
-
-        boolean isMandatory = ctx.MANDATORY() != null;
+        boolean isMandatory = ctx.OPTIONAL() == null;
+        
         WhereClauseContext whereClause = ctx.whereClause();
         Optional<Expression> whereClauseExpression = whereClause != null ? 
             Optional.of(whereClauseVisitor.visitWhereClause(whereClause)) : 

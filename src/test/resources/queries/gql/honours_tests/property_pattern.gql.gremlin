@@ -1,1 +1,0 @@
-g.V().hasLabel("Person").has("name","Olof Morra").as("x").as("#COMPILER_s1795398093").toE(Direction.OUT).hasLabel("Does").otherV().as("y").select(Pop.mixed,"x","y").by().by()

@@ -1,1 +1,0 @@
-g.V().hasLabel("Tag").as("#COMPILER_s40007918").toE(Direction.IN).hasLabel("HAS_TAG").otherV().and(__.or(__.hasLabel("Comment"),__.hasLabel("Post"))).as("message").bothE().hasLabel("HAS_CREATOR").otherV().hasLabel("Person").as("creator").count().project("COUNT(*)").by()

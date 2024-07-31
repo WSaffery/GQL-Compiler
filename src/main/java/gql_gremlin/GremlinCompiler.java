@@ -779,11 +779,11 @@ public class GremlinCompiler {
     {
         // GraphTraversal<Vertex, Vertex> traversal = V();
 
-        if (query.matchExpressions.size() > 1)
-        {
-            System.out.println("Multi match programs not supported");
-            return null;
-        }
+        // if (query.matchExpressions.size() > 1)
+        // {
+        //     System.out.println("Multi match programs not supported");
+        //     return null;
+        // }
 
         ArrayList<String> fullReturnNames = new ArrayList<>();
         ArrayList<ReturnType> returnNameTypes = new ArrayList<>();

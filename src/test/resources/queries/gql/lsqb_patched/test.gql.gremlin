@@ -1,1 +1,0 @@
-g.V().and(__.or(__.hasLabel("A"),__.hasLabel("B"))).as("s").as("#COMPILER_s1834777901").toE(Direction.OUT).otherV().hasLabel("C").V().hasLabel("D").as("#COMPILER_s1926261836").toE(Direction.OUT).otherV().where(P.eq("s")).count().project("COUNT(*)").by()
