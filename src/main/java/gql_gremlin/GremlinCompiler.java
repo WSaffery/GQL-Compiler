@@ -510,9 +510,9 @@ public class GremlinCompiler {
         return traversal;
     }
 
-    public GraphTraversal<Vertex, Vertex> compileRestrictedPatterns(GraphTraversal<Vertex, Vertex> traversal, List<QualifiedPathPattern> qualifiedPathPatterns)
+    public GraphTraversal<Vertex, Vertex> compileRestrictedPatterns(GraphTraversal<Vertex, Vertex> traversal, List<QualifiedPathPattern> qualifiedPathPatterns,
+        HashSet<String> capturedSet)
     {
-        HashSet<String> capturedSet = new HashSet<>();
 
         for (QualifiedPathPattern qualifiedPathPattern : qualifiedPathPatterns)
         {
@@ -522,141 +522,20 @@ public class GremlinCompiler {
         return traversal;
     }
 
-    public GraphTraversal<Vertex, ?> compileToTraversal(MatchExpression matchExpression)
+    public GraphTraversal<Vertex, Vertex> compileToTraversal(
+        GraphTraversal<Vertex, Vertex> start, MatchExpression matchExpression, HashSet<String> capturedSet)
     {        
-        GraphTraversal<Vertex, Vertex> traversal = start();
+        GraphTraversal<Vertex, Vertex> traversal = matchExpression.isMandatory ? 
+              compileRestrictedPatterns(start, matchExpression.pathPatterns, capturedSet)
+            : start.optional(compileRestrictedPatterns(start(), matchExpression.pathPatterns, capturedSet));
 
-        // verifies there are no variables in parenthesised sub-paths that are used outside of their core path. 
-        // MatchPatternFactory.verifyNesting(matchExpression.pathPatterns);
-
-        Map<String, Boolean> intersectionMap = MatchPatternFactory.getIntersectionMap(matchExpression.pathPatterns);
-
-        List<QualifiedPathPattern> restrictedPathPatterns = new ArrayList<>();
-        List<PathPattern> unrestrictedPathPatterns = new ArrayList<>();
-
-        for (QualifiedPathPattern pathPattern : matchExpression.pathPatterns)
-        {
-            if (pathPattern.variableName().isPresent() || pathPattern.evaluationMode() != EvaluationMode.WALK)
-            {
-                restrictedPathPatterns.add(pathPattern);
-            }
-            else 
-            {
-                // maximal match usage:
-                // if the pattern contains iteration
-                    // if the iteration(s) contain outer variable references
-                        // if those iterations are small
-                            // unroll those iterations, add to unrestricted path patterns
-                        // otherwise
-                            // add to restricted path patterns
-                    // otherwise
-                        // add to unrestricted path patterns
-                // otherwise
-                    // add to unrestricted path patterns
-
-                // for now add everything to restricted
-                restrictedPathPatterns.add(pathPattern);
-            }
-        }
-
-        // ensures that connected path patterns are next to each other and ordered by some dfs of their graph
-        // restrictedPathPatterns = orderRestrictedPathPatterns(restrictedPathPatterns);
-
-        traversal = compileRestrictedPatterns(traversal, restrictedPathPatterns);
-
-        // TODO! actually use the where clause of the MatchExpression if it exists
-        // see matchExpression.whereClause
-        
-
-        List<PathPattern> matchPathPatterns = MatchPatternFactory.makeMatchPatterns(unrestrictedPathPatterns, intersectionMap);
-
-        if (matchPathPatterns.size() == 0 && matchExpression.whereClause.isPresent())
+        if (matchExpression.whereClause.isPresent())
         {
             assert Expression.isBooleanExpression(matchExpression.whereClause.get()) : "Where clause must be boolean expression";  
             traversal = traversal.and(filterByWhereClause(matchExpression.whereClause.get()));
         }
 
-        if (matchPathPatterns.size() == 0)
-        {
-            return traversal;   
-        }
-        // EnumMap<EvaluationMode, List<PathPattern>> pathPatterns = new EnumMap<>(EvaluationMode.class);
-        // for (EvaluationMode mode : EvaluationMode.values()) 
-        //     pathPatterns.put(mode, new ArrayList<>());
-
-        // for (QualifiedPathPattern p : matchExpression.pathPatterns)
-        // {
-        //     final EvaluationMode mode = p.evaluationMode();
-        //     final PathPattern pattern = p.pathPattern();
-            
-        //     pathPatterns.get(mode).add(pattern);
-        // }
-
-        // OrderedPathResult orderedPathResult = MatchPatternFactory.makeOrderedPaths(pathPatterns);
-        
-        // Map<EvaluationMode, List<OrderedPathPattern>> orderedPathPatterns = 
-        //     orderedPathResult.orderedPaths();
-        // Map<String, VariableOccurrenceCounter> variableOccurrences = orderedPathResult.variableOccurences();
-
-        // Optional<String> jointVariable = MatchPatternFactory.getJointVariable(variableOccurrences);
-
-        // boolean restrictedRan = 
-        //     orderedPathPatterns.get(EvaluationMode.SIMPLE).size() > 0 || 
-        //     orderedPathPatterns.get(EvaluationMode.ACYCLIC).size() > 0 ||
-        //     orderedPathPatterns.get(EvaluationMode.TRAIL).size() > 0;
-
-        // orderedPathPatterns.get(EvaluationMode.SIMPLE);
-
-        // // if there's a variable shared between the path-based and match-based
-        // // patterns then select it before running match
-        // // assumes our match-based patterns are all connected
-        // if (jointVariable.isPresent())
-        // {
-        //     // we don't actually want to select to any join variables
-        //     // leading as statements in match that correspond to old as variables 
-        //     // will maintain identity (i.e. jump back)
-        //     // as such the point the traverser enters the match statement isn't meaningful
-        //     // unless there is an anonymous pattern starting a fragment(?)
-        //     // traversal = traversal.select(jointVariable.get());
-        // }
-        // else if (restrictedRan)
-        // {
-        //     throw new SemanticErrorException("Match statement patterns must all be connected");
-        // }
-
-        // we currently distinguish match step patterns vs path patterns purely by EvalMode
-        // in the future when path capture (p = ...) is supported will need to expand to include 
-        // captured WALK patterns as path patterns, not match step patterns.
-        // List<List<OrderedElementPattern>> matchPatterns = 
-            // MatchPatternFactory.makeMatchPatterns(orderedPathPatterns.get(EvaluationModeCategory.unrestrictedMode()));
-
-        System.out.println("Match Pattern Fragments: " + matchPathPatterns.toString());
-
-        ArrayList<GraphTraversal<?,?>> matchTraversals = new ArrayList<>();
-        
-        // TODO! add match pattern support or remove old code
-        for (PathPattern matchPathPattern : matchPathPatterns)
-        {
-            throw new SyntaxErrorException("Match pattern based execution currently unsupported");
-            // matchTraversals.add(compileToMatchTraversal(matchPathPattern.pathSequence()));
-        }
-
-
-        GraphTraversal<?,?>[] traversalArray = matchTraversals.toArray(new GraphTraversal<?, ?>[0]);
-
-
-        // we must make a new variable to take
-        GraphTraversal<Vertex, Map<String, Object>> resultTraversal = traversal.match(traversalArray);
-
-        if (matchExpression.whereClause.isPresent())
-        {
-            // add checking of where clause by compiling expression to predicate
-            // traversal.where()
-            System.out.println("Where clause unsupported");
-        }
-
-
-        return resultTraversal;
+        return traversal;
     }
 
 
@@ -777,14 +656,6 @@ public class GremlinCompiler {
 
     public GraphTraversal<Vertex, Map<String,Object>> compileToTraversal(GqlQuery query)
     {
-        // GraphTraversal<Vertex, Vertex> traversal = V();
-
-        // if (query.matchExpressions.size() > 1)
-        // {
-        //     System.out.println("Multi match programs not supported");
-        //     return null;
-        // }
-
         ArrayList<String> fullReturnNames = new ArrayList<>();
         ArrayList<ReturnType> returnNameTypes = new ArrayList<>();
         ArrayList<String> returnNames = new ArrayList<>();
@@ -843,9 +714,12 @@ public class GremlinCompiler {
             }
         }
 
-
-        GraphTraversal<Vertex, ?> traversal = 
-            compileToTraversal(query.matchExpressions.get(0));
+        GraphTraversal<Vertex, Vertex> traversal = start();
+        HashSet<String> capturedSet = new HashSet<>();
+        for (MatchExpression matchExpression : query.matchExpressions)
+        {
+            traversal = compileToTraversal(traversal, matchExpression, capturedSet);
+        }
 
         if (query.returnStatement.setQuantifier() != SetQuantifier.ALL)
         {
@@ -862,11 +736,9 @@ public class GremlinCompiler {
             else if (query.returnStatement.returnItems().get(0) instanceof CountAsterisk)
             {
                 CountAsterisk countAsterisk = (CountAsterisk) query.returnStatement.returnItems().get(0);
-                traversal = traversal.count();
                 String name = countAsterisk.name().orElseGet(() -> "COUNT(*)");
                 GraphTraversal<Vertex, Map<String, Object>> resultTraversal =
-                    traversal.project(name).by();
-
+                    traversal.count().project(name).by();
                 return resultTraversal;
             }
         }

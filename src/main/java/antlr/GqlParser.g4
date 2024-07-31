@@ -160,6 +160,7 @@ expr
     | expr compOp expr                      # ValueComparison
     | expr booleanComparator TRUTH_VALUE    # BooleanComparison
     | expr comparator expr                  # ExpressionComparison
+    | EXISTS pathPatternExpression          # GraphExistsExpression
     ;
 
 isLabelExpr

@@ -5,7 +5,7 @@
 -- the optional matches has no impact on the result cardinality
 -- technically a sound optimiser could drop the optional matches
 
-MATCH (:Tag)<-[:HAS_TAG]-(message:Comment | Post)-[:HAS_CREATOR]-(creator:Person),
-OPTIONAL MATCH (message)<-[:LIKES]-(liker:Person),
-OPTIONAL MATCH (message)<-[:REPLY_OF]-(comment:Comment)
+MATCH (:Tag)<-[:hasTag]-(message:Comment | Post)-[:hasCreator]-(creator:Person)
+OPTIONAL MATCH (message)<-[:likes]-(liker:Person)
+OPTIONAL MATCH (message)<-[:replyOf]-(comment:Comment)
 RETURN COUNT(*)

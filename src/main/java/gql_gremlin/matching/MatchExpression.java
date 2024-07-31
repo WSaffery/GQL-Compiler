@@ -7,8 +7,8 @@ import ast.expressions.Expression;
 import ast.patterns.QualifiedPathPattern;
 
 public class MatchExpression {
-    Optional<String> graphName;
-    boolean isMandatory;
+    public Optional<String> graphName;
+    public boolean isMandatory;
     public Optional<Expression> whereClause;
     public List<QualifiedPathPattern> pathPatterns;
 
