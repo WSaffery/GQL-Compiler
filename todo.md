@@ -101,3 +101,7 @@ However, because we have access to the schema and query we can determine whether
 - q6: safe, duplicated knows edges made up of different pairs
 - q7: safe, no repeated edge type
 
+# Development
+
+- Finish building WHERE EXISTS into AST
+- Compile WHERE EXISTS
