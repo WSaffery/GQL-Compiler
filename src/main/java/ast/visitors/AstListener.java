@@ -65,11 +65,6 @@ public class AstListener extends GqlParserBaseListener {
     {
         boolean isMandatory = ctx.OPTIONAL() == null;
         
-        WhereClauseContext whereClause = ctx.whereClause();
-        Optional<Expression> whereClauseExpression = whereClause != null ? 
-            Optional.of(whereClauseVisitor.visitWhereClause(whereClause)) : 
-            Optional.empty();
-        
         ArrayList<QualifiedPathPattern> pathPatterns = new ArrayList<>();
 
         for (PathPatternContext pathPatternCtx : ctx.pathPatternList().pathPattern()) {
@@ -84,6 +79,11 @@ public class AstListener extends GqlParserBaseListener {
             pathPatterns.add(new QualifiedPathPattern(var, mode, path));
             var.ifPresent((name) -> result.variables.addVariable(name, VariableType.PATH));
         }
+
+        WhereClauseContext whereClause = ctx.whereClause();
+        Optional<Expression> whereClauseExpression = whereClause != null ? 
+            Optional.of(whereClauseVisitor.visitWhereClause(whereClause)) : 
+            Optional.empty();
 
         Optional<String> graphName = Optional.empty();
         if (ctx.getParent() instanceof FocusedMatchClauseContext) {
