@@ -16,7 +16,7 @@ src/antlr/GQLVisitor.java
 /src/antlr/gql/
 /target/
 
-
+src/main/java/antlr/*.java
 src/antlr/*.java
 src/antlr/*.interp
 src/antlr/*.tokens
