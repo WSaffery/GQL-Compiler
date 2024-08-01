@@ -144,7 +144,6 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
             String name = variableName.get();
             if (!variables.variableExists(name) && existential)
             {
-                System.err.println("variables:" + variables.getVariables());
                 throw new SemanticErrorException("Non-existent variable reference in existential pattern");
             }
             else 
