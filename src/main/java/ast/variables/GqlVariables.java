@@ -13,6 +13,11 @@ public class GqlVariables {
         variableMap = new HashMap<>();
     }
 
+    public boolean variableExists(String name)
+    {
+        return variableMap.containsKey(name);
+    }
+
     public void addVariable(String name, VariableType type)
     {
         if (variableMap.containsKey(name) && 

@@ -36,6 +36,7 @@ import ast.patterns.label.LabelExpression;
 import ast.patterns.label.LabelPattern;
 import ast.patterns.label.WildcardLabel;
 import ast.variables.GqlVariables;
+import ast.variables.Variable;
 import ast.variables.VariableType;
 import enums.Direction;
 import exceptions.SemanticErrorException;
@@ -49,12 +50,27 @@ import java.util.List;
 import java.util.Optional;
 
 public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {    
-    ExpressionVisitor expressionVisitor = new ExpressionVisitor();
     GqlVariables variables;
+    ExpressionVisitor expressionVisitor;
+    boolean existential; 
+    // If existential is True this visitor will throw if a pattern variable does not 
+    // already exist rather than add it to the variable set.
+
+    public PathPatternExpressionVisitor(GqlVariables variables, ExpressionVisitor expressionVisitor, boolean existential)
+    {
+        this.variables = variables;
+        this.expressionVisitor = expressionVisitor;
+        this.existential = existential;
+    }
+
+    public PathPatternExpressionVisitor(GqlVariables variables, boolean existential)
+    {
+        this(variables, new ExpressionVisitor(variables), existential);
+    }
 
     public PathPatternExpressionVisitor(GqlVariables variables)
     {
-        this.variables = variables;
+        this(variables, false);
     }
 
     @Override
@@ -123,7 +139,20 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
     @Override
     public NodePattern visitNodePattern(NodePatternContext ctx) {
         Optional<String> variableName = visitElementVariable(ctx.elementPatternFiller().elementVariable());
-        variableName.ifPresent(name -> variables.addVariable(name, VariableType.NODE));
+        if (variableName.isPresent())
+        {
+            String name = variableName.get();
+            if (!variables.variableExists(name) && existential)
+            {
+                System.err.println("variables:" + variables.getVariables());
+                throw new SemanticErrorException("Non-existent variable reference in existential pattern");
+            }
+            else 
+            {
+                // checks type is correct if variable exists
+                variables.addVariable(name, VariableType.NODE);
+            }
+        }
 
         LabelPattern labels = visitIsLabelExpr(ctx.elementPatternFiller().isLabelExpr());
         HashMap<String, Value> properties = getProperties(ctx.elementPatternFiller());
@@ -176,7 +205,20 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
 
     private EdgePattern getEdgePattern(ElementPatternFillerContext ctx, Optional<Direction> direction) {
         Optional<String> variableName = visitElementVariable(ctx.elementVariable());
-        variableName.ifPresent(name -> variables.addVariable(name, VariableType.EDGE));
+        if (variableName.isPresent())
+        {
+            String name = variableName.get();
+            if (!variables.variableExists(name) && existential)
+            {
+                throw new SemanticErrorException("Non-existent variable reference in existential pattern");
+            }
+            else 
+            {
+                // checks type is correct if variable exists
+                variables.addVariable(name, VariableType.EDGE);
+            }
+        }
+
         LabelPattern labels = visitIsLabelExpr(ctx.isLabelExpr());
 
         HashMap<String, Value> properties = getProperties(ctx);

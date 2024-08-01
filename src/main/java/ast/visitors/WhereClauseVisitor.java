@@ -22,10 +22,17 @@ package ast.visitors;
 import antlr.GqlParser.WhereClauseContext;
 import antlr.GqlParserBaseVisitor;
 import ast.expressions.Expression;
+import ast.variables.GqlVariables;
 
 
 public class WhereClauseVisitor extends GqlParserBaseVisitor<Expression> {
-    ExpressionVisitor expressionVisitor = new ExpressionVisitor();
+    GqlVariables variables;
+    ExpressionVisitor expressionVisitor;
+
+    public WhereClauseVisitor(GqlVariables variables) {
+        this.variables = variables;
+        this.expressionVisitor = new ExpressionVisitor(variables);
+    }
 
     @Override
     public Expression visitWhereClause(WhereClauseContext ctx) {

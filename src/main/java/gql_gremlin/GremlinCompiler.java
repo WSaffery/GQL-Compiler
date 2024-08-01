@@ -576,7 +576,6 @@ public class GremlinCompiler {
             }
             else if (comp.left() instanceof PropertyReference && comp.right() instanceof PropertyReference)
             {
-                // TODO! test this
                 PropertyReference aProp = (PropertyReference) comp.left();
                 PropertyReference bProp = (PropertyReference) comp.right();
                 
@@ -614,7 +613,6 @@ public class GremlinCompiler {
             {
                 throw new SyntaxErrorException("Bad comparison expression");
             }
-
         }
         else 
         {

@@ -31,6 +31,7 @@ import ast.returns.CountAsterisk;
 import ast.returns.ReturnExpression;
 import ast.returns.ReturnItem;
 import ast.returns.ReturnStatement;
+import ast.variables.GqlVariables;
 import enums.SetQuantifier;
 import exceptions.SyntaxErrorException;
 import antlr.GqlParserBaseVisitor;
@@ -39,7 +40,11 @@ import java.util.ArrayList;
 
 
 public class ReturnStatementVisitor extends GqlParserBaseVisitor {
-    ExpressionVisitor expressionVisitor = new ExpressionVisitor();
+    ExpressionVisitor expressionVisitor;
+
+    public ReturnStatementVisitor(GqlVariables variables) {
+        expressionVisitor = new ExpressionVisitor(variables);
+    }
 
     @Override
     public ReturnStatement visitReturnStatement(ReturnStatementContext ctx) {

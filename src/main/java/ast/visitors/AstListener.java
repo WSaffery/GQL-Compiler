@@ -30,10 +30,10 @@ import gql_gremlin.matching.MatchExpression;
 // builds up the program result using local state, visitors below visit query all return Null.
 public class AstListener extends GqlParserBaseListener {
     public List<String> semanticErrors = new ArrayList<>();
-    private WhereClauseVisitor whereClauseVisitor = new WhereClauseVisitor();
-    private ReturnStatementVisitor returnStatementVisitor = new ReturnStatementVisitor();
     private GqlProgram result = new GqlProgram();
     private PathPatternExpressionVisitor pathPatternExpressionVisitor = new PathPatternExpressionVisitor(result.variables);
+    private WhereClauseVisitor whereClauseVisitor = new WhereClauseVisitor(result.variables);
+    private ReturnStatementVisitor returnStatementVisitor = new ReturnStatementVisitor(result.variables);
     private GqlQuery currentQuery = null;
 
     public GqlProgram GetResult()

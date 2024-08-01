@@ -39,13 +39,24 @@ import ast.expressions.atomic.TruthValue;
 import ast.expressions.composite.BooleanConjunctionExpression;
 import ast.expressions.composite.ComparisonExpression;
 import ast.expressions.composite.NegatedExpression;
+import ast.expressions.graph.GraphExistsExpression;
 import ast.expressions.references.NameExpression;
 import ast.expressions.references.PropertyReference;
+import ast.patterns.PathPattern;
+import ast.variables.GqlVariables;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 
 public class ExpressionVisitor extends GqlParserBaseVisitor<Expression> {
+    GqlVariables variables;
+    PathPatternExpressionVisitor pathPatternExpressionVisitor;
+
+    public ExpressionVisitor(GqlVariables variables) {
+        this.variables = variables;
+        pathPatternExpressionVisitor = new PathPatternExpressionVisitor(variables, this, true);
+    }
+
     public Expression visitExpr(ExprContext ctx) {
         if (ctx instanceof ValueExpressionContext) return visitValue(((ValueExpressionContext) ctx).value());
         if (ctx instanceof NameExpressionContext) return visitNameExpression((NameExpressionContext) ctx);
@@ -54,13 +65,14 @@ public class ExpressionVisitor extends GqlParserBaseVisitor<Expression> {
         if (ctx instanceof NegatedExpressionContext) return visitNegatedExpression((NegatedExpressionContext) ctx);
         if (ctx instanceof BooleanComparisonContext) return visitBooleanComparison((BooleanComparisonContext) ctx);
         if (ctx instanceof ValueComparisonContext) return visitValueComparison((ValueComparisonContext) ctx);
-        if (ctx instanceof GraphExistsExpressionContext) return visitGraphExists((GraphExistsExpressionContext) ctx);
+        if (ctx instanceof GraphExistsExpressionContext) return visitGraphExistsExpression((GraphExistsExpressionContext) ctx);
         throw new SemanticErrorException("Invalid expression given at line " + ctx.getStart().getLine() + " column " + ctx.getStart().getCharPositionInLine() + ".");
     }
 
-    private Expression visitGraphExists(GraphExistsExpressionContext ctx) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitGraphExists'");
+    public Expression visitGraphExistsExpression(GraphExistsExpressionContext ctx) {
+        assert ctx.pathPatternExpression() != null : "Exists expression without path pattern";
+        PathPattern existentialPattern = pathPatternExpressionVisitor.visitPathPatternExpression(ctx.pathPatternExpression());
+        return new GraphExistsExpression(existentialPattern);
     }
 
     public Value visitPropertyExpr(ExprContext ctx) {
