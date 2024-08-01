@@ -10,7 +10,10 @@ import ast.atoms.Quantifier;
 import ast.expressions.Expression;
 import ast.expressions.Value;
 import ast.expressions.atomic.TruthValue;
+import ast.expressions.composite.BooleanConjunctionExpression;
 import ast.expressions.composite.ComparisonExpression;
+import ast.expressions.composite.NegatedExpression;
+import ast.expressions.graph.GraphExistsExpression;
 import ast.expressions.references.NameExpression;
 import ast.expressions.references.PropertyReference;
 import ast.patterns.EdgePattern;
@@ -30,6 +33,7 @@ import ast.returns.Asterisk;
 import ast.returns.CountAsterisk;
 import ast.returns.ReturnExpression;
 import ast.returns.ReturnItem;
+import enums.BooleanComparator;
 import enums.EvaluationMode;
 import enums.SetQuantifier;
 import enums.ValueComparator;
@@ -37,6 +41,8 @@ import exceptions.SemanticErrorException;
 import exceptions.SyntaxErrorException;
 import gql_gremlin.matching.MatchExpression;
 import gql_gremlin.matching.MatchPatternFactory;
+import groovyjarjarantlr4.v4.misc.Graph;
+
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 import static gql_gremlin.helpers.GremlinHelpers.*;
 import static gql_gremlin.helpers.JavaHelpers.*;
@@ -612,6 +618,38 @@ public class GremlinCompiler {
             else 
             {
                 throw new SyntaxErrorException("Bad comparison expression");
+            }
+        }
+        else if (expression instanceof GraphExistsExpression)
+        {
+            GraphExistsExpression graphExistsExpression = (GraphExistsExpression) expression;
+            QualifiedPathPattern pathPattern = graphExistsExpression.qualifiedPathPattern();
+            HashSet<String> variables = CompilerHelpers.pathPatternVariables(pathPattern);
+            // TODO! check: could use where step here?
+            return and(compileRestrictedPattern(start(), pathPattern, variables));
+        }
+        else if (expression instanceof NegatedExpression)
+        {
+            NegatedExpression negatedExpression = (NegatedExpression) expression;
+            return not(filterByWhereClause(negatedExpression.subExpression()));
+        }
+        else if (expression instanceof BooleanConjunctionExpression)
+        {
+            BooleanConjunctionExpression conjunctionExpression = (BooleanConjunctionExpression) expression;
+            switch (conjunctionExpression.comparator())
+            {
+                case AND:
+                    return and(
+                        filterByWhereClause(conjunctionExpression.left()), 
+                        filterByWhereClause(conjunctionExpression.right())
+                    );
+                case OR:
+                    return or(
+                        filterByWhereClause(conjunctionExpression.left()), 
+                        filterByWhereClause(conjunctionExpression.right())
+                    );
+                default:
+                    throw new SyntaxErrorException("Only AND and OR are supported for boolean conjunction");
             }
         }
         else 

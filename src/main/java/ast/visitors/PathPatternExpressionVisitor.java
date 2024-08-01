@@ -36,7 +36,6 @@ import ast.patterns.label.LabelExpression;
 import ast.patterns.label.LabelPattern;
 import ast.patterns.label.WildcardLabel;
 import ast.variables.GqlVariables;
-import ast.variables.Variable;
 import ast.variables.VariableType;
 import enums.Direction;
 import exceptions.SemanticErrorException;
