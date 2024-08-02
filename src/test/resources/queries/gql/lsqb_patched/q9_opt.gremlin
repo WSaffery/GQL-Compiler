@@ -1,0 +1,11 @@
+g.V().hasLabel("Person").as("person1").
+as("#COMPILER_s866996395").bothE().hasLabel("knows").otherV().hasLabel("Person").as("person2").
+bothE().hasLabel("knows").otherV().hasLabel("Person").as("person3").
+toE(Direction.OUT).hasLabel("hasInterest").otherV().hasLabel("Tag").as("tag").
+and(
+    not(
+        select("person1").as("#COMPILER_s2020463940").bothE().hasLabel("knows").otherV().where(P.eq("person3"))
+    ),
+    select("person1").where(P.neq("person3")))
+)
+.count().project("COUNT(*)").by()

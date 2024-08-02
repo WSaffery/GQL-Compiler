@@ -448,6 +448,10 @@ public class GremlinCompiler {
         List<PathComponent> components = pathPattern.pathSequence();
         HashSet<String> variables = CompilerHelpers.pathPatternVariables(components);
 
+        // !TODO: fix path compiler labels
+        //  - are they even used?
+        //  - using the hash code may be unsound, what if multiple paths were identical
+        //      - depends on how records generate hash codes when they have object components
         String pathHashCode = Integer.toString(qualifiedPathPattern.hashCode());
         String startLabel = "#COMPILER_s%s".formatted(pathHashCode);
         String endLabel = "#COMPILER_e%s".formatted(pathHashCode);

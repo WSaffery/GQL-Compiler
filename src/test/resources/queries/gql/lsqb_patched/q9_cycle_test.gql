@@ -1,0 +1,5 @@
+MATCH 
+(person1:Person)-[:knows]-(person2:Person)-[:knows]-(person3:Person)-[:hasInterest]->(tag:Tag),
+(person3)-[:knows]-(person1)
+WHERE person1 <> person3
+RETURN COUNT(*)
