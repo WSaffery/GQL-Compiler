@@ -121,8 +121,8 @@ public class JanusGremlinGraph implements GraphLoader {
             }
             
             // labels property broken?
-            if (!(node.labels == null)) {
-                // pipe.property("labels", node.labels.clone());
+            if (node.labels != null) {
+                pipe.property("label", node.labels.get(0));
             }
 
 

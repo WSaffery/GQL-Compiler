@@ -21,10 +21,10 @@ Commands for different tasks.
 ### With Janus graph setup
 
 - run to test loading and deleting test graph g
-	`mvn exec:java -Dexec.mainClass="RemoteDbApp" -e`
+	`mvn exec:java -Dexec.mainClass="TestRemoteDbApp" -e`
 
-- run with basic graphs
-	`mvn exec:java -Dexec.mainClass="RemoteDbApp" -e -Dexec.args="-graphs c3 c4 g g1 g2 g3 g4 g5 g6"`
+- test load and drop with all basic graphs
+	`mvn exec:java -Dexec.mainClass="TestRemoteDbApp" -e -Dexec.args="-graphs c3 c4 g g1 g2 g3 g4 g5 g6"`
 	
-- run with lsqb 0.1 sf
-	`mvn exec:java -Dexec.mainClass="RemoteDbApp" -e -Dexec.args="-graphs lsqb_0.1"`
+- load lsqb 0.1 sf
+	`mvn exec:java -Dexec.mainClass="RemoteDbApp" -e -Dexec.args="-mode load -graph lsqb01"`
