@@ -1,0 +1,2 @@
+Derived from [GraphScope](https://github.com/alibaba/GraphScope).
+See this the interactive engine benchmark queries at [this](https://github.com/alibaba/GraphScope/tree/e69a05a5bf7de4bc19632a8b8d02237d720ce464/interactive_engine/benchmark/queries/gremlin_queries/lsqb) commit.

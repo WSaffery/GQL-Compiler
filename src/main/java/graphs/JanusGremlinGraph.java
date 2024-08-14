@@ -120,10 +120,11 @@ public class JanusGremlinGraph implements GraphLoader {
                     pipe.addV();
             }
             
-            // labels property broken?
-            if (node.labels != null) {
-                pipe.property("label", node.labels.get(0));
-            }
+            // should in theory speed up janus if we 
+            // add a index on the "label" property
+            // if (node.labels != null) {
+            //     pipe.property("label", node.labels.get(0));
+            // }
 
 
             if (!(node.properties == null)) {

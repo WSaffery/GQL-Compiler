@@ -1,8 +1,14 @@
 package cli.display;
 
+import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.tinkerpop.gremlin.process.traversal.util.Metrics;
+import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalMetrics;
 
 import ast.GqlProgram;
 
@@ -17,16 +23,19 @@ public class DisplayHelpers {
         }
     }
 
-    public static void printTable(List<Map<String,Object>> maps)
+    public static void printTable(List<Map<String,Object>> maps, PrintStream printStream)
     {   
         Map<String, Integer> sizes = new HashMap<>();
         for (Map<String, Object> map : maps) 
         {
             for (Map.Entry<String, Object> e : map.entrySet())
             {
-                sizes.putIfAbsent(e.getKey(), 0);
+                String key = e.getKey();
                 Integer len = e.getValue().toString().length();
-                sizes.compute(e.getKey(), (s, v) -> Integer.max(v, len));
+
+                // default length is key length
+                sizes.putIfAbsent(key, key.length()); 
+                sizes.compute(key, (s, v) -> Integer.max(v, len));
             }
         }
 
@@ -37,9 +46,9 @@ public class DisplayHelpers {
             String format = " %%-%ds|".formatted(e.getValue());
             // get "%-[width]s"
 
-            System.out.printf(format, e.getKey());
+            printStream.printf(format, e.getKey());
         }
-        System.out.println();
+        printStream.println();
 
         for (Map<String, Object> map : maps)
         {
@@ -49,15 +58,35 @@ public class DisplayHelpers {
                 String format = " %%-%ds|".formatted(size);
                 if (map.containsKey(key))
                 {
-                    System.out.printf(format, map.get(key));
+                    printStream.printf(format, map.get(key));
                 }
                 else 
                 {
-                    System.out.printf(format, "NO MATCH");
+                    printStream.printf(format, "NO MATCH");
                 }
             }
-            System.out.println();
+            printStream.println();
         }
+    }
 
+    public static void printMetrics(TraversalMetrics metrics, PrintStream printStream)
+    {
+        List<Map<String,Object>> table = new ArrayList<>();
+        for (Metrics metric : metrics.getMetrics())
+        {
+            String name = metric.getName();
+            Long count = metric.getCount(TraversalMetrics.ELEMENT_COUNT_ID);
+            Long traversers = metric.getCount(TraversalMetrics.TRAVERSER_COUNT_ID);
+            Object durationPercAnnotation = metric.getAnnotation(TraversalMetrics.PERCENT_DURATION_KEY);
+            long duration = metric.getDuration(TimeUnit.MILLISECONDS);
+            table.add(Map.of(
+                "Name", name,
+                "Count", count, 
+                "Traversers", traversers, 
+                "Duration (ms)", duration,
+                "Duration (%)", durationPercAnnotation
+            ));
+        }
+        printTable(table, printStream);
     }
 }

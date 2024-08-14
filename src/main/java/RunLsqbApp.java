@@ -29,42 +29,37 @@ import graphs.ResourcePaths;
 // for some reason can't get remote-graph.properties files working
 // have to instantiate connection directly using remote-objects.yaml files
 
-public class RunRemoteDbApp {
-    // usage: -query query -conf conf -rts rts
-    // where query is some query path relative to /src/test/resources/queries/
+public class RunLsqbApp {
+    // usage: -querydir querydir -conf conf -rts rts
+    // where querydir is some query directory path relative to /src/test/resources/queries/
     // where conf is cluster yaml config files, ala remote-objects.yaml
     // and rts is the remote traversal source name, "g" by default
 
-    public static final String defaultQuery = "gql/noop.gql";
+    public static final String defaultQueryDirectory = "gql/lsqb_optimized";
     public static final String defaultConfigFile = "conf/remote-objects.yaml";
     public static final String defaultRTSName = "g";
     public static final String defaultLanguage = "gql";
     public static final String defaultOutputFile = ""; // stdout
 
     public static final CliArgParser argParser = new CliArgParser(Map.of(
-        "query", Arg.single(defaultQuery),
+        "querydir", Arg.single(defaultQueryDirectory),
         "conf", Arg.single(defaultConfigFile),
         "rts", Arg.single(defaultRTSName),
-        "output", Arg.single(defaultOutputFile),
-        "language", Arg.single(defaultLanguage),
-        "profile", Arg.flag()
+        "output", Arg.single(defaultOutputFile)
     ));
 
     public static void main(String[] args) throws Exception {
         argParser.parseArgs(args);
 
-        String queryArg = argParser.getArgSingle("query");
+        String queryDir = argParser.getArgSingle("querydir");
         String conf = argParser.getArgSingle("conf");
         String rts =  argParser.getArgSingle("rts"); // default = "g"
-        boolean profile = argParser.checkFlagged("profile");
         PrintStream printStream = getPrintStream(argParser.getArgSingle("output"));
-
-        String queryPath = ResourcePaths.getQueryFolder() + queryArg;
-        String queryLanguage = argParser.getArgSingle("language");
+        String queryDirPath = ResourcePaths.getQueryFolder() + queryDir;
 
         System.out.println("conf: " + conf);
-        System.out.println("query: " + queryArg);
-        System.out.println("queryPath: " + queryPath);
+        System.out.println("queryDir: " + queryDir);
+        System.out.println("queryDirPath: " + queryDirPath);
 
         DriverRemoteConnection connection = DriverRemoteConnection.using(
             Cluster.open(conf), rts
@@ -73,56 +68,36 @@ public class RunRemoteDbApp {
         GraphTraversalSource gts = traversal().withRemote(connection);
         ;
 
-        if (queryLanguage.equals("gql"))
+        for (int i = 1; i < 9; i++)
         {
+            String queryPath = queryDirPath + "//q" + i + ".gql";
+            if (!new File(queryPath).exists())
+            {
+                System.out.println("Skipping query " + i + " file doesn't exist");
+                continue;
+            }
+            
+            final long startTime = System.currentTimeMillis();
             GqlProgram program = GqlProgram.buildProgram(queryPath);
             GremlinCompiler compiler = new GremlinCompiler();
             GraphTraversal<Vertex, Map<String,Object>> traversal = compiler.compileToTraversal(program);
             traversal = appendTraversal(gts, traversal.asAdmin().getBytecode());
-            if (profile)
-            {
-                List<TraversalMetrics> metrics = traversal.profile().toList();
-                assert metrics.size() == 1 : "multiple metrics returned by profile";
-                // printStream.println(metrics.get(0));
-                printMetrics(metrics.get(0), printStream);
-            }
-            else {
-                List<Map<String,Object>> res = traversal.toList();
-                printTable(res, printStream);
-            }
-        }
-        else if (queryLanguage.equals("gremlin"))
-        {
-            // GroovyTranslator translator = GroovyTranslator.of("g");
-            // translator.
-            // traversal = gts.
-            GremlinGroovyScriptEngine gremlinGroovyScriptEngine = new GremlinGroovyScriptEngine();
-            SimpleBindings bindings = new SimpleBindings();
-            bindings.put("g", gts);
-            FileReader reader = new FileReader(new File(queryPath));
-            
-            GraphTraversal<?, ?> traversal = (GraphTraversal<?, ?>) gremlinGroovyScriptEngine.eval(reader, bindings);
-            // CompiledScript script = gremlinGroovyScriptEngine.compile();
-            // script.
-            if (profile)
-            {
-                List<TraversalMetrics> metrics = traversal.profile().toList();
-                assert metrics.size() == 1 : "multiple metrics returned by profile";
-                // printStream.println(metrics.get(0));
-                printMetrics(metrics.get(0), printStream);
-            }
-            else 
-            {
-                List<?> res = traversal.toList();
-                for (Object obj : res) 
-                {
-                    printStream.println(obj);
-                }
-            }
-        }
-        else 
-        {
-            throw new RuntimeException("Bad query language specified");
+            List<Map<String,Object>> res = traversal.toList();
+            final long endTime = System.currentTimeMillis();
+
+            assert res.size() == 1: "Too many result rows from query";
+            assert res.get(0).size() == 1: "Too many result rows from query";
+            Object resVal = res.get(0).values().toArray()[0];
+            // assert resVal instanceof long : "Bad result, not a count";
+            long count = (long) resVal;
+            long duration = endTime - startTime;
+            double durationSeconds = duration / 1000.0;
+
+            printTable(List.of(Map.of(
+                "Query", i,
+                "Count", count,
+                "Time (seconds)", durationSeconds
+            )), printStream);
         }
         
 

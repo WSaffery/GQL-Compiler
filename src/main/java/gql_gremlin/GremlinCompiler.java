@@ -161,7 +161,6 @@ class CompilerHelpers
 
 // essentially takes the place of GqlFileQueryEvaluator
 public class GremlinCompiler {
-
     // left deep nesting of and operation to get around inability to access an array of graph traversals
     public GraphTraversal<Object, Object> recurseAndOperands(List<LabelExpression> operands)
     {
