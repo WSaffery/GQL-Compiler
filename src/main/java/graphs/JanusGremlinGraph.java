@@ -52,13 +52,14 @@ public class JanusGremlinGraph implements GraphLoader {
         tr.begin();
         nodes.forEach(this::addNodeToCurrentGraphBuffered);
         flushNodeBuffer();
-        assert(tr.isOpen());
-        System.out.println(currentGraph.V().id().toList());
-        for (Object id : idMap.values())
-        {
-            System.out.println(id);
-            System.out.println(currentGraph.V(id).id().toList());
-        }
+        
+        // assert(tr.isOpen());
+        // System.out.println(currentGraph.V().id().toList());
+        // for (Object id : idMap.values())
+        // {
+        //     System.out.println(id);
+        //     System.out.println(currentGraph.V(id).id().toList());
+        // }
 
         edges.forEach(this::addEdgeToCurrentGraphBuffered);
         flushEdgeBuffer();
