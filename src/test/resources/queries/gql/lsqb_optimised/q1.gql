@@ -1,12 +1,8 @@
--- MATCH (:Country)<-[:isPartOf]-(:City)
---      <-[:isLocatedIn]-(:Person)<-[:hasMember]-(:Forum)
---      -[:containerOf]->(:Post)<-[:replyOf]-(:Comment)
---      -[:hasTag]->(:Tag)-[:hasType]->(:TagCla)
--- RETURN COUNT(*)
--- we can drop label checks of vertices everywhere
-
-MATCH (:Country)<-[:isPartOf]-()
-      <-[:isLocatedIn]-()<-[:hasMember]-()
-      -[:containerOf]->()<-[:replyOf]-()
-      -[:hasTag]->()-[:hasType]->()
+MATCH (:TagCla)<-[:hasType]- -- 16080
+      (:Tag)<-[:hasTag]- -- 252881
+      (:Comment)-[:replyOf]-> -- 107461
+      (:Post)<-[:containerOf]- -- 172438
+      (:Forum)-[:hasMember]-> -- 273866
+      (:Person)-[:isLocatedIn]-> -- 1700
+      (:City) -[:isPartOf]-> (:Country) -- 1343
 RETURN COUNT(*)

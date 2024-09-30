@@ -1,0 +1,4 @@
+-- smoke test
+FROM lsqb01
+MATCH (tagcla:TagCla)
+RETURN tagcla

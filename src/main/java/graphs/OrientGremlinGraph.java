@@ -19,16 +19,20 @@ import exceptions.InvalidEdgeFormatException;
 import json.gremlin.JsonEdge;
 import json.gremlin.JsonNode;
 
-public class JanusGremlinGraph implements GraphLoader {
+// TODO! fix this
+// the problem is that the vertex queries are returning "temporary" ids
+// i.e. #210:-34 instead of #210:34
+// these ids are changed at the end of the transaction.
+public class OrientGremlinGraph implements GraphLoader {
     public GraphTraversalSource currentGraph;
-    public Map<String, Object> idMap;
+    public Map<String, Vertex> vMap;
     private ArrayList<JsonNode> nodeBuffer;
     private ArrayList<JsonEdge> edgeBuffer;
     private int FLUSH_SIZE = 100;
 
-    public JanusGremlinGraph(GraphTraversalSource gts) {
+    public OrientGremlinGraph(GraphTraversalSource gts) {
         this.currentGraph = gts;
-        this.idMap = new HashMap<>();
+        this.vMap = new HashMap<>();
         nodeBuffer = new ArrayList<>();
         edgeBuffer = new ArrayList<>();
     }
@@ -38,7 +42,7 @@ public class JanusGremlinGraph implements GraphLoader {
     {
         nodes.forEach(this::addNodeToCurrentGraph);
         edges.forEach(this::addEdgeToCurrentGraph);
-        
+
         for (JsonEdge edge: edges)
         {
             this.checkIfEdgeIsConnected(edge);
@@ -47,23 +51,15 @@ public class JanusGremlinGraph implements GraphLoader {
 
     public void streamJsonGraph(Stream<JsonNode> nodes, Stream<JsonEdge> edges) throws InvalidEdgeFormatException
     {
-        Transaction tr = currentGraph.tx();
-        tr.open();
-        tr.begin();
+        GraphTraversalSource originalSource = currentGraph;
+        
         nodes.forEach(this::addNodeToCurrentGraphBuffered);
         flushNodeBuffer();
-        assert(tr.isOpen());
-        System.out.println(currentGraph.V().id().toList());
-        for (Object id : idMap.values())
-        {
-            System.out.println(id);
-            System.out.println(currentGraph.V(id).id().toList());
-        }
 
         edges.forEach(this::addEdgeToCurrentGraphBuffered);
-        flushEdgeBuffer();
-        tr.close();
 
+
+        currentGraph = originalSource;
         // disabled connectivity checks, can't reuse the same stream twice
         // need to use a stream supplier if I want to do this
         // nodeSupplier = () -> (...).getNodeStream();
@@ -158,15 +154,17 @@ public class JanusGremlinGraph implements GraphLoader {
 
         // add final steps to traversal (select all added vertices and grab their ids)
         // also get result with toList
-        List<Object> actualIds = pipe.select(Pop.all, "v").unfold().id().toList();
+        // TODO! pretty bad code
+        @SuppressWarnings({ "rawtypes", "unchecked", "null" })
+        List<Vertex> remoteVertices = (List) pipe.select(Pop.all, "v").unfold().toList();
 
-        assert(actualIds.size() == nodes.size());
+        assert(remoteVertices.size() == nodes.size());
         // map dropped custom ids
-        for (int i = 0; i < actualIds.size(); i++)
+        for (int i = 0; i < remoteVertices.size(); i++)
         {
             String jsonId = nodes.get(i).identity;
-            Object actualId = actualIds.get(i);
-            idMap.put(jsonId, actualId);
+            Vertex remoteVertex = remoteVertices.get(i);
+            vMap.put(jsonId, remoteVertex);
         }
     }
 
@@ -192,9 +190,9 @@ public class JanusGremlinGraph implements GraphLoader {
             });
         }
 
-        Object actualId = pipe.id().next();
+        Vertex remoteVertex = pipe.next();
         
-        idMap.put(jsonId, actualId);
+        vMap.put(jsonId, remoteVertex);
     }
 
     private boolean nodeDoesNotExist(Object id) {
@@ -202,7 +200,7 @@ public class JanusGremlinGraph implements GraphLoader {
     }
 
     private boolean nodeDoesNotExist(String id) {
-        return nodeDoesNotExist(idMap.get(id));
+        return nodeDoesNotExist(vMap.get(id).id());
     }
 
     private void checkIfEdgeIsConnected(JsonEdge edge) throws InvalidEdgeFormatException {
@@ -237,8 +235,11 @@ public class JanusGremlinGraph implements GraphLoader {
             }
             
 
-            Object sourceNodeId = idMap.get(edge.start);
-            Object targetNodeId = idMap.get(edge.end);
+            // the vertices are "DetachedVertices" without access to their actual id 
+            // "get" does not reattach them, they're equivalent to just holding the 
+            // temporary rid
+            Object sourceNodeId = vMap.get(edge.start).id();
+            Object targetNodeId = vMap.get(edge.end).id();
 
             pipe.from(V(sourceNodeId)).to(V(targetNodeId));
 
@@ -273,8 +274,8 @@ public class JanusGremlinGraph implements GraphLoader {
             this.currentGraph.addE(edge.labels.get(0)) :
             this.currentGraph.addE("nolabel");
 
-        Object sourceNodeId = idMap.get(edge.start);
-        Object targetNodeId = idMap.get(edge.end);
+        Object sourceNodeId = vMap.get(edge.start).id();
+        Object targetNodeId = vMap.get(edge.end).id();
 
         pipe.from(V(sourceNodeId)).to(V(targetNodeId));
 

@@ -1,0 +1,1 @@
+g.V().has("plabel","Person").as("a").out().as("b").out().where(P.eq("a")).count().project("COUNT(*)").by()

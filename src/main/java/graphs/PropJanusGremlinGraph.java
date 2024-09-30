@@ -19,14 +19,14 @@ import exceptions.InvalidEdgeFormatException;
 import json.gremlin.JsonEdge;
 import json.gremlin.JsonNode;
 
-public class JanusGremlinGraph implements GraphLoader {
+public class PropJanusGremlinGraph implements GraphLoader {
     public GraphTraversalSource currentGraph;
     public Map<String, Object> idMap;
     private ArrayList<JsonNode> nodeBuffer;
     private ArrayList<JsonEdge> edgeBuffer;
     private int FLUSH_SIZE = 100;
 
-    public JanusGremlinGraph(GraphTraversalSource gts) {
+    public PropJanusGremlinGraph(GraphTraversalSource gts) {
         this.currentGraph = gts;
         this.idMap = new HashMap<>();
         nodeBuffer = new ArrayList<>();
@@ -38,7 +38,7 @@ public class JanusGremlinGraph implements GraphLoader {
     {
         nodes.forEach(this::addNodeToCurrentGraph);
         edges.forEach(this::addEdgeToCurrentGraph);
-        
+
         for (JsonEdge edge: edges)
         {
             this.checkIfEdgeIsConnected(edge);
@@ -47,22 +47,10 @@ public class JanusGremlinGraph implements GraphLoader {
 
     public void streamJsonGraph(Stream<JsonNode> nodes, Stream<JsonEdge> edges) throws InvalidEdgeFormatException
     {
-        Transaction tr = currentGraph.tx();
-        tr.open();
-        tr.begin();
         nodes.forEach(this::addNodeToCurrentGraphBuffered);
         flushNodeBuffer();
-        assert(tr.isOpen());
-        System.out.println(currentGraph.V().id().toList());
-        for (Object id : idMap.values())
-        {
-            System.out.println(id);
-            System.out.println(currentGraph.V(id).id().toList());
-        }
-
         edges.forEach(this::addEdgeToCurrentGraphBuffered);
         flushEdgeBuffer();
-        tr.close();
 
         // disabled connectivity checks, can't reuse the same stream twice
         // need to use a stream supplier if I want to do this
@@ -135,9 +123,9 @@ public class JanusGremlinGraph implements GraphLoader {
             
             // should in theory speed up janus if we 
             // add a index on the "label" property
-            // if (node.labels != null) {
-            //     pipe.property("label", node.labels.get(0));
-            // }
+            if (node.labels != null) {
+                pipe.property("plabel", node.labels.get(0));
+            }
 
 
             if (!(node.properties == null)) {
@@ -181,8 +169,8 @@ public class JanusGremlinGraph implements GraphLoader {
             this.currentGraph.addV(node.labels.get(0)) : 
             this.currentGraph.addV();
 
-        if (!(node.labels == null)) {
-            // pipe.property("labels", node.labels.clone());
+        if (node.labels != null) {
+            pipe.property("plabel", node.labels.get(0));
         }
 
         if (!(node.properties == null)) {
@@ -242,8 +230,8 @@ public class JanusGremlinGraph implements GraphLoader {
 
             pipe.from(V(sourceNodeId)).to(V(targetNodeId));
 
-            if (!(edge.labels == null)) {
-                // pipe.property("labels", edge.labels.clone());
+            if (edge.labels != null) {
+                pipe.property("plabel", edge.labels.get(0));
             }
 
             if (!(edge.properties == null)) {
@@ -278,8 +266,8 @@ public class JanusGremlinGraph implements GraphLoader {
 
         pipe.from(V(sourceNodeId)).to(V(targetNodeId));
 
-        if (!(edge.labels == null)) {
-            // pipe.property("labels", edge.labels.clone());
+        if (edge.labels != null) {
+            pipe.property("plabel", edge.labels.get(0));
         }
 
         if (!(edge.properties == null)) {

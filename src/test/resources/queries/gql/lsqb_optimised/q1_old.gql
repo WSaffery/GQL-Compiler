@@ -1,0 +1,8 @@
+MATCH (:Country)<-[:isPartOf]-(:City) -- 1343
+      <-[:isLocatedIn]-(:Person) -- 1700
+      <-[:hasMember]-(:Forum) -- 273866
+      -[:containerOf]->(:Post) -- 172438
+      <-[:replyOf]-(:Comment) -- 107461
+      -[:hasTag]->(:Tag) -- 252881
+      -[:hasType]->(:TagCla) -- 16080
+RETURN COUNT(*)

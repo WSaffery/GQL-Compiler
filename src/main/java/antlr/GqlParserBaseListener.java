@@ -498,6 +498,18 @@ public class GqlParserBaseListener implements GqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterCountNameExpression(GqlParser.CountNameExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCountNameExpression(GqlParser.CountNameExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterNegatedExpression(GqlParser.NegatedExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}

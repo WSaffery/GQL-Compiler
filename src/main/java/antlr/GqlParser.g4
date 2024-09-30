@@ -161,6 +161,7 @@ expr
     | expr booleanComparator TRUTH_VALUE    # BooleanComparison
     | expr comparator expr                  # ExpressionComparison
     | EXISTS pathPatternExpression          # GraphExistsExpression
+    | COUNT LEFT_PAREN name RIGHT_PAREN     # CountNameExpression
     ;
 
 isLabelExpr

@@ -424,6 +424,18 @@ public interface GqlParserListener extends ParseTreeListener {
 	 */
 	void exitGraphExistsExpression(GqlParser.GraphExistsExpressionContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code CountNameExpression}
+	 * labeled alternative in {@link GqlParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterCountNameExpression(GqlParser.CountNameExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code CountNameExpression}
+	 * labeled alternative in {@link GqlParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitCountNameExpression(GqlParser.CountNameExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code NegatedExpression}
 	 * labeled alternative in {@link GqlParser#expr}.
 	 * @param ctx the parse tree

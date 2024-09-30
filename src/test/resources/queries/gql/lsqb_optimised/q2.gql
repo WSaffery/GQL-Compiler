@@ -1,5 +1,6 @@
 MATCH
-    (person1:Person)-[:knows]-(person2:Person),
-    (person1)<-[:hasCreator]-(comment:Comment)
-    -[:replyOf]->(post:Post)-[:hasCreator]->(person2)
+    (person1:Person)<-[:hasCreator]-(comment:Comment) -- 215488
+    -[:replyOf]->(post:Post) -- 107461
+    -[:hasCreator]->(person2:Person), -- 172438
+    (person1)-[:knows]-(person2) -- 18135
 RETURN COUNT(*)

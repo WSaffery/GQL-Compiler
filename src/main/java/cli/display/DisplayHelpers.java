@@ -80,13 +80,25 @@ public class DisplayHelpers {
             Object durationPercAnnotation = metric.getAnnotation(TraversalMetrics.PERCENT_DURATION_KEY);
             long duration = metric.getDuration(TimeUnit.MILLISECONDS);
             table.add(Map.of(
-                "Name", name,
-                "Count", count, 
-                "Traversers", traversers, 
-                "Duration (ms)", duration,
-                "Duration (%)", durationPercAnnotation
+                "Name", denull(name),
+                "Count", denull(count), 
+                "Traversers", denull(traversers), 
+                "Duration (ms)", denull(duration),
+                "Duration (%)", denull(durationPercAnnotation)
             ));
         }
         printTable(table, printStream);
+    }
+
+    public static Object denull(Object object)
+    {
+        if (object == null)
+        {
+            return "Null";
+        }
+        else 
+        {
+            return object;
+        }
     }
 }

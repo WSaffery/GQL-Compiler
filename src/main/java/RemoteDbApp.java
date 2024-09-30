@@ -1,3 +1,4 @@
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,8 @@ import graphs.GremlinGraph;
 import graphs.GremlinGraphFactory;
 import graphs.GraphLoader;
 import graphs.JanusGremlinGraph;
+import graphs.OrientGremlinGraph;
+import graphs.PropJanusGremlinGraph;
 import graphs.ResourcePaths;
 
 // for some reason can't get remote-graph.properties files working
@@ -126,16 +129,22 @@ public class RemoteDbApp {
     static void loadGraph(GraphTraversalSource gts, String graphName, boolean customKeys) throws Exception
     {
         GremlinGraphFactory factory = new GremlinGraphFactory(ResourcePaths.getGraphFolder());
+        // ordinary
         GraphLoader graph = customKeys ? new GremlinGraph(gts) : new JanusGremlinGraph(gts);
+        // test orient
+        // GraphLoader graph = new OrientGremlinGraph(gts);
         factory.loadJsonToGraph(graph, graphName);
     }
 
     static void showGraph(GraphTraversalSource gts)
     {
-        List<Edge> edges = gts.E().toList();
-        edges.forEach(e -> System.out.println(e.toString()));
-        List<Vertex> vertexs = gts.V().toList();
-        vertexs.forEach(v -> System.out.println(v.toString()));
+        List<String> edges = gts.E().label().toList();
+        HashSet<String> edgeSet = new HashSet<>(edges);
+        edgeSet.forEach(e -> System.out.println(e.toString()));
+        // edges.forEach(e -> System.out.println(e.toString()));
+        
+        // List<Vertex> vertexs = gts.V().toList();
+        // vertexs.forEach(v -> System.out.println(v.toString()));
     }
 
     static void dropGraph(GraphTraversalSource gts)

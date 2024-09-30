@@ -25,6 +25,7 @@ import antlr.GqlParser.ReturnListContext;
 import antlr.GqlParser.ReturnStatementContext;
 import antlr.GqlParser.SetQuantifierContext;
 import ast.expressions.Expression;
+import ast.expressions.references.CountNameExpression;
 import ast.expressions.references.NameExpression;
 import ast.returns.Asterisk;
 import ast.returns.CountAsterisk;
@@ -109,6 +110,11 @@ public class ReturnStatementVisitor extends GqlParserBaseVisitor {
         {
             NameExpression namedExpression = (NameExpression) expr;
             return new ReturnExpression(namedExpression);
+        }
+        else if (expr instanceof CountNameExpression)
+        {
+            CountNameExpression namedCountExpression = (CountNameExpression) expr;
+            return new ReturnExpression(namedCountExpression, "COUNT(" + namedCountExpression.name() + ")");
         }
         else 
         {

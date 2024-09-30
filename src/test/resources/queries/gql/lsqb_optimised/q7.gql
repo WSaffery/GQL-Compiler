@@ -1,7 +1,9 @@
 -- MESSAGE = COMMENT UNION POST
 -- (:Message) -> (:Comment | Post)
-
-MATCH (:Tag)<-[:hasTag]-(message:Comment | Post)-[:hasCreator]-(creator:Person)
+-- note, in our first measurement set we had 
+-- matching both directions for hasCreator 
+-- changed to one way with little measured impact
+MATCH (:Tag)<-[:hasTag]-(message:Comment | Post)-[:hasCreator]->(creator:Person)
 OPTIONAL MATCH (message)<-[:likes]-(liker:Person)
 OPTIONAL MATCH (message)<-[:replyOf]-(comment:Comment)
 RETURN COUNT(*)

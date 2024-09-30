@@ -105,3 +105,8 @@ However, because we have access to the schema and query we can determine whether
 
 - Finish building WHERE EXISTS into AST
 - Compile WHERE EXISTS
+
+# TESTING
+
+- Fix query 6 and 9
+  - both take too long and time out

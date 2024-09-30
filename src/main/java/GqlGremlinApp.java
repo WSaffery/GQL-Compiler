@@ -81,7 +81,7 @@ public class GqlGremlinApp {
         GraphTraversal<Vertex, Map<String,Object>> traversal = compiler.compileToTraversal(program);
 
         TraversalExplanation expl = traversal.explain();
-
+        
         System.out.println("Final Traversal:");
         System.out.println(expl.prettyPrint());
 

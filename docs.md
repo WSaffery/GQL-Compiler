@@ -28,3 +28,19 @@ Commands for different tasks.
 	
 - load lsqb 0.1 sf
 	`mvn exec:java -Dexec.mainClass="RemoteDbApp" -e -Dexec.args="-mode load -graph lsqb01"`
+
+
+## Running LSQB
+
+After loading lsqb check it's in the database
+
+```
+mvn exec:java -Dexec.mainClass="RunRemoteDbApp" -e -Dexec.args="-conf conf/remote-objects.yaml -query gql/lsqb_patched/q0.gql"
+```
+
+Then to run the full benchmark
+
+
+```
+mvn exec:java -Dexec.mainClass="RunLsqbApp" -e -Dexec.args="-conf conf/remote-objects.yaml -results results/results.csv"
+```

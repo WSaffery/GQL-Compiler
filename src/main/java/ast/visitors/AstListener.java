@@ -26,8 +26,8 @@ import ast.variables.VariableType;
 import enums.EvaluationMode;
 import gql_gremlin.matching.MatchExpression;
 
-// Ast Visitor for single graph query
-// builds up the program result using local state, visitors below visit query all return Null.
+// Ast Listener for single graph query
+// builds up the program result using local state, accessible via GetResult.
 public class AstListener extends GqlParserBaseListener {
     public List<String> semanticErrors = new ArrayList<>();
     private GqlProgram result = new GqlProgram();

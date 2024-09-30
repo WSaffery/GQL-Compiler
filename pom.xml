@@ -66,9 +66,14 @@
             <version>1.0.0</version>
         </dependency>
         <dependency>
+        <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-core</artifactId>
+            <version>1.1.0-20240904-090132.7602494</version>
+        </dependency>
+        <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-gremlin</artifactId>
-            <version>3.2.29</version>
+            <version>3.2.32</version>
         </dependency>
         <dependency>
             <groupId>com.arcadedb</groupId>

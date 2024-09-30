@@ -40,6 +40,7 @@ import ast.expressions.composite.BooleanConjunctionExpression;
 import ast.expressions.composite.ComparisonExpression;
 import ast.expressions.composite.NegatedExpression;
 import ast.expressions.graph.GraphExistsExpression;
+import ast.expressions.references.CountNameExpression;
 import ast.expressions.references.NameExpression;
 import ast.expressions.references.PropertyReference;
 import ast.patterns.PathPattern;
@@ -66,7 +67,12 @@ public class ExpressionVisitor extends GqlParserBaseVisitor<Expression> {
         if (ctx instanceof BooleanComparisonContext) return visitBooleanComparison((BooleanComparisonContext) ctx);
         if (ctx instanceof ValueComparisonContext) return visitValueComparison((ValueComparisonContext) ctx);
         if (ctx instanceof GraphExistsExpressionContext) return visitGraphExistsExpression((GraphExistsExpressionContext) ctx);
+        if (ctx instanceof CountNameExpressionContext) return visitCountNameExpression((CountNameExpressionContext) ctx);
         throw new SemanticErrorException("Invalid expression given at line " + ctx.getStart().getLine() + " column " + ctx.getStart().getCharPositionInLine() + ".");
+    }
+
+    public Expression visitCountNameExpression(CountNameExpressionContext ctx) {
+        return new CountNameExpression(ctx.name().ID().getText());
     }
 
     public Expression visitGraphExistsExpression(GraphExistsExpressionContext ctx) {

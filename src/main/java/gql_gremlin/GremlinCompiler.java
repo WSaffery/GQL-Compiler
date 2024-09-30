@@ -14,6 +14,7 @@ import ast.expressions.composite.BooleanConjunctionExpression;
 import ast.expressions.composite.ComparisonExpression;
 import ast.expressions.composite.NegatedExpression;
 import ast.expressions.graph.GraphExistsExpression;
+import ast.expressions.references.CountNameExpression;
 import ast.expressions.references.NameExpression;
 import ast.expressions.references.PropertyReference;
 import ast.patterns.EdgePattern;
@@ -39,6 +40,7 @@ import enums.SetQuantifier;
 import enums.ValueComparator;
 import exceptions.SemanticErrorException;
 import exceptions.SyntaxErrorException;
+import exceptions.UnsupportedFeatureException;
 import gql_gremlin.matching.MatchExpression;
 import gql_gremlin.matching.MatchPatternFactory;
 import groovyjarjarantlr4.v4.misc.Graph;
@@ -226,7 +228,7 @@ public class GremlinCompiler {
             }
             else 
             {
-                throw new SemanticErrorException("Unsupported label expression");
+                throw new UnsupportedFeatureException("Unsupported label expression");
             }
         }
 
@@ -579,7 +581,7 @@ public class GremlinCompiler {
                 }
                 else 
                 {
-                    throw new SemanticErrorException("Can only check equality of identity references");
+                    throw new UnsupportedFeatureException("Can only check equality of identity references");
                 }
                 
             }
@@ -698,9 +700,7 @@ public class GremlinCompiler {
         ArrayList<String> fullReturnNames = new ArrayList<>();
         ArrayList<ReturnType> returnNameTypes = new ArrayList<>();
         ArrayList<String> returnNames = new ArrayList<>();
-        
-
- 
+         
         // reference name [element label] : {(reference key [property name], alias [value label]), ...}        
         HashMap<String, List<PropertyResult>> returnReferences = new HashMap<>();
         for (ReturnItem item : query.returnStatement.returnItems())
@@ -739,14 +739,18 @@ public class GremlinCompiler {
                         returnNameTypes.add(ReturnType.Value);
                     }
                 }
+                else if (expr instanceof CountNameExpression)
+                {
+                    throw new UnsupportedFeatureException("Count Name Expressions currently unsupported");
+                }
                 else
                 {
-                    System.out.println("Unsupported return item");
+                    throw new UnsupportedFeatureException("Unsupported return item");
                 }
             }
-            else if ((item instanceof CountAsterisk) && query.returnStatement.returnItems().size() == 1)
+            else if ((item instanceof CountAsterisk || item instanceof Asterisk) && query.returnStatement.returnItems().size() == 1)
             {
-                continue;
+                break;
             }
             else {
                 throw new SyntaxErrorException("Bad return syntax");

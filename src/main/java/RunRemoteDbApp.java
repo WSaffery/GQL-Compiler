@@ -11,6 +11,7 @@ import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalExplanation;
 import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalMetrics;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import  org.apache.tinkerpop.gremlin.groovy.jsr223.GremlinGroovyScriptEngine;
@@ -47,7 +48,8 @@ public class RunRemoteDbApp {
         "rts", Arg.single(defaultRTSName),
         "output", Arg.single(defaultOutputFile),
         "language", Arg.single(defaultLanguage),
-        "profile", Arg.flag()
+        "profile", Arg.flag(),
+        "explain", Arg.flag()
     ));
 
     public static void main(String[] args) throws Exception {
@@ -57,6 +59,7 @@ public class RunRemoteDbApp {
         String conf = argParser.getArgSingle("conf");
         String rts =  argParser.getArgSingle("rts"); // default = "g"
         boolean profile = argParser.checkFlagged("profile");
+        boolean explain = argParser.checkFlagged("explain");
         PrintStream printStream = getPrintStream(argParser.getArgSingle("output"));
 
         String queryPath = ResourcePaths.getQueryFolder() + queryArg;
@@ -65,6 +68,8 @@ public class RunRemoteDbApp {
         System.out.println("conf: " + conf);
         System.out.println("query: " + queryArg);
         System.out.println("queryPath: " + queryPath);
+
+        assert (!explain || !profile) : "Can't both profile and explain the query";
 
         DriverRemoteConnection connection = DriverRemoteConnection.using(
             Cluster.open(conf), rts
@@ -85,6 +90,11 @@ public class RunRemoteDbApp {
                 assert metrics.size() == 1 : "multiple metrics returned by profile";
                 // printStream.println(metrics.get(0));
                 printMetrics(metrics.get(0), printStream);
+            }
+            else if (explain)
+            {
+                TraversalExplanation explanation = traversal.explain();
+                System.out.println(explanation.prettyPrint());
             }
             else {
                 List<Map<String,Object>> res = traversal.toList();
@@ -108,8 +118,14 @@ public class RunRemoteDbApp {
             {
                 List<TraversalMetrics> metrics = traversal.profile().toList();
                 assert metrics.size() == 1 : "multiple metrics returned by profile";
+                // System.out.println(metrics);
                 // printStream.println(metrics.get(0));
                 printMetrics(metrics.get(0), printStream);
+            }
+            else if (explain)
+            {
+                TraversalExplanation explanation = traversal.explain();
+                System.out.println(explanation.prettyPrint());
             }
             else 
             {

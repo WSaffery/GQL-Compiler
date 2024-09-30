@@ -1,7 +1,12 @@
 FROM lsqb01
 MATCH
-    (person1:Person)-[:isLocatedIn]->(city1:City)-[:isPartOf]->(country:Country),
-    (person1)-[:knows]-(person2:Person)-[:isLocatedIn]->(city2:City)-[:isPartOf]->(country),
-    (person1)-[:knows]-(person3:Person)-[:isLocatedIn]->(city3:City)-[:isPartOf]->(country),
-    (person2)-[:knows]-(person3)
+    (person1:Person)-[:isLocatedIn]->(city1:City) -- 1700
+    -[:isPartOf]->(country:Country), -- 1343
+    (person1)-[:knows]-(person2:Person) -- 18135
+    -[:isLocatedIn]->(city2:City) -- 1700
+    -[:isPartOf]->(country), -- 1343
+    (person1)-[:knows]-(person3:Person) -- 18135
+    -[:isLocatedIn]->(city3:City) -- 1700
+    -[:isPartOf]->(country),  -- 1343
+    (person2)-[:knows]-(person3) -- 18135
 RETURN COUNT(*)
