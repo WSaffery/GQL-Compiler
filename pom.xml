@@ -70,11 +70,21 @@
             <artifactId>janusgraph-core</artifactId>
             <version>1.1.0-20240904-090132.7602494</version>
         </dependency>
+        <!-- <dependency> -->
+        <!-- <groupId>com.orientechnologies</groupId>
+        <artifactId>orientdb-core</artifactId>
+        <version>3.2.32</version>
+        </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-gremlin</artifactId>
             <version>3.2.32</version>
         </dependency>
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-graphdb</artifactId>
+            <version>3.2.32</version>
+        </dependency> -->
         <dependency>
             <groupId>com.arcadedb</groupId>
             <artifactId>arcadedb-engine</artifactId>

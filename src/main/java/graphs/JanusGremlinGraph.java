@@ -47,12 +47,12 @@ public class JanusGremlinGraph implements GraphLoader {
 
     public void streamJsonGraph(Stream<JsonNode> nodes, Stream<JsonEdge> edges) throws InvalidEdgeFormatException
     {
-        Transaction tr = currentGraph.tx();
-        tr.open();
-        tr.begin();
+        // Transaction tr = currentGraph.tx();
+        // tr.open();
+        // tr.begin();
         nodes.forEach(this::addNodeToCurrentGraphBuffered);
         flushNodeBuffer();
-        
+
         // assert(tr.isOpen());
         // System.out.println(currentGraph.V().id().toList());
         // for (Object id : idMap.values())
@@ -63,7 +63,7 @@ public class JanusGremlinGraph implements GraphLoader {
 
         edges.forEach(this::addEdgeToCurrentGraphBuffered);
         flushEdgeBuffer();
-        tr.close();
+        // tr.close();
 
         // disabled connectivity checks, can't reuse the same stream twice
         // need to use a stream supplier if I want to do this

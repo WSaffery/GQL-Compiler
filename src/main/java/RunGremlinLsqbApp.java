@@ -2,23 +2,25 @@ import java.io.PrintStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CompletionException;
 
+import javax.script.SimpleBindings;
+
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
+import org.apache.tinkerpop.gremlin.groovy.jsr223.GremlinGroovyScriptEngine;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
-import ast.GqlProgram;
 import cli.Arg;
 import cli.CliArgParser;
-import gql_gremlin.GremlinCompiler;
 
-import static gql_gremlin.helpers.GremlinHelpers.appendTraversal;
+
+
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 import graphs.ResourcePaths;
 import java.util.Collections;
@@ -30,21 +32,20 @@ import benchmark.Result;
 // for some reason can't get remote-graph.properties files working
 // have to instantiate connection directly using remote-objects.yaml files
 
-
-public class RunLsqbApp {
+public class RunGremlinLsqbApp {
     // usage: -querydir querydir -conf conf -rts rts
     // where querydir is some query directory path relative to /src/test/resources/queries/
     // where conf is cluster yaml config files, ala remote-objects.yaml
     // and rts is the remote traversal source name, "g" by default
 
-    public static final String defaultQueryDirectory = "gql/lsqb_optimised";
+    public static final String defaultQueryDirectory = "gremlin/lsqb";
     public static final String defaultConfigFile = "conf/remote-objects.yaml";
     public static final String defaultRTSName = "g";
     public static final String defaultOutputFile = ""; // stdout
     public static final String defaultSeed = "123";
     public static final String defaultRepetitions = "10";
     public static final String defaultVariant = "";
-    public static final String defaultResultsFile = "results/results.csv";
+    public static final String defaultResultsFile = "results/results_gremlin.csv";
 
 
     public static final CliArgParser argParser = new CliArgParser(Map.of(
@@ -90,8 +91,7 @@ public class RunLsqbApp {
         GraphTraversalSource gts = traversal().withRemote(connection);
         ;
 
-        String system = "GqlToGremlin";
-        
+        String system = "Gremlin";        
         
         double scaleFactor = 0.1;
 
@@ -115,8 +115,8 @@ public class RunLsqbApp {
                     continue;
                 }
 
-                String queryPath = queryDirPath + "//q" + i + ".gql";
-                printStream.println(queryPath);
+                String queryPath = queryDirPath + "//q" + i + ".gremlin";
+                System.out.println(queryPath);
                 if (!new File(queryPath).exists())
                 {
                     printStream.println("Skipping query " + i + " file doesn't exist");
@@ -124,19 +124,18 @@ public class RunLsqbApp {
                 }
                 
                 final long startTime = System.currentTimeMillis();
-                GqlProgram program = GqlProgram.buildProgram(queryPath);
-                GremlinCompiler compiler = new GremlinCompiler();
-                GraphTraversal<Vertex, Map<String,Object>> traversal = compiler.compileToTraversal(program);
-                traversal = appendTraversal(gts, traversal.asAdmin().getBytecode());
-                try {
-                    List<Map<String,Object>> res = traversal.toList();
-                    final long endTime = System.currentTimeMillis();
 
+                GremlinGroovyScriptEngine gremlinGroovyScriptEngine = new GremlinGroovyScriptEngine();
+                SimpleBindings bindings = new SimpleBindings();
+                bindings.put("g", gts);
+                FileReader reader = new FileReader(new File(queryPath));
+                GraphTraversal<?, ?> traversal = (GraphTraversal<?, ?>) gremlinGroovyScriptEngine.eval(reader, bindings);
+
+                try {
+                    List<?> res = traversal.toList();
+                    final long endTime = System.currentTimeMillis();
                     assert res.size() == 1: "Too many result rows from query";
-                    assert res.get(0).size() == 1: "Too many result rows from query";
-                    Object resVal = res.get(0).values().toArray()[0];
-                    // assert resVal instanceof long : "Bad result, not a count";
-                    long count = (long) resVal;
+                    long count = (long) res.get(0);
                     long duration = endTime - startTime;
                     double durationSeconds = duration / 1000.0;
                     

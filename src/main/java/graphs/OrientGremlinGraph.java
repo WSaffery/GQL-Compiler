@@ -19,20 +19,16 @@ import exceptions.InvalidEdgeFormatException;
 import json.gremlin.JsonEdge;
 import json.gremlin.JsonNode;
 
-// TODO! fix this
-// the problem is that the vertex queries are returning "temporary" ids
-// i.e. #210:-34 instead of #210:34
-// these ids are changed at the end of the transaction.
 public class OrientGremlinGraph implements GraphLoader {
     public GraphTraversalSource currentGraph;
-    public Map<String, Vertex> vMap;
+    public Map<String, Object> idMap;
     private ArrayList<JsonNode> nodeBuffer;
     private ArrayList<JsonEdge> edgeBuffer;
     private int FLUSH_SIZE = 100;
 
     public OrientGremlinGraph(GraphTraversalSource gts) {
         this.currentGraph = gts;
-        this.vMap = new HashMap<>();
+        this.idMap = new HashMap<>();
         nodeBuffer = new ArrayList<>();
         edgeBuffer = new ArrayList<>();
     }
@@ -42,7 +38,7 @@ public class OrientGremlinGraph implements GraphLoader {
     {
         nodes.forEach(this::addNodeToCurrentGraph);
         edges.forEach(this::addEdgeToCurrentGraph);
-
+        
         for (JsonEdge edge: edges)
         {
             this.checkIfEdgeIsConnected(edge);
@@ -51,30 +47,23 @@ public class OrientGremlinGraph implements GraphLoader {
 
     public void streamJsonGraph(Stream<JsonNode> nodes, Stream<JsonEdge> edges) throws InvalidEdgeFormatException
     {
-        GraphTraversalSource originalSource = currentGraph;
-        
+        Transaction tr = currentGraph.tx();
+        tr.open();
+        tr.begin();
         nodes.forEach(this::addNodeToCurrentGraphBuffered);
         flushNodeBuffer();
+        
+        assert(tr.isOpen());
+        System.out.println(currentGraph.V().id().toList());
+        for (Object id : idMap.values())
+        {
+            System.out.println(id);
+            System.out.println(currentGraph.V(id).id().toList());
+        }
 
         edges.forEach(this::addEdgeToCurrentGraphBuffered);
-
-
-        currentGraph = originalSource;
-        // disabled connectivity checks, can't reuse the same stream twice
-        // need to use a stream supplier if I want to do this
-        // nodeSupplier = () -> (...).getNodeStream();
-        // edgeSupplier = () -> (...).getEdgeStream();
-        // Optional<JsonEdge> startlessEdge = edges.filter(edge -> nodeDoesNotExist(edge.start)).findAny();
-        // if (startlessEdge.isPresent())
-        // {
-        //     throw new InvalidEdgeFormatException("Edge " + startlessEdge.get().identity + " start node does not exist.");
-        // }
-        
-        // Optional<JsonEdge> endlessEdge = edges.filter(edge -> nodeDoesNotExist(edge.end)).findAny();
-        // if (endlessEdge.isPresent())
-        // {
-        //     throw new InvalidEdgeFormatException("Edge " + endlessEdge.get().identity + " end node does not exist.");
-        // }
+        flushEdgeBuffer();
+        tr.close();
     }
 
     private void addNodeToCurrentGraphBuffered(JsonNode node) {
@@ -154,17 +143,15 @@ public class OrientGremlinGraph implements GraphLoader {
 
         // add final steps to traversal (select all added vertices and grab their ids)
         // also get result with toList
-        // TODO! pretty bad code
-        @SuppressWarnings({ "rawtypes", "unchecked", "null" })
-        List<Vertex> remoteVertices = (List) pipe.select(Pop.all, "v").unfold().toList();
+        List<Object> actualIds = pipe.select(Pop.all, "v").unfold().id().toList();
 
-        assert(remoteVertices.size() == nodes.size());
+        assert(actualIds.size() == nodes.size());
         // map dropped custom ids
-        for (int i = 0; i < remoteVertices.size(); i++)
+        for (int i = 0; i < actualIds.size(); i++)
         {
             String jsonId = nodes.get(i).identity;
-            Vertex remoteVertex = remoteVertices.get(i);
-            vMap.put(jsonId, remoteVertex);
+            Object actualId = actualIds.get(i);
+            idMap.put(jsonId, actualId);
         }
     }
 
@@ -190,9 +177,9 @@ public class OrientGremlinGraph implements GraphLoader {
             });
         }
 
-        Vertex remoteVertex = pipe.next();
+        Object actualId = pipe.id().next();
         
-        vMap.put(jsonId, remoteVertex);
+        idMap.put(jsonId, actualId);
     }
 
     private boolean nodeDoesNotExist(Object id) {
@@ -200,7 +187,7 @@ public class OrientGremlinGraph implements GraphLoader {
     }
 
     private boolean nodeDoesNotExist(String id) {
-        return nodeDoesNotExist(vMap.get(id).id());
+        return nodeDoesNotExist(idMap.get(id));
     }
 
     private void checkIfEdgeIsConnected(JsonEdge edge) throws InvalidEdgeFormatException {
@@ -235,11 +222,8 @@ public class OrientGremlinGraph implements GraphLoader {
             }
             
 
-            // the vertices are "DetachedVertices" without access to their actual id 
-            // "get" does not reattach them, they're equivalent to just holding the 
-            // temporary rid
-            Object sourceNodeId = vMap.get(edge.start).id();
-            Object targetNodeId = vMap.get(edge.end).id();
+            Object sourceNodeId = idMap.get(edge.start);
+            Object targetNodeId = idMap.get(edge.end);
 
             pipe.from(V(sourceNodeId)).to(V(targetNodeId));
 
@@ -274,8 +258,8 @@ public class OrientGremlinGraph implements GraphLoader {
             this.currentGraph.addE(edge.labels.get(0)) :
             this.currentGraph.addE("nolabel");
 
-        Object sourceNodeId = vMap.get(edge.start).id();
-        Object targetNodeId = vMap.get(edge.end).id();
+        Object sourceNodeId = idMap.get(edge.start);
+        Object targetNodeId = idMap.get(edge.end);
 
         pipe.from(V(sourceNodeId)).to(V(targetNodeId));
 

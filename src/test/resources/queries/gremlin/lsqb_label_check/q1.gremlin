@@ -1,0 +1,9 @@
+g.V().match(
+    __.as('forum').hasLabel('Forum').out('hasMember').hasLabel('Person').as('person'),
+    __.as('person').hasLabel('Person').out('isLocatedIn').hasLabel("City").as('city'),
+    __.as('city').hasLabel('City').out('isPartOf').hasLabel('Country').as('country'),
+    __.as('forum').hasLabel('Forum').out('containerOf').hasLabel('Post').as('post'),
+    __.as('post').hasLabel('Post').in('replyOf').hasLabel('Comment').as('comment'),
+    __.as('comment').hasLabel('Comment').out('hasTag').hasLabel('Tag').as('tag'),
+    __.as('tag').hasLabel('Tag').out('hasType').hasLabel('TagCla').as('tagClass')
+  ).count()

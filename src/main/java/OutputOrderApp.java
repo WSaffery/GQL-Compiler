@@ -10,7 +10,7 @@ import java.util.List;
 public class OutputOrderApp {
     public static final String defaultSeed = "123";
     public static final String defaultRepetitions = "10";
-    public static final List<String> defaultFilter = List.of("6", "9");
+    public static final List<String> defaultFilter = List.of();
 
     public static final CliArgParser argParser = new CliArgParser(Map.of(
         "seed", Arg.single(defaultSeed),

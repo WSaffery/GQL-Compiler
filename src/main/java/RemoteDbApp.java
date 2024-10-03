@@ -2,11 +2,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.configuration2.BaseConfiguration;
+import org.apache.commons.configuration2.Configuration;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+
+// import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
+// import com.tinkerpop.rexster.OrientGraphConfiguration;
 
 import cli.Arg;
 import cli.CliArgParser;
@@ -33,12 +39,14 @@ public class RemoteDbApp {
 
     public static final String defaultMode = "test";
     public static final boolean defaultCustomKeys = false;
+    public static final String defaultSystem = "janus";
     public static final String defaultConfigFile = "conf/remote-objects.yaml";
     public static final String defaultGraph = "g";
 
     public static final CliArgParser argParser = new CliArgParser(Map.of(
         "mode", Arg.single(defaultMode),
         "customKeys", Arg.flag(),
+        "system", Arg.single(defaultSystem),
         "conf", Arg.single(defaultConfigFile),
         "graph", Arg.single(defaultGraph)
     ));
@@ -47,15 +55,37 @@ public class RemoteDbApp {
         argParser.parseArgs(args);
 
         String mode = argParser.getArgSingle("mode");
+        String system = argParser.getArgSingle("system");
         String conf = argParser.getArgSingle("conf");
 
         System.out.println("conf: " + conf);
 
-        DriverRemoteConnection connection = DriverRemoteConnection.using(
+        // OrientGraph OGraph;
+        GraphTraversalSource gts;
+        // if (system.equals("orient"))
+        // {
+        //     // config = new BaseConfiguration();
+            
+        //     Configuration config = new BaseConfiguration();
+        //     config = new BaseConfiguration();
+        //     config.setProperty("orient-url","remote:localhost/demodb");
+        //     config.setProperty("orient-transactional",true);
+        //     config.setProperty("orient-user", "root");
+        //     config.setProperty("orient-pass", "root1234");
+        //     // Configuration 
+
+        //     OGraph = OrientGraph.open(config);
+        //     gts = OGraph.traversal();
+        // }
+        // else 
+        // {
+            DriverRemoteConnection connection = DriverRemoteConnection.using(
             Cluster.open(conf), "g"
             );
 
-        GraphTraversalSource gts = traversal().withRemote(connection);
+            gts = traversal().withRemote(connection);
+        // }
+        
             
         // graph independent operation modes
         if (mode.equals("print"))
@@ -96,6 +126,9 @@ public class RemoteDbApp {
             
             System.out.println("Finished for graph " + graph + " with config: " + conf);
         }
+        // gts.close();
+
+        gts.tx().commit();
         gts.close();
         
         // for some reason the program always hangs at the end, (it passes gts.close and all actual code)
