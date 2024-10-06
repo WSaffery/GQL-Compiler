@@ -3,7 +3,7 @@
 
 MATCH 
 (message:Comment|Post)-[:hasTag]->(:Tag),
-(message)-[:hasCreator]-(:Person), -- creator
+(message)-[:hasCreator]->(:Person), -- creator
 (message)<-[:likes]-(:Person), -- liker
 (message)<-[:replyOf]-(:Comment)
 RETURN COUNT(*)

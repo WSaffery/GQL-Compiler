@@ -16,6 +16,11 @@ public final class EdgePattern extends ElementPattern {
         this.direction = direction;
     }
 
+    public EdgePattern reversed()
+    {
+        return new EdgePattern(variableName, labelPattern, properties, direction.map(d -> d.reversed()));
+    }
+
     public String toString()
     {
         if (direction.isEmpty())

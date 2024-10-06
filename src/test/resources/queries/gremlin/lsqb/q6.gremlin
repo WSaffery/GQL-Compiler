@@ -1,12 +1,7 @@
 g.V().match(
-    __.as('person1').
-    both('knows').
-      as('person2'),
-    __.as('person2').
-    both('knows').
-      as('person3'),
-    __.as('person3').
-    out('hasInterest').as('tag')
+    __.as('person1').both('knows').as('person2'),
+    __.as('person2').both('knows').as('person3'),
+    __.as('person3').out('hasInterest').as('tag')
   ).where('person1', neq('person3')).
   count()
 

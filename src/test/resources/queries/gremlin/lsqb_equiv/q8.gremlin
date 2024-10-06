@@ -1,0 +1,6 @@
+g.V().match(
+    as('tag1').hasLabel('Tag').in('hasTag').as('message'),
+    as('message').in('replyOf').as('comment'),    
+    as('comment').out('hasTag').as('tag2')
+  ).where('tag1', neq('tag2')).
+  select('comment').not(out('hasTag').where(eq('tag1'))).count()

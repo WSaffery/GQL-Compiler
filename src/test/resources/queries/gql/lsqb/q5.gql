@@ -1,4 +1,7 @@
-MATCH (tag1:Tag)<-[:hasTag]-(message:Message)<-[:replyOf]-(comment:Comment)
-      -[:hasTag]->(tag2:Tag)
+-- using message doesn't work because there is no message table 
+-- MESSAGE = COMMENT UNION POST
+
+MATCH (tag1:Tag)<-[:hasTag]-(message:Comment | Post)
+      <-[:replyOf]-(comment:Comment)-[:hasTag]->(tag2:Tag)
 WHERE tag1 <> tag2
 RETURN COUNT(*)

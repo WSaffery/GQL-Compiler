@@ -1,0 +1,9 @@
+g.V().match(
+    as('country').hasLabel('Country').in('isPartOf').as('city'),
+    as('city').hasLabel('City').in('isLocatedIn').as('person'),
+    as('person').hasLabel('Person').in('hasMember').as('forum'),
+    as('forum').hasLabel('Forum').out('containerOf').as('post'),
+    as('post').hasLabel('Post').in('replyOf').as('comment'),
+    as('comment').hasLabel('Comment').out('hasTag').as('tag'),
+    as('tag').hasLabel('Tag').out('hasType').as('tagClass')
+  ).count()

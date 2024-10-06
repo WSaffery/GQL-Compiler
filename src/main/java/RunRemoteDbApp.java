@@ -80,10 +80,13 @@ public class RunRemoteDbApp {
 
         if (queryLanguage.equals("gql"))
         {
+            final long startTime = System.currentTimeMillis();
+
             GqlProgram program = GqlProgram.buildProgram(queryPath);
             GremlinCompiler compiler = new GremlinCompiler();
             GraphTraversal<Vertex, Map<String,Object>> traversal = compiler.compileToTraversal(program);
             traversal = appendTraversal(gts, traversal.asAdmin().getBytecode());
+            final long compileEndTime = System.currentTimeMillis();
             if (profile)
             {
                 List<TraversalMetrics> metrics = traversal.profile().toList();
@@ -94,11 +97,33 @@ public class RunRemoteDbApp {
             else if (explain)
             {
                 TraversalExplanation explanation = traversal.explain();
-                System.out.println(explanation.prettyPrint());
+                printStream.println(explanation.prettyPrint());
             }
             else {
-                List<Map<String,Object>> res = traversal.toList();
-                printTable(res, printStream);
+                List<Map<String,Object>> res = null;
+                try {
+                    res = traversal.toList();
+                }
+                catch (Exception e)
+                {
+                    System.out.println(e.getMessage());
+                }
+                final long endTime = System.currentTimeMillis();
+                final long duration = endTime - startTime;
+                final double durationSeconds = duration / 1000.0;
+                final long compDuration = compileEndTime - startTime;
+                final double compDurationSeconds = compDuration / 1000.0;
+
+                if (res != null)
+                {
+                    printTable(res, printStream);
+                }
+                else 
+                {
+                    printStream.println("Query failed");
+                }
+                printStream.printf("Compiled in %.4f seconds\n", compDurationSeconds);
+                printStream.printf("Finished in %.4f seconds\n", durationSeconds);
             }
         }
         else if (queryLanguage.equals("gremlin"))

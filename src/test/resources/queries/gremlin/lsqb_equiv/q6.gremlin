@@ -1,0 +1,7 @@
+g.V().match(
+    as('person1').hasLabel('Person').both('knows').as('person2'),
+    as('person2').both('knows').as('person3'),
+    as('person3').out('hasInterest').as('tag')
+  ).where('person1', neq('person3')).count()
+
+  

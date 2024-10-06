@@ -1,5 +1,4 @@
 MATCH
     (person1:Person)-[:knows]-(person2:Person),
-    (person1)<-[:hasCreator]-(comment:Comment)
-    -[:replyOf]->(post:Post)-[:hasCreator]->(person2)
+    (person1)<-[:hasCreator]-(comment:Comment)-[:replyOf]->(post:Post)-[:hasCreator]->(person2)
 RETURN COUNT(*)

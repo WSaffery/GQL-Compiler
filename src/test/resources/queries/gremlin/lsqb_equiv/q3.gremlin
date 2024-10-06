@@ -1,0 +1,12 @@
+g.V().match(
+    as('country').hasLabel('Country'),
+    as('person1').hasLabel('Person').out('isLocatedIn').as('city1'),
+    as('city1').hasLabel('City').out('isPartOf').as('country'),
+    as('person2').hasLabel('Person').out('isLocatedIn').as('city2'),
+    as('city2').hasLabel('City').out('isPartOf').as('country'),
+    as('person3').hasLabel('Person').out('isLocatedIn').as('city3'),
+    as('city3').hasLabel('City').out('isPartOf').as('country'),
+    as('person1').hasLabel('Person').both('knows').as('person2'),
+    as('person1').hasLabel('Person').both('knows').as('person3'),
+    as('person2').hasLabel('Person').both('knows').as('person3')
+  ).count()

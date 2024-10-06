@@ -1,4 +1,6 @@
-MATCH (:Tag)<-[:HAS_TAG]-(message:Message)-[:HAS_CREATOR]-(creator:Person),
-      [(message)<-[:LIKES]-(liker:Person)]{0,1},
-      [(message)<-[:REPLY_OF]-(comment:Comment)]{0,1}
+-- MESSAGE = COMMENT UNION POST
+-- (:Message) == (:Comment | Post)
+MATCH (:Tag)<-[:hasTag]-(message:Comment | Post)-[:hasCreator]->(creator:Person)
+OPTIONAL MATCH (message)<-[:likes]-(liker:Person)
+OPTIONAL MATCH (message)<-[:replyOf]-(comment:Comment)
 RETURN COUNT(*)

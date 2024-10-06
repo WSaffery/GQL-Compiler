@@ -19,6 +19,8 @@
 
 package enums;
 
+import javax.management.RuntimeErrorException;
+
 // TODO! Add other orientations
 // Orientation               | Symbol
 // Left                      | <-
@@ -59,6 +61,21 @@ public enum Direction {
                 return "-";
             default:
                 return "";
+        }
+    }
+
+    public Direction reversed()
+    {
+        switch (this)
+        {
+            case LEFT_TO_RIGHT:
+                return Direction.RIGHT_TO_LEFT;
+            case RIGHT_TO_LEFT:
+                return Direction.LEFT_TO_RIGHT;
+            case UNDIRECTED:
+                return Direction.UNDIRECTED;
+            default:
+                throw new RuntimeException("bad direction: " + this);
         }
     }
 }

@@ -1,0 +1,6 @@
+g.V().match(
+    as('tag').hasLabel('Tag').in('hasTag').as('message'),
+    as('message').out('hasCreator').as('creator'),
+    as('message').in('likes').as('liker'),
+    as('message').in('replyOf').as('comment')
+  ).count()

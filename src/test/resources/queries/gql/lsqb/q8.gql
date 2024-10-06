@@ -2,8 +2,7 @@
 -- (:Message) -> (:Comment | Post)
 
 MATCH 
-    (tag1:Tag)<-[:hasTag]-(message: Comment | Post)
-    <-[:replyOf]-(comment:Comment)-[:hasTag]->(tag2:Tag)
+    (tag1:Tag)<-[:hasTag]-(message: Comment | Post)<-[:replyOf]-(comment:Comment)-[:hasTag]->(tag2:Tag)
 WHERE NOT EXISTS (comment)-[:hasTag]->(tag1)
     AND tag1 <> tag2
 RETURN COUNT(*)

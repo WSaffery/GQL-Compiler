@@ -1,0 +1,6 @@
+g.V().match(
+    as('p1').hasLabel('Person').both('knows').as('p2'),
+    as('p1').in('hasCreator').hasLabel('Comment').as('c'),
+    as('c').out('replyOf').hasLabel('Post').as('p'),
+    as('p').in('hasCreator').as('p2')
+  ).count()

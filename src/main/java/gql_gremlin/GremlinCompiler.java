@@ -4,6 +4,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.Pop;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.javatuples.Pair;
 
 import ast.GqlProgram;
 import ast.atoms.Quantifier;
@@ -323,7 +324,14 @@ public class GremlinCompiler {
         }
         else if (pattern instanceof NodePattern)
         {
-            traversal = traversal.V();
+            if (capturedSet.size() > 0)
+            {
+                traversal = traversal.barrier().V();
+            }
+            else 
+            {
+                traversal = traversal.V();
+            }
         }
         else if (pattern instanceof EdgePattern)
         {
@@ -449,6 +457,7 @@ public class GremlinCompiler {
         List<PathComponent> components = pathPattern.pathSequence();
         HashSet<String> variables = CompilerHelpers.pathPatternVariables(components);
 
+
         // !TODO: fix path compiler labels
         //  - are they even used?
         //  - using the hash code may be unsound, what if multiple paths were identical
@@ -456,13 +465,16 @@ public class GremlinCompiler {
         String pathHashCode = Integer.toString(qualifiedPathPattern.hashCode());
         String startLabel = "#COMPILER_s%s".formatted(pathHashCode);
         String endLabel = "#COMPILER_e%s".formatted(pathHashCode);
-        
+        boolean labeledPath = qualifiedPathPattern.evaluationMode() == EvaluationMode.ACYCLIC || qualifiedPathPattern.variableName().isPresent();
+        // the above strings are only used if the above is true
 
         PathComponent head = components.get(0);
         if (head instanceof ElementPattern)
         {
             traversal = compileStartingElementPattern(traversal, (ElementPattern) head, capturedSet);
-            traversal = traversal.as(startLabel);
+            if (labeledPath) {
+                traversal = traversal.as(startLabel);
+            }
         }
         else 
         {
@@ -470,8 +482,11 @@ public class GremlinCompiler {
             // need to unroll one layer 
             // and start from there if possible
 
-            GraphTraversal<Vertex, Vertex> startingTraversal = traversal.V();
-            startingTraversal = startingTraversal.as(startLabel);
+            GraphTraversal<Vertex, Vertex> startingTraversal = capturedSet.size() > 0 ? traversal.barrier().V() : traversal.V();
+            if (labeledPath)
+            {
+                startingTraversal = startingTraversal.as(startLabel);
+            }
             traversal = compileParenPathPattern(
                 startingTraversal, (ParenPathPattern) head, capturedSet, variables);
         }
@@ -527,7 +542,48 @@ public class GremlinCompiler {
 
         for (QualifiedPathPattern qualifiedPathPattern : qualifiedPathPatterns)
         {
-            traversal = compileRestrictedPattern(traversal, qualifiedPathPattern, capturedSet);
+            PathPattern pathPattern = qualifiedPathPattern.pathPattern();
+            Optional<String> headVariable = pathPattern.headVariableName();
+            if (qualifiedPathPattern.ordinary() &&
+                headVariable.filter(n -> capturedSet.contains(n)).isEmpty() && 
+                capturedSet.size() > 0)
+            {
+                // we will perform a table scan, but we might not need to
+                Integer idx = null;
+                List<Optional<String>> variables = pathPattern.variableSequence();
+                for (int i =  0; i < variables.size(); i++)
+                {
+                    // System.out.printf("i=%s var=%s\n",i, variables.get(i));
+                    if (variables.get(i).filter(n -> capturedSet.contains(n)).isPresent())
+                    {
+                        // we can use i as the start of two new path patterns!
+                        idx = i;
+                        break;
+                    }
+                }
+
+                // System.out.println("hi idx:" + idx);
+                if (idx == null)
+                {
+                    // no optimisation possible
+                    traversal = compileRestrictedPattern(traversal, qualifiedPathPattern, capturedSet);
+                }
+                else if (idx == pathPattern.pathSequence().size()-1)
+                {
+                    traversal = compileRestrictedPattern(traversal, QualifiedPathPattern.makeOrdinary(pathPattern.reversed()), capturedSet);
+                }
+                else
+                {
+                    Pair<PathPattern, PathPattern> paths = pathPattern.split(idx);
+                    traversal = compileRestrictedPattern(traversal, QualifiedPathPattern.makeOrdinary(paths.getValue0()), capturedSet);
+                    traversal = compileRestrictedPattern(traversal, QualifiedPathPattern.makeOrdinary(paths.getValue1()), capturedSet);
+                }
+            }
+            else 
+            {
+                // no optimisation possible
+                traversal = compileRestrictedPattern(traversal, qualifiedPathPattern, capturedSet);
+            }
         }
 
         return traversal;
