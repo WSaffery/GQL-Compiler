@@ -35,19 +35,18 @@ import ast.returns.Asterisk;
 import ast.returns.CountAsterisk;
 import ast.returns.ReturnExpression;
 import ast.returns.ReturnItem;
-import enums.BooleanComparator;
 import enums.EvaluationMode;
 import enums.SetQuantifier;
 import enums.ValueComparator;
 import exceptions.SemanticErrorException;
 import exceptions.SyntaxErrorException;
 import exceptions.UnsupportedFeatureException;
+import gql_gremlin.helpers.CompilerHelpers;
 import gql_gremlin.matching.MatchExpression;
-import gql_gremlin.matching.MatchPatternFactory;
-import groovyjarjarantlr4.v4.misc.Graph;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 import static gql_gremlin.helpers.GremlinHelpers.*;
+import static gql_gremlin.helpers.CompilerHelpers.*;
 import static gql_gremlin.helpers.JavaHelpers.*;
 
 import java.util.AbstractCollection;
@@ -60,9 +59,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
-
-import javax.management.RuntimeErrorException;
 
 
 enum GQLDirection {
@@ -78,105 +74,8 @@ record PropertyResult(
 {}
 
 
-class CompilerHelpers
-{
-    // reorders restricted path patterns so that for each of the contained connected components
-    // its path patterns are contiguous in the resulting list and in the order of some dfs through the component
-    //
-    // i.e. [(a -> b), (d -> a), (b -> c), (c -> d)] becomes [(a -> b), (b -> c), (c -> d), (d -> a)]
-    // note this function doesn't care about the direction of edges in patterns, assumption being querying is bidirectional
-    public static List<QualifiedPathPattern> orderRestrictedPathPatterns(List<QualifiedPathPattern> restrictedPathPatterns)
-    {
-        ArrayList<QualifiedPathPattern> reorderedPathPatterns = new ArrayList<>();
-
-        List<HashSet<String>> variablesList = 
-            restrictedPathPatterns.stream().map(pathPattern -> pathPatternVariables(pathPattern)).toList();
-
-        
-        while (restrictedPathPatterns.size() > 0)
-        {
-            int i = restrictedPathPatterns.size()-1;
-
-            while (i != -1) 
-            {
-                reorderedPathPatterns.add(restrictedPathPatterns.remove(i));
-                Set<String> variables = variablesList.remove(i);
-                i = -1;
-
-                for (int j = 0; j < restrictedPathPatterns.size(); j++)
-                {
-                    Set<String> testVariables = variablesList.get(j);
-                    if (intersects(variables, testVariables))
-                    {
-                        i = j;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return reorderedPathPatterns;
-    }
-    
-    public static Stream<String> pathPatternVariablesAllLayersStream(List<PathComponent> pathSequence)
-    {
-        return pathSequence.stream().flatMap(component -> {
-            Stream<String> stream = null;
-            if (component instanceof ParenPathPattern)
-            {
-                stream = pathPatternVariablesAllLayersStream(((ParenPathPattern) component).pathPattern().pathSequence());
-            }
-            else 
-            {
-                stream = Stream.ofNullable(((ElementPattern) component).variableName.orElse(null));
-            }
-            return stream;
-        });
-    }
-
-    public static HashSet<String> pathPatternVariablesAllLayers(List<PathComponent> pathSequence)
-    {
-        return new HashSet<>(pathPatternVariablesAllLayersStream(pathSequence).toList());
-    }
-
-    public static HashSet<String> pathPatternVariables(List<PathComponent> pathSequence)
-    {
-        return new HashSet<>(pathSequence.stream().flatMap(component -> {
-            Stream<String> stream = null;
-            if (component instanceof ParenPathPattern)
-            {
-                stream = Stream.of();
-            }
-            else 
-            {
-                stream = Stream.ofNullable(((ElementPattern) component).variableName.orElse(null));
-            }
-            return stream;
-        }).toList());
-    }
-
-    public static HashSet<String> pathPatternVariables(QualifiedPathPattern pathPattern)
-    {
-        return pathPatternVariables(pathPattern.pathPattern().pathSequence());
-    }
-
-}
-
 // essentially takes the place of GqlFileQueryEvaluator
-public class GremlinCompiler {
-    // left deep nesting of and operation to get around inability to access an array of graph traversals
-    public GraphTraversal<Object, Object> recurseAndOperands(List<LabelExpression> operands)
-    {
-        if (operands.size() == 1) return filterByLabelExpression(operands.get(0));
-        return and(filterByLabelExpression(operands.get(0)), recurseAndOperands(operands.subList(1, operands.size())));
-    }
-
-    // left deep nesting of or operation to get around inability to access an array of graph traversals
-    public GraphTraversal<Object, Object> recurseOrOperands(List<LabelExpression> operands)
-    {
-        if (operands.size() == 1) return filterByLabelExpression(operands.get(0));
-        return or(filterByLabelExpression(operands.get(0)), recurseAndOperands(operands.subList(1, operands.size())));
-    }
+public class GremlinCompiler implements Compiler {
 
     public GraphTraversal<Object, Object> filterByLabelExpression(LabelExpression labelExpression)
     {
@@ -892,7 +791,7 @@ public class GremlinCompiler {
         }
 
         ArrayList<GraphTraversal<Vertex, Map<String,Object>>> queryTraversals = new ArrayList<>();
-        for (GqlQuery query : program.body.getQueries()) 
+        for (GqlQuery query : program.body.queries()) 
         {
             queryTraversals.add(compileToTraversal(query));
         }

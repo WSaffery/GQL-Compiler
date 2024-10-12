@@ -42,6 +42,11 @@ public class PathPattern {
         return getComponentVariableName(pathSequence.get(0));
     }
 
+    public Optional<String> tailVariableName()
+    {
+        return getComponentVariableName(pathSequence.get(pathSequence.size()-1));
+    }
+
     // take pattern (p1, p2, ..., pn)
     // return two new patterns
     // reversed((p1, p2, ..., pi)), (pi+1, pi+2, ..., pn)

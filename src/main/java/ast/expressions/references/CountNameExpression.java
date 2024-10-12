@@ -1,5 +1,7 @@
 package ast.expressions.references;
 
+import java.util.List;
+
 import ast.expressions.ReferenceExpression;
 
 public class CountNameExpression extends ReferenceExpression {
@@ -11,6 +13,11 @@ public class CountNameExpression extends ReferenceExpression {
 
     public String name() {
         return name;
+    }
+
+    public List<String> referencedVariables()
+    {
+        return List.of(name);
     }
 
     @Override

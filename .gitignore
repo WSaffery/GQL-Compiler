@@ -30,3 +30,4 @@ src/main/resources/database/lsqb01/*.json
 *.gql.gremlin
 
 *.ods#
+*.csv#

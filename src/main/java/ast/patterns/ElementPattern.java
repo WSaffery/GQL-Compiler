@@ -21,4 +21,5 @@ public abstract sealed class ElementPattern implements PathComponent permits Edg
     public Optional<String> variableName() { return variableName; };
     public LabelPattern labelPattern() { return labelPattern; };
     public HashMap<String, Value> properties() { return properties; };
+    
 }

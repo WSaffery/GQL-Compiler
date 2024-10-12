@@ -19,6 +19,8 @@
 
 package ast.expressions.references;
 
+import java.util.List;
+
 import ast.expressions.ReferenceExpression;
 
 public class NameExpression extends ReferenceExpression {
@@ -30,6 +32,11 @@ public class NameExpression extends ReferenceExpression {
 
     public String name() {
         return name;
+    }
+
+    public List<String> referencedVariables()
+    {
+        return List.of(name);
     }
 
     @Override

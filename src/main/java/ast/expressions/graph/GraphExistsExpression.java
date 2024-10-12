@@ -1,5 +1,7 @@
 package ast.expressions.graph;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import ast.expressions.GraphExpression;
@@ -23,5 +25,18 @@ public class GraphExistsExpression implements GraphExpression {
     public QualifiedPathPattern qualifiedPathPattern()
     {
         return new QualifiedPathPattern(Optional.empty(), EvaluationMode.WALK, pathPattern);
+    }
+
+    public List<String> referencedVariables()
+    {
+        List<String> names = new ArrayList<>();
+        for (Optional<String> name : pathPattern.variableSequence())
+        {
+            if (name.isPresent())
+            {
+                names.add(name.get());
+            }
+        }
+        return names;
     }
 }

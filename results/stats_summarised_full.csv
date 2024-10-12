@@ -1,0 +1,26 @@
+StartLabel,EndLabel,EdgeLabel,Triplet,Count,Count/AvgCount
+Forum, Post, containerOf,"[Forum, containerOf, Post]",172438,2.07216963628218
+Person, Company, workAt,"[Person, workAt, Company]",3637,0.0437054533638659
+Comment, Comment, replyOf,"[Comment, replyOf, Comment]",108027,1.29814930177023
+Person, City, isLocatedIn,"[Person, isLocatedIn, City]",1700,0.0204287244208336
+Post, Country, isLocatedIn,"[Post, isLocatedIn, Country]",172438,2.07216963628218
+Country, Continent, isPartOf,"[Country, isPartOf, Continent]",111,0.00133387553571326
+Comment, Person, hasCreator,"[Comment, hasCreator, Person]",215488,2.589497039998
+Person, Tag, hasInterest,"[Person, hasInterest, Tag]",39170,0.470701844449443
+Post, Person, hasCreator,"[Post, hasCreator, Person]",172438,2.07216963628218
+Forum, Person, hasMember,"[Forum, hasMember, Person]",273866,3.29101943660943
+Post, Tag, hasTag,"[Post, hasTag, Tag]",66346,0.797273029661547
+Comment, Tag, hasTag,"[Comment, hasTag, Tag]",252881,3.03884485897931
+Tag, TagCla, hasType,"[Tag, hasType, TagCla]",16080,0.19323169922765
+University, City, isLocatedIn,"[University, isLocatedIn, City]",6380,0.0766678010617169
+Forum, Tag, hasTag,"[Forum, hasTag, Tag]",54513,0.655077090795826
+Comment, Country, isLocatedIn,"[Comment, isLocatedIn, Country]",215488,2.589497039998
+TagCla, TagCla, isSubclassOf,"[TagCla, isSubclassOf, TagCla]",70,0.000841182770269621
+Person, University, studyAt,"[Person, studyAt, University]",1374,0.0165112160907208
+Forum, Person, hasModerator,"[Forum, hasModerator, Person]",17043,0.204803970767216
+Company, Country, isLocatedIn,"[Company, isLocatedIn, Country]",1575,0.0189266123310665
+Person, Person, knows,"[Person, knows, Person]",18135,0.217926421983422
+Person, Post, likes,"[Person, likes, Post]",70199,0.84357413271653
+City, Country, isPartOf,"[City, isPartOf, Country]",1343,0.0161386922924586
+Comment, Post, replyOf,"[Comment, replyOf, Post]",107461,1.29134773822777
+Person, Comment, likes,"[Person, likes, Comment]",92203,1.10799392810243

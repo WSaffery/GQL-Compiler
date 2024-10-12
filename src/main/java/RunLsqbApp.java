@@ -17,6 +17,7 @@ import ast.GqlProgram;
 import cli.Arg;
 import cli.CliArgParser;
 import gql_gremlin.GremlinCompiler;
+import gql_gremlin.Compiler;
 
 import static gql_gremlin.helpers.GremlinHelpers.appendTraversal;
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
@@ -45,7 +46,7 @@ public class RunLsqbApp {
     public static final String defaultRepetitions = "10";
     public static final String defaultVariant = "";
     public static final String defaultResultsFile = "results/results.csv";
-
+    public static final String defaultCompilerType = "rigid";
 
     public static final CliArgParser argParser = new CliArgParser(Map.of(
         "querydir", Arg.single(defaultQueryDirectory),
@@ -56,7 +57,8 @@ public class RunLsqbApp {
         "repetitions", Arg.single(defaultRepetitions),
         "variant", Arg.single(defaultVariant),
         "results", Arg.single(defaultResultsFile),
-        "skip", Arg.multi()
+        "skip", Arg.multi(),
+        "compiler", Arg.single(defaultCompilerType)
     ));
 
     public static void main(String[] args) throws Exception {
@@ -82,6 +84,7 @@ public class RunLsqbApp {
         Integer repetitions = Integer.parseInt(argParser.getArgSingle("repetitions"));
         Integer seed = Integer.parseInt(argParser.getArgSingle("seed"));
         List<Integer> skip = argParser.getArgs("skip").stream().map(Integer::parseInt).toList();
+        String compilerType = argParser.getArgSingle("compiler");
 
         DriverRemoteConnection connection = DriverRemoteConnection.using(
             Cluster.open(conf), rts
@@ -90,14 +93,14 @@ public class RunLsqbApp {
         GraphTraversalSource gts = traversal().withRemote(connection);
         ;
 
-        String system = "GqlToGremlin";
-        
+        String compilerDescription = Compiler.getCompilerDescription(compilerType);
+        String system = String.format("GqlToGremlin[%s]", compilerDescription);
+        // the optimising compiler has our datasets' summary included, but no other state
+        Compiler compiler = Compiler.getCompiler(compilerType);
         
         double scaleFactor = 0.1;
 
         Random rnd = new Random(seed);
-        
-        // ArrayList<Result> results = new ArrayList<>();
 
         File resultsFile = resultsFilePath.toFile();
         PrintStream resultsPrintStream = new PrintStream(new FileOutputStream(resultsFile, true));
@@ -125,7 +128,6 @@ public class RunLsqbApp {
                 
                 final long startTime = System.currentTimeMillis();
                 GqlProgram program = GqlProgram.buildProgram(queryPath);
-                GremlinCompiler compiler = new GremlinCompiler();
                 GraphTraversal<Vertex, Map<String,Object>> traversal = compiler.compileToTraversal(program);
                 traversal = appendTraversal(gts, traversal.asAdmin().getBytecode());
                 try {

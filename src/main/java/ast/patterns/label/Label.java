@@ -12,4 +12,9 @@ public final class Label extends LabelExpression
     public String getValue() {
         return value;
     }
+
+    public String toString()
+    {
+        return String.format("label=%s", value);
+    }
 }

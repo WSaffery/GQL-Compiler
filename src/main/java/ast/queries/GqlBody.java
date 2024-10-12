@@ -17,12 +17,12 @@ public class GqlBody {
         return queries.size();
     }
 
-    public Collection<GqlQuery> getQueries()
+    public Collection<GqlQuery> queries()
     {
         return queries;
     }
 
-    public Collection<QueryConjunctor> getConjunctions()
+    public Collection<QueryConjunctor> conjunctions()
     {
         return conjunctions;
     }

@@ -1,5 +1,7 @@
 package ast.expressions;
 
+import java.util.List;
+
 import ast.expressions.atomic.GqlString;
 import ast.expressions.atomic.TruthValue;
 import ast.expressions.composite.BooleanConjunctionExpression;
@@ -12,7 +14,11 @@ import ast.expressions.references.PropertyReference;
 public abstract sealed interface Expression permits 
     Value, CompositeExpression, ReferenceExpression, GraphExpression {
 
-     
+    default public List<String> referencedVariables()
+    {
+        return List.of();
+    }
+    
     // check if the expression's result is of type boolean
     public static boolean isBooleanExpression(Expression expression)
     {

@@ -1,5 +1,8 @@
 package ast.expressions.composite;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ast.expressions.CompositeExpression;
 import ast.expressions.Expression;
 import enums.BooleanComparator;
@@ -26,5 +29,15 @@ public final class BooleanConjunctionExpression implements CompositeExpression {
     @Override
     public String toString() {
         return left.toString() + " " + comparator.toString() + " " + right.toString();
+    }
+
+    // Could use a cheaper concat optimised list wrapper instead
+    // i.e. https://stackoverflow.com/a/13868352
+    // leaving for now
+    public List<String> referencedVariables()
+    {
+        ArrayList<String> names = new ArrayList<>(right.referencedVariables());
+        names.addAll(left.referencedVariables());
+        return names;
     }
 }

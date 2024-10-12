@@ -1,0 +1,7 @@
+MATCH (country1:Country) <-[:isPartOf]- (:City) <-[:isLocatedIn]-
+(person:Person) -[:knows]- (:Person) <-[:hasCreator]-
+(:Comment) <-[:replyOf]- (:Post) <-[:containerOf]-
+(:Forum) -[:hasMember]-> (:Person) -[:isLocatedIn]->
+(:City) -[:isPartOf]-> (country2:Country)
+WHERE country1 <> country2
+RETURN person, country1, country2

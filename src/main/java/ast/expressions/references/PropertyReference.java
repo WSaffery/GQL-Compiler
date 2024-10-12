@@ -19,6 +19,8 @@
 
 package ast.expressions.references;
 
+import java.util.List;
+
 import ast.expressions.ReferenceExpression;
 
 // key = "*" implies return all as map
@@ -39,6 +41,11 @@ public class PropertyReference extends ReferenceExpression {
     public String key()
     {
         return key;
+    }
+
+    public List<String> referencedVariables()
+    {
+        return List.of(name);
     }
 
     @Override

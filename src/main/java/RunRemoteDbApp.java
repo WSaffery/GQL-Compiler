@@ -20,6 +20,7 @@ import ast.GqlProgram;
 import cli.Arg;
 import cli.CliArgParser;
 import gql_gremlin.GremlinCompiler;
+import gql_gremlin.Compiler;
 
 import static cli.display.DisplayHelpers.printMetrics;
 import static cli.display.DisplayHelpers.printTable;
@@ -41,6 +42,7 @@ public class RunRemoteDbApp {
     public static final String defaultRTSName = "g";
     public static final String defaultLanguage = "gql";
     public static final String defaultOutputFile = ""; // stdout
+    static final String defaultCompiler = "rigid";
 
     public static final CliArgParser argParser = new CliArgParser(Map.of(
         "query", Arg.single(defaultQuery),
@@ -48,6 +50,7 @@ public class RunRemoteDbApp {
         "rts", Arg.single(defaultRTSName),
         "output", Arg.single(defaultOutputFile),
         "language", Arg.single(defaultLanguage),
+        "compiler", Arg.single(defaultCompiler),
         "profile", Arg.flag(),
         "explain", Arg.flag()
     ));
@@ -64,6 +67,7 @@ public class RunRemoteDbApp {
 
         String queryPath = ResourcePaths.getQueryFolder() + queryArg;
         String queryLanguage = argParser.getArgSingle("language");
+        String compilerType = argParser.getArgSingle("compiler");
 
         System.out.println("conf: " + conf);
         System.out.println("query: " + queryArg);
@@ -83,7 +87,7 @@ public class RunRemoteDbApp {
             final long startTime = System.currentTimeMillis();
 
             GqlProgram program = GqlProgram.buildProgram(queryPath);
-            GremlinCompiler compiler = new GremlinCompiler();
+            Compiler compiler = Compiler.getCompiler(compilerType);
             GraphTraversal<Vertex, Map<String,Object>> traversal = compiler.compileToTraversal(program);
             traversal = appendTraversal(gts, traversal.asAdmin().getBytecode());
             final long compileEndTime = System.currentTimeMillis();

@@ -18,7 +18,7 @@ Value, Count
 "[TagCla, isSubclassOf, TagCla]", 70
 "[Person, studyAt, University]", 1374
 "[Forum, hasModerator, Person]", 17043
-'[Company, isLocatedIn, Country]', 1575
+"[Company, isLocatedIn, Country]", 1575
 "[Person, knows, Person]", 18135
 "[Person, likes, Post]", 70199
 "[City, isPartOf, Country]", 1343
