@@ -1,0 +1,5 @@
+MATCH TRAIL
+(:Country)<-[:isPartOf]-(:City)
+    <-[:isLocatedIn]-(:Person)<-[:hasMember]-(:Forum)
+    -[:containerOf]->(:Post) [()<-[:replyOf]-(:Comment)]*
+RETURN COUNT(*)

@@ -1,0 +1,5 @@
+MATCH 
+(:Country)<-[:isPartOf]-(:City)
+    <-[:isLocatedIn]-(:Person)<-[:hasMember]-(:Forum)
+    -[:containerOf]->(:Post) [()<-[:replyOf]-(:Comment)]{1,10}
+RETURN COUNT(*)
