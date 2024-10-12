@@ -19,6 +19,7 @@ import gql_gremlin.query.QueryNode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -269,29 +270,25 @@ public class OptimisingCompiler implements Compiler {
         
         MatchExpression matchExpression = query.matchExpressions.get(0);
 
-        for (QualifiedPathPattern pathPattern : matchExpression.pathPatterns)
+        List<PathPattern> optimisablePathPatterns = new ArrayList<>();
+        ListIterator<QualifiedPathPattern> iter = matchExpression.pathPatterns.listIterator();
+        while (iter.hasNext())
         {
-            if (!pathPattern.ordinary())
+            QualifiedPathPattern pattern = iter.next();
+            if (pattern.ordinary())
             {
-                // we cannot effectively optimise match statements
-                // with path patterns that aren't ordinary, currently
-                return;
+                optimisablePathPatterns.add(pattern.pathPattern());
+                iter.remove();
             }
         }
+        // add all "ordinary" path patterns to our optimisable list, then remove them from the match statement
 
-        List<PathPattern> pathPatterns = matchExpression.pathPatterns.stream().map(p -> p.pathPattern()).toList();
-
-        QueryGraph graph = QueryGraph.constructQueryGraph(pathPatterns);
-        
-        // System.out.println(graph.edges());
-        // System.out.println("Edges: " + graph.edges().stream().map(edge -> edge.labels()).toList());
+        QueryGraph graph = QueryGraph.constructQueryGraph(optimisablePathPatterns);
 
         Summary summary = Summary.getLsqb01Summary();
         List<Triplet<QueryNode, QueryEdge, QueryNode>> order = findOrder(graph, summary);
         
-        // System.out.println("Ordering: " + order.stream().map(triplet -> triplet.getValue1()).toList());
         List<PathPattern> newPathPatterns = makePaths(order);
-        // System.out.println("New Path Patterns: " + newPathPatterns);
         if (!returnAll)
         {
             HashSet<String> requiredVars = new HashSet<>();
@@ -307,7 +304,8 @@ public class OptimisingCompiler implements Compiler {
             pruneCaptures(newPathPatterns, requiredVars);
         }
 
-        matchExpression.pathPatterns = newPathPatterns.stream().map(p -> QualifiedPathPattern.makeOrdinary(p)).toList();
+        // newPathPatterns.iterator().forEachRemaining(p -> matchExpression.pathPatterns.add(QualifiedPathPattern.makeOrdinary((p))));
+        matchExpression.pathPatterns.addAll(newPathPatterns.stream().map(p -> QualifiedPathPattern.makeOrdinary(p)).toList());
     }
 
     // discards graphName information from focused match clauses
