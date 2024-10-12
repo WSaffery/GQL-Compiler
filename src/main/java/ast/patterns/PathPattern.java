@@ -17,6 +17,11 @@ public class PathPattern {
         this.pathSequence = pathSequence;
     }
 
+    public boolean containsParenPath()
+    {
+        return pathSequence.stream().anyMatch(c -> c instanceof ParenPathPattern);
+    }
+
     public List<PathComponent> pathSequence() {
         return pathSequence;
     }

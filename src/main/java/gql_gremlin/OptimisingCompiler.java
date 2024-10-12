@@ -275,7 +275,7 @@ public class OptimisingCompiler implements Compiler {
         while (iter.hasNext())
         {
             QualifiedPathPattern pattern = iter.next();
-            if (pattern.ordinary())
+            if (pattern.ordinary() && !pattern.pathPattern().containsParenPath())
             {
                 optimisablePathPatterns.add(pattern.pathPattern());
                 iter.remove();
