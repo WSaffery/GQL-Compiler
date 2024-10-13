@@ -42,7 +42,7 @@ public class RunRemoteDbApp {
     public static final String defaultRTSName = "g";
     public static final String defaultLanguage = "gql";
     public static final String defaultOutputFile = ""; // stdout
-    static final String defaultCompiler = "rigid";
+    public static final String defaultCompiler = "rigid";
 
     public static final CliArgParser argParser = new CliArgParser(Map.of(
         "query", Arg.single(defaultQuery),

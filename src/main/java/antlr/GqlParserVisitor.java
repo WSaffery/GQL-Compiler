@@ -109,6 +109,30 @@ public interface GqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParenthesizedPathPatternExpression(GqlParser.ParenthesizedPathPatternExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link GqlParser#leftParenthesizedPathPatternExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLeftParenthesizedPathPatternExpression(GqlParser.LeftParenthesizedPathPatternExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link GqlParser#rightParenthesizedPathPatternExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRightParenthesizedPathPatternExpression(GqlParser.RightParenthesizedPathPatternExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link GqlParser#fullParenthesizedPathPatternExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFullParenthesizedPathPatternExpression(GqlParser.FullParenthesizedPathPatternExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link GqlParser#loneParenthesizedPathPatternExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLoneParenthesizedPathPatternExpression(GqlParser.LoneParenthesizedPathPatternExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link GqlParser#nodePattern}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

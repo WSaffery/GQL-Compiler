@@ -210,6 +210,54 @@ public class GqlParserBaseListener implements GqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterLeftParenthesizedPathPatternExpression(GqlParser.LeftParenthesizedPathPatternExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLeftParenthesizedPathPatternExpression(GqlParser.LeftParenthesizedPathPatternExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRightParenthesizedPathPatternExpression(GqlParser.RightParenthesizedPathPatternExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRightParenthesizedPathPatternExpression(GqlParser.RightParenthesizedPathPatternExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFullParenthesizedPathPatternExpression(GqlParser.FullParenthesizedPathPatternExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFullParenthesizedPathPatternExpression(GqlParser.FullParenthesizedPathPatternExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLoneParenthesizedPathPatternExpression(GqlParser.LoneParenthesizedPathPatternExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLoneParenthesizedPathPatternExpression(GqlParser.LoneParenthesizedPathPatternExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterNodePattern(GqlParser.NodePatternContext ctx) { }
 	/**
 	 * {@inheritDoc}

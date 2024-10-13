@@ -1,1 +1,4 @@
-MATCH SIMPLE (x {value: "start"}) -[]-> [(y {value: "a"}) -[]-> (z {value: "b"}) -[]-> (w {value: "c"}) -[]-> (end {value: "a"})]* -[]-> (x) 
+MATCH SIMPLE 
+(x {value: "start"}) -[]-> [(y {value: "a"}) -[]-> 
+(z {value: "b"}) -[]-> (w {value: "c"}) -[]-> 
+(end {value: "a"})]* -[]-> (x)

@@ -43,6 +43,8 @@ import exceptions.SyntaxErrorException;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+
+import java.lang.StackWalker.Option;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -124,15 +126,59 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
     @Override
     public ParenPathPattern visitParenthesizedPathPatternExpression(ParenthesizedPathPatternExpressionContext ctx)
     {
-        if (ctx.whereClause() != null)
+        WhereClauseContext where = null;
+        LenContext len = null;
+        PathPatternExpressionContext path = null;
+        NodePatternContext head = null;
+        NodePatternContext tail = null;
+
+        if (ctx.leftParenthesizedPathPatternExpression() != null)
+        {
+            LeftParenthesizedPathPatternExpressionContext lower_ctx = ctx.leftParenthesizedPathPatternExpression();
+            where = lower_ctx.whereClause();
+            len = lower_ctx.len();
+            path = lower_ctx.pathPatternExpression();
+            head = lower_ctx.nodePattern();
+        }
+        else if (ctx.rightParenthesizedPathPatternExpression() != null)
+        {
+            RightParenthesizedPathPatternExpressionContext lower_ctx = ctx.rightParenthesizedPathPatternExpression();
+            where = lower_ctx.whereClause();
+            len = lower_ctx.len();
+            path = lower_ctx.pathPatternExpression();
+            tail = lower_ctx.nodePattern();
+        }
+        else if (ctx.loneParenthesizedPathPatternExpression() != null)
+        {
+            LoneParenthesizedPathPatternExpressionContext lower_ctx = ctx.loneParenthesizedPathPatternExpression();
+            where = lower_ctx.whereClause();
+            len = lower_ctx.len();
+            path = lower_ctx.pathPatternExpression();
+        }
+        else
+        {
+            assert ctx.fullParenthesizedPathPatternExpression() != null : "Bad paren path";
+            FullParenthesizedPathPatternExpressionContext lower_ctx = ctx.fullParenthesizedPathPatternExpression();
+            where = lower_ctx.whereClause();
+            len = lower_ctx.len();
+            path = lower_ctx.pathPatternExpression();
+            head = lower_ctx.nodePattern(0);
+            tail = lower_ctx.nodePattern(1);
+        }
+
+        if (where != null)
         {
             throw new SemanticErrorException("Where clause currently unsupported");
         }
+        assert path != null : "bad paren path";
+        assert len != null : "bad paren path";
 
         return new ParenPathPattern(
-            visitPathPatternExpression(ctx.pathPatternExpression()), 
+            visitPathPatternExpression(path), 
             null, 
-            visitLen(ctx.len()));
+            visitLen(len),
+            Optional.ofNullable(head).map(p -> visitNodePattern(p)),
+            Optional.ofNullable(tail).map(p -> visitNodePattern(p)));
     }
 
     @Override

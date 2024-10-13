@@ -76,6 +76,16 @@ public class PathPattern {
                     component = edge.reversed();
                 }
             }
+            else if (component instanceof ParenPathPattern)
+            {
+                ParenPathPattern parenPathPattern = (ParenPathPattern) component;
+                component = new ParenPathPattern(
+                    parenPathPattern.pathPattern().reversed(), 
+                    parenPathPattern.whereExpression(), 
+                    parenPathPattern.quantifier(),
+                    parenPathPattern.tailOuterNode(),
+                    parenPathPattern.headOuterNode());
+            }
 
             // add the component
             aComponents.add(component);

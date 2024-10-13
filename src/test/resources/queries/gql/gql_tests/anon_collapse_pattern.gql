@@ -1,0 +1,4 @@
+FROM g6
+MATCH (a: A) [() -> (b:B) -> ()] (c: C),
+      (a: A) ->* (c: C),
+RETURN a, b, c

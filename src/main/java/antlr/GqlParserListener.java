@@ -170,6 +170,46 @@ public interface GqlParserListener extends ParseTreeListener {
 	 */
 	void exitParenthesizedPathPatternExpression(GqlParser.ParenthesizedPathPatternExpressionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link GqlParser#leftParenthesizedPathPatternExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterLeftParenthesizedPathPatternExpression(GqlParser.LeftParenthesizedPathPatternExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GqlParser#leftParenthesizedPathPatternExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitLeftParenthesizedPathPatternExpression(GqlParser.LeftParenthesizedPathPatternExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GqlParser#rightParenthesizedPathPatternExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterRightParenthesizedPathPatternExpression(GqlParser.RightParenthesizedPathPatternExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GqlParser#rightParenthesizedPathPatternExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitRightParenthesizedPathPatternExpression(GqlParser.RightParenthesizedPathPatternExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GqlParser#fullParenthesizedPathPatternExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterFullParenthesizedPathPatternExpression(GqlParser.FullParenthesizedPathPatternExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GqlParser#fullParenthesizedPathPatternExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitFullParenthesizedPathPatternExpression(GqlParser.FullParenthesizedPathPatternExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GqlParser#loneParenthesizedPathPatternExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterLoneParenthesizedPathPatternExpression(GqlParser.LoneParenthesizedPathPatternExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GqlParser#loneParenthesizedPathPatternExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitLoneParenthesizedPathPatternExpression(GqlParser.LoneParenthesizedPathPatternExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link GqlParser#nodePattern}.
 	 * @param ctx the parse tree
 	 */

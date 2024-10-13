@@ -5,7 +5,6 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Triplet;
 
 import ast.GqlProgram;
-import ast.patterns.EdgePattern;
 import ast.patterns.ElementPattern;
 import ast.patterns.PathComponent;
 import ast.patterns.PathPattern;
@@ -285,7 +284,6 @@ public class OptimisingCompiler implements Compiler {
 
         QueryGraph graph = QueryGraph.constructQueryGraph(optimisablePathPatterns);
 
-        Summary summary = Summary.getLsqb01Summary();
         List<Triplet<QueryNode, QueryEdge, QueryNode>> order = findOrder(graph, summary);
         
         List<PathPattern> newPathPatterns = makePaths(order);

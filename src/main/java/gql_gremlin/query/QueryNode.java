@@ -1,19 +1,10 @@
 package gql_gremlin.query;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import ast.patterns.NodePattern;
-import ast.patterns.label.BinaryLabelExpression;
-import ast.patterns.label.BinaryLabelOperator;
-import ast.patterns.label.Label;
-import ast.patterns.label.LabelExpression;
-import ast.patterns.label.LabelPattern;
-import ast.patterns.label.WildcardLabel;
 import exceptions.SemanticErrorException;
-import exceptions.UnsupportedFeatureException;
 
 public class QueryNode {
     NodePattern pattern;

@@ -1,0 +1,5 @@
+MATCH ACYCLIC (person1:Person)-[:isLocatedIn]->(city1:City)
+    -[:isPartOf]->(country: Country)
+    <-[:isPartOf]-(city2:City)
+    <-[:isLocatedIn]-(person2:Person)
+RETURN COUNT(*)

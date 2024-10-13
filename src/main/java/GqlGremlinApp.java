@@ -41,31 +41,36 @@ import antlr.GqlLexer;
 import antlr.GqlParser;
 import ast.GqlProgram;
 import ast.visitors.AstListener;
+import cli.Arg;
+import cli.CliArgParser;
+import cli.Arg;
+import cli.CliArgParser;
 import gql_gremlin.GremlinCompiler;
 import graphs.GremlinGraph;
 import graphs.GremlinGraphFactory;
 import graphs.ResourcePaths;
+import static cli.display.DisplayHelpers.printTable;
 
 public class GqlGremlinApp {
-    static final String testQueryFolder = "/src/test/resources/queries/";
+    public static final String defaultQuery = "gql/noop.gql";
+    public static final String defaultCompiler = "rigid";
+
+    public static final CliArgParser argParser = new CliArgParser(Map.of(
+        "query", Arg.single(defaultQuery),
+        "compiler", Arg.single(defaultCompiler),
+        "norun", Arg.flag(),
+        "printgraph", Arg.flag()
+    ));
 
     public static void main(String[] args) throws Exception {
-        assert(args.length >= 1);        
-        System.out.println(args[0]);
-        // System.out.println(Files.size(Paths.get(System.getProperty("user.dir") + testQueryFolder + args[0])));
-        // System.out.println(testQueryFolder.substring(0, testQueryFolder.length()-1));
-        // System.out.println(
-        //     Files.list(
-        //         Paths.get(
-        //             System.getProperty("user.dir") + testQueryFolder + "gql"
-        //             )
-        //         )
-        //     .map(path -> path.toString()).toList()
-        // );
+        argParser.parseArgs(args);
+        String queryArg = argParser.getArgSingle("query");
+        boolean norun = argParser.checkFlagged("norun");
+        boolean printgraph = argParser.checkFlagged("printgraph");
+        String queryPath = ResourcePaths.getQueryFolder() + queryArg;
+        assert Paths.get(queryPath).toAbsolutePath().toFile().exists() : "File doesn't exist";
 
-        assert Paths.get(System.getProperty("user.dir") + testQueryFolder + args[0]).toAbsolutePath().toFile().exists() : "File doesn't exist";
-
-        GqlLexer lexer = makeGqlFileLexer(testQueryFolder + args[0]);
+        GqlLexer lexer = makeGqlFileLexer(queryPath);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GqlParser parser = new GqlParser(tokens);
         
@@ -85,7 +90,7 @@ public class GqlGremlinApp {
         System.out.println("Final Traversal:");
         System.out.println(expl.prettyPrint());
 
-        if (args.length >= 2 && args[1].equals("-p"))
+        if (norun)
         {
             return;
         }
@@ -101,16 +106,17 @@ public class GqlGremlinApp {
                     );
         GraphTraversalSource g = graph.currentGraph;
 
-        // printGraph(g);
+        if (printgraph)
+        {
+            printGraph(g);
+        }
 
         // takes anonymous traversal and applies it to our target graph
         traversal = appendTraversal(g, traversal.asAdmin().getBytecode());
 
         List<Map<String,Object>> res = traversal.toList();
 
-        printTable(res);
-
-        
+        printTable(res, System.out);
     }
 
     public static void printProgram(GqlProgram program)
@@ -140,54 +146,6 @@ public class GqlGremlinApp {
         List<Map<Object,Object>> edgeProperties = g.E().valueMap().toList();
         System.out.println("EDGES PROPERTIES: ");
         System.out.println(edgeProperties);
-
-        // System.out.println("GRAPH: ");
-        // System.out.println(res);
-
-    }
-
-    public static void printTable(List<Map<String,Object>> maps)
-    {   
-        Map<String, Integer> sizes = new HashMap<>();
-        for (Map<String, Object> map : maps) 
-        {
-            for (Map.Entry<String, Object> e : map.entrySet())
-            {
-                sizes.putIfAbsent(e.getKey(), 0);
-                Integer len = e.getValue().toString().length();
-                sizes.compute(e.getKey(), (s, v) -> Integer.max(v, len));
-            }
-        }
-
-        for (Map.Entry<String, Integer> e : sizes.entrySet())
-        {
-            // System.out.println(e);
-            // String width = Integer.toString(e.getValue());
-            String format = " %%-%ds|".formatted(e.getValue());
-            // get "%-[width]s"
-
-            System.out.printf(format, e.getKey());
-        }
-        System.out.println();
-
-        for (Map<String, Object> map : maps)
-        {
-            for (String key : sizes.keySet())
-            {
-                Integer size = sizes.get(key);
-                String format = " %%-%ds|".formatted(size);
-                if (map.containsKey(key))
-                {
-                    System.out.printf(format, map.get(key));
-                }
-                else 
-                {
-                    System.out.printf(format, "NO MATCH");
-                }
-            }
-            System.out.println();
-        }
-
     }
 
     public static GqlLexer makeGqlFileLexer(String filePath)

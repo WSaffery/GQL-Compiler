@@ -76,6 +76,25 @@ pointPattern
     ;
 
 parenthesizedPathPatternExpression
+    : leftParenthesizedPathPatternExpression
+    | rightParenthesizedPathPatternExpression
+    | fullParenthesizedPathPatternExpression
+    | loneParenthesizedPathPatternExpression
+    ;
+
+leftParenthesizedPathPatternExpression
+    : nodePattern LEFT_BRACKET pathPatternExpression whereClause? RIGHT_BRACKET len?
+    ;
+
+rightParenthesizedPathPatternExpression
+    : LEFT_BRACKET pathPatternExpression whereClause? RIGHT_BRACKET len? nodePattern
+    ;
+
+fullParenthesizedPathPatternExpression
+    : nodePattern LEFT_BRACKET pathPatternExpression whereClause? RIGHT_BRACKET len? nodePattern
+    ;
+
+loneParenthesizedPathPatternExpression
     : LEFT_BRACKET pathPatternExpression whereClause? RIGHT_BRACKET len?
     ;
 
