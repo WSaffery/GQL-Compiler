@@ -2,6 +2,7 @@ package gql_gremlin;
 
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.Pop;
+import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Pair;
@@ -812,7 +813,10 @@ public class GremlinCompiler implements Compiler {
                     resultTraversal = resultTraversal.by();
                     break;
                 case GroupGraphValue:
-                    resultTraversal = resultTraversal.by(unfold().fold());
+                    // hack to turn result which may be a list or a single value (because of Pop.Mixed)
+                    // into a guaranteed list.
+                    resultTraversal = resultTraversal.by(
+                        choose(count(Scope.local).is(P.eq(1)), fold()));
                     break;
             }
         }
