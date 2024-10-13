@@ -53,7 +53,7 @@ import java.util.Optional;
 public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {    
     GqlVariables variables;
     ExpressionVisitor expressionVisitor;
-    boolean existential; 
+    boolean existential;
     // If existential is True this visitor will throw if a pattern variable does not 
     // already exist rather than add it to the variable set.
 
@@ -74,8 +74,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
         this(variables, false);
     }
 
-    @Override
-    public PathPattern visitPathPatternExpression(PathPatternExpressionContext ctx) {
+    public PathPattern visitPathPatternExpression(PathPatternExpressionContext ctx, boolean parenPath) {
 
         ArrayList<PathComponent> pathSequence = new ArrayList<>();
 
@@ -100,11 +99,11 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
 
                 if (pointChild instanceof NodePatternContext)
                 {
-                    pathSequence.add(visitNodePattern((NodePatternContext) pointChild));
+                    pathSequence.add(visitNodePattern((NodePatternContext) pointChild, parenPath));
                 }
                 else if (pointChild instanceof ParenthesizedPathPatternExpressionContext)
                 {
-                    pathSequence.add(visitParenthesizedPathPatternExpression((ParenthesizedPathPatternExpressionContext) pointChild));
+                    pathSequence.add(visitParenthesizedPathPatternExpression((ParenthesizedPathPatternExpressionContext) pointChild, parenPath));
                 }
                 
             } else if (child instanceof EdgePatternContext) {
@@ -114,7 +113,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
                     actual_idx++;
                 }
 
-                pathSequence.add(visitEdgePattern((EdgePatternContext) child));
+                pathSequence.add(visitEdgePattern((EdgePatternContext) child, parenPath));
             }
 
             actual_idx++;
@@ -123,8 +122,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
         return new PathPattern(pathSequence);
     }
 
-    @Override
-    public ParenPathPattern visitParenthesizedPathPatternExpression(ParenthesizedPathPatternExpressionContext ctx)
+    public ParenPathPattern visitParenthesizedPathPatternExpression(ParenthesizedPathPatternExpressionContext ctx, boolean parenPath)
     {
         WhereClauseContext where = null;
         LenContext len = null;
@@ -174,15 +172,14 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
         assert path != null : "bad paren path";
 
         return new ParenPathPattern(
-            visitPathPatternExpression(path), 
+            visitPathPatternExpression(path,true), 
             null, 
             visitLen(len),
-            Optional.ofNullable(head).map(p -> visitNodePattern(p)),
-            Optional.ofNullable(tail).map(p -> visitNodePattern(p)));
+            Optional.ofNullable(head).map(p -> visitNodePattern(p, parenPath)),
+            Optional.ofNullable(tail).map(p -> visitNodePattern(p, parenPath))); // incase we're in a nested paren path
     }
 
-    @Override
-    public NodePattern visitNodePattern(NodePatternContext ctx) {
+    public NodePattern visitNodePattern(NodePatternContext ctx, boolean parenPath) {
         Optional<String> variableName = visitElementVariable(ctx.elementPatternFiller().elementVariable());
         if (variableName.isPresent())
         {
@@ -193,8 +190,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
             }
             else 
             {
-                // checks type is correct if variable exists
-                variables.addVariable(name, VariableType.NODE);
+                variables.addVariable(name, VariableType.NODE, parenPath);
             }
         }
 
@@ -204,20 +200,19 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
         return new NodePattern(variableName, labels, properties);
     }
 
-    @Override
-    public EdgePattern visitEdgePattern(EdgePatternContext ctx) {
+    public EdgePattern visitEdgePattern(EdgePatternContext ctx, boolean parenPath) {
         // default unlabelled right pointing edge
         EdgePattern edge = new EdgePattern(Optional.empty(), null, null, Optional.empty());
 
         if (ctx.getChild(0) instanceof FullEdgeUndirectedContext) {
-            edge = visitFullEdgeUndirected((FullEdgeUndirectedContext) ctx.getChild(0));
+            edge = visitFullEdgeUndirected((FullEdgeUndirectedContext) ctx.getChild(0), parenPath);
         } else if (ctx.getChild(0) instanceof FullEdgePointingLeftContext) {
-            edge = visitFullEdgePointingLeft((FullEdgePointingLeftContext) ctx.getChild(0));
+            edge = visitFullEdgePointingLeft((FullEdgePointingLeftContext) ctx.getChild(0), parenPath);
         } else if (ctx.getChild(0) instanceof FullEdgePointingRightContext) {
-            edge = visitFullEdgePointingRight((FullEdgePointingRightContext) ctx.getChild(0));
+            edge = visitFullEdgePointingRight((FullEdgePointingRightContext) ctx.getChild(0), parenPath);
         } else if (ctx.getChild(0) instanceof FullEdgeAnyOrientationContext)
         {
-            edge = visitFullEdgeAnyOrientation((FullEdgeAnyOrientationContext) ctx.getChild(0));
+            edge = visitFullEdgeAnyOrientation((FullEdgeAnyOrientationContext) ctx.getChild(0), parenPath);
         }
 
         if (ctx.len() != null) {
@@ -227,27 +222,23 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
         return edge;
     }
 
-    @Override
-    public EdgePattern visitFullEdgePointingLeft(FullEdgePointingLeftContext ctx) {
-        return getEdgePattern(ctx.elementPatternFiller(), Optional.of(Direction.RIGHT_TO_LEFT));
+    public EdgePattern visitFullEdgePointingLeft(FullEdgePointingLeftContext ctx, boolean parenPath) {
+        return getEdgePattern(ctx.elementPatternFiller(), Optional.of(Direction.RIGHT_TO_LEFT), parenPath);
     }
 
-    @Override
-    public EdgePattern visitFullEdgePointingRight(FullEdgePointingRightContext ctx) {
-        return getEdgePattern(ctx.elementPatternFiller(), Optional.of(Direction.LEFT_TO_RIGHT));
+    public EdgePattern visitFullEdgePointingRight(FullEdgePointingRightContext ctx, boolean parenPath) {
+        return getEdgePattern(ctx.elementPatternFiller(), Optional.of(Direction.LEFT_TO_RIGHT), parenPath);
     }
 
-    @Override
-    public EdgePattern visitFullEdgeUndirected(FullEdgeUndirectedContext ctx) {
-        return getEdgePattern(ctx.elementPatternFiller(), Optional.of(Direction.UNDIRECTED));
+    public EdgePattern visitFullEdgeUndirected(FullEdgeUndirectedContext ctx, boolean parenPath) {
+        return getEdgePattern(ctx.elementPatternFiller(), Optional.of(Direction.UNDIRECTED), parenPath);
     }
 
-    @Override
-    public EdgePattern visitFullEdgeAnyOrientation(FullEdgeAnyOrientationContext ctx) {
-        return getEdgePattern(ctx.elementPatternFiller(), Optional.empty());
+    public EdgePattern visitFullEdgeAnyOrientation(FullEdgeAnyOrientationContext ctx, boolean parenPath) {
+        return getEdgePattern(ctx.elementPatternFiller(), Optional.empty(), parenPath);
     }
 
-    private EdgePattern getEdgePattern(ElementPatternFillerContext ctx, Optional<Direction> direction) {
+    private EdgePattern getEdgePattern(ElementPatternFillerContext ctx, Optional<Direction> direction, boolean parenPath) {
         Optional<String> variableName = visitElementVariable(ctx.elementVariable());
         if (variableName.isPresent())
         {
@@ -259,7 +250,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
             else 
             {
                 // checks type is correct if variable exists
-                variables.addVariable(name, VariableType.EDGE);
+                variables.addVariable(name, VariableType.EDGE, parenPath);
             }
         }
 

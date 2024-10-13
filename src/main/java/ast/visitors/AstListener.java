@@ -44,6 +44,7 @@ public class AstListener extends GqlParserBaseListener {
     public void enterQueryExpression(QueryExpressionContext ctx)
     {
         currentQuery = new GqlQuery();
+        currentQuery.variables = result.variables;
         result.body.addQuery(currentQuery);
     }
 
@@ -74,7 +75,7 @@ public class AstListener extends GqlParserBaseListener {
                 Optional.empty() :
                 Optional.of(pathPatternCtx.pathVariable().getText());
             
-            PathPattern path = pathPatternExpressionVisitor.visitPathPatternExpression(pathPatternCtx.pathPatternExpression());
+            PathPattern path = pathPatternExpressionVisitor.visitPathPatternExpression(pathPatternCtx.pathPatternExpression(), false);
 
             pathPatterns.add(new QualifiedPathPattern(var, mode, path));
             var.ifPresent((name) -> result.variables.addVariable(name, VariableType.PATH));

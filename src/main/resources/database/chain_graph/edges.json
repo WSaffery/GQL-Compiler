@@ -1,0 +1,10 @@
+[
+    { "identity": "e0", "start": "a1", "end": "a2", "isDirected": 1}, 
+    { "identity": "e1", "start": "a2", "end": "a3", "isDirected": 1}, 
+    { "identity": "e2", "start": "a3", "end": "a4", "isDirected": 1}, 
+    { "identity": "e3", "start": "a4", "end": "a5", "isDirected": 1}, 
+    { "identity": "e4", "start": "a5", "end": "a6", "isDirected": 1}, 
+    { "identity": "e5", "start": "a6", "end": "a7", "isDirected": 1}, 
+    { "identity": "e6", "start": "a7", "end": "a8", "isDirected": 1}, 
+    { "identity": "e7", "start": "a8", "end": "a9", "isDirected": 1}
+]

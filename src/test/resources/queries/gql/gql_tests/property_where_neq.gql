@@ -1,0 +1,11 @@
+-- Expected 
+-- (a {v: 1}) -> (b {v: 2})
+-- (a {v: 1}) -> (c {v: 3})
+-- (b {v: 2}) -> (c {v: 3})
+-- (b {v: 2}) -> (d {v: 1})
+-- (c {v: 3}) -> (d {v: 1})
+
+FROM t1
+MATCH (x) -[]-> (y)
+WHERE x.v <> y.v
+RETURN x, y

@@ -77,7 +77,7 @@ public class ExpressionVisitor extends GqlParserBaseVisitor<Expression> {
 
     public Expression visitGraphExistsExpression(GraphExistsExpressionContext ctx) {
         assert ctx.pathPatternExpression() != null : "Exists expression without path pattern";
-        PathPattern existentialPattern = pathPatternExpressionVisitor.visitPathPatternExpression(ctx.pathPatternExpression());
+        PathPattern existentialPattern = pathPatternExpressionVisitor.visitPathPatternExpression(ctx.pathPatternExpression(), false);
         return new GraphExistsExpression(existentialPattern);
     }
 

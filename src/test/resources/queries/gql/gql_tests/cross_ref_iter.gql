@@ -1,4 +1,0 @@
-FROM c3
-MATCH (a) -[]-> (b) -[]-> (c),
-      [(d)-[]->(b)-[]->(e)]{1,2}
-RETURN a, b, c, d, e

@@ -1,0 +1,22 @@
+[
+    {
+      "identity": "Rick",
+      "labels": ["Person"],
+      "properties": { "v": 10}
+    },
+    {
+      "identity": "Jill",
+      "labels": ["Person"],
+      "properties": { "v": 28 }
+    },
+    {
+      "identity": "Jack",
+      "labels": ["Person"],
+      "properties": { "v": 30 }
+    },
+    {
+      "identity": "Adam",
+      "labels": ["Person"],
+      "properties": { "v": 10 }
+    }
+  ]

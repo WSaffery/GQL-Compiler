@@ -1,0 +1,11 @@
+[
+  {"identity": "a1", "labels": ["A"]}, 
+  {"identity": "a2", "labels": ["A"]}, 
+  {"identity": "a3", "labels": ["A"]},
+  {"identity": "a4", "labels": ["A"]}, 
+  {"identity": "a5", "labels": ["A"]}, 
+  {"identity": "a6", "labels": ["A"]},
+  {"identity": "a7", "labels": ["A"]}, 
+  {"identity": "a8", "labels": ["A"]}, 
+  {"identity": "a9", "labels": ["A"]}
+]

@@ -137,9 +137,9 @@ public class GremlinCompiler implements Compiler {
             String key = item.getKey();
             Object value = item.getValue().getValue();
             // continue;
-            if (value instanceof Float)
+            if (value instanceof Double)
             {
-                Float num = (Float) value;
+                Double num = (Double) value;
                 traversal = traversal.has(key, num);
             }
             else if (value instanceof String)
@@ -394,9 +394,6 @@ public class GremlinCompiler implements Compiler {
         }
         else 
         {
-            // throw new SyntaxErrorException("Paren path pattern execution as head of path currently unsupported");
-            // need to unroll one layer 
-            // and start from there if possible
             ParenPathPattern parenPathPattern = (ParenPathPattern) head;
 
             GraphTraversal<Vertex, Vertex> startingTraversal;
@@ -408,6 +405,9 @@ public class GremlinCompiler implements Compiler {
             else 
             {
                 startingTraversal = traversal.V();
+                // TODO!
+                // need to unroll one layer 
+                // and start from there if possible
             }
 
             if (labeledPath)
@@ -672,6 +672,7 @@ public class GremlinCompiler implements Compiler {
     }
 
     enum ReturnType {
+        GroupGraphValue,
         GraphValue,
         GraphMap,
         Value
@@ -698,7 +699,14 @@ public class GremlinCompiler implements Compiler {
                     NameExpression nameExpr = (NameExpression) expr;
                     fullReturnNames.add(nameExpr.name());
                     returnNames.add(nameExpr.name());
-                    returnNameTypes.add(ReturnType.GraphValue);
+                    if (query.variables.isGroup(nameExpr.name()))
+                    {
+                        returnNameTypes.add(ReturnType.GroupGraphValue);
+                    }
+                    else 
+                    {
+                        returnNameTypes.add(ReturnType.GraphValue);
+                    }
                 }
                 else if (expr instanceof PropertyReference)
                 {
@@ -802,6 +810,9 @@ public class GremlinCompiler implements Compiler {
                     break;
                 case GraphValue:
                     resultTraversal = resultTraversal.by();
+                    break;
+                case GroupGraphValue:
+                    resultTraversal = resultTraversal.by(unfold().fold());
                     break;
             }
         }

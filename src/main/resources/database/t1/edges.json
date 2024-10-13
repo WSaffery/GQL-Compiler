@@ -19,14 +19,20 @@
   },
   {
     "identity": "e4",
-    "start": "d",
-    "end": "b",
+    "start": "a",
+    "end": "c",
     "isDirected": 1
   },
   {
     "identity": "e5",
     "start": "a",
-    "end": "a",
+    "end": "d",
+    "isDirected": 1
+  },
+  {
+    "identity": "e6",
+    "start": "b",
+    "end": "d",
     "isDirected": 1
   }
 ]

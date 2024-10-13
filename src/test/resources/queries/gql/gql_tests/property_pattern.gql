@@ -1,0 +1,3 @@
+FROM t1
+MATCH (x {v: 1})-[]->(y)
+RETURN x, y

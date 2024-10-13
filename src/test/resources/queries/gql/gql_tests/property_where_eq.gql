@@ -1,0 +1,7 @@
+-- Expected 
+-- (a {v: 1}) -> (d {v: 1})
+
+FROM t1
+MATCH (x) -[]-> (y)
+WHERE x.v = y.v
+RETURN x, y

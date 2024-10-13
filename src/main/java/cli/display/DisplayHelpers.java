@@ -3,6 +3,7 @@ package cli.display;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,7 @@ public class DisplayHelpers {
 
     public static void printTable(List<Map<String,Object>> maps, PrintStream printStream)
     {   
-        Map<String, Integer> sizes = new HashMap<>();
+        Map<String, Integer> sizes = new LinkedHashMap<>();
         for (Map<String, Object> map : maps) 
         {
             for (Map.Entry<String, Object> e : map.entrySet())

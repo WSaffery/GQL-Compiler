@@ -115,7 +115,6 @@ public class GqlGremlinApp {
         traversal = appendTraversal(g, traversal.asAdmin().getBytecode());
 
         List<Map<String,Object>> res = traversal.toList();
-
         printTable(res, System.out);
     }
 

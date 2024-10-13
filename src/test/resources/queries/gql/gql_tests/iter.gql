@@ -1,0 +1,10 @@
+-- The chain contains 2*k edges for k in [1,3]
+-- The chain starts with a node with label A
+-- expect to see
+-- (a)->(b)->(c)
+-- (a)->(b)->(a+c)->(b)->(c)
+-- (a)->(b)->(a+c)->(b)->(a+c)->(b)->(c)
+
+FROM chain_graph
+MATCH [(a) -[]-> (b) -[]-> (c)]{1,3}
+RETURN a, b, c
