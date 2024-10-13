@@ -132,6 +132,7 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
         NodePatternContext head = null;
         NodePatternContext tail = null;
 
+        System.out.println(ctx);
         if (ctx.leftParenthesizedPathPatternExpression() != null)
         {
             LeftParenthesizedPathPatternExpressionContext lower_ctx = ctx.leftParenthesizedPathPatternExpression();
@@ -171,7 +172,6 @@ public class PathPatternExpressionVisitor extends GqlParserBaseVisitor {
             throw new SemanticErrorException("Where clause currently unsupported");
         }
         assert path != null : "bad paren path";
-        assert len != null : "bad paren path";
 
         return new ParenPathPattern(
             visitPathPatternExpression(path), 

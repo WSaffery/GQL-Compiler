@@ -162,7 +162,10 @@ public class GremlinCompiler implements Compiler {
         return traversal;
     }
 
-    public <E> GraphTraversal<Vertex, E> compileElementPattern(GraphTraversal<Vertex, E> traversal, ElementPattern pattern, HashSet<String> capturedSet)
+    public <E> GraphTraversal<Vertex, E> compileElementPattern(
+        GraphTraversal<Vertex, E> traversal, 
+        ElementPattern pattern, 
+        Set<String> capturedSet)
     {
         Optional<String> variableName = pattern.variableName();
         boolean captured = variableName.isPresent() && capturedSet.contains(variableName.get());
@@ -317,6 +320,13 @@ public class GremlinCompiler implements Compiler {
         boolean uncaptured = uncapturedInnerVariables.size() > 0; 
         boolean unroll =  quantifier.b() > 1; 
 
+        if (parenPathPattern.headOuterNode().isPresent())
+        {
+            traversal = compileElementPattern(traversal, 
+                parenPathPattern.headOuterNode().get(), 
+                capturedVariables);
+        }
+
         // TODO! add support for 0 length iteration
         if (uncaptured && unroll)
         {
@@ -343,6 +353,13 @@ public class GremlinCompiler implements Compiler {
         if (uncaptured && !unroll)
         {
             capturedVariables.addAll(uncapturedInnerVariables);
+        }
+
+        if (parenPathPattern.tailOuterNode().isPresent())
+        {
+            traversal = compileElementPattern(traversal, 
+                parenPathPattern.tailOuterNode().get(), 
+                capturedVariables);
         }
 
         return traversal;
@@ -380,14 +397,24 @@ public class GremlinCompiler implements Compiler {
             // throw new SyntaxErrorException("Paren path pattern execution as head of path currently unsupported");
             // need to unroll one layer 
             // and start from there if possible
+            ParenPathPattern parenPathPattern = (ParenPathPattern) head;
 
-            GraphTraversal<Vertex, Vertex> startingTraversal = capturedSet.size() > 0 ? traversal.barrier().V() : traversal.V();
+            GraphTraversal<Vertex, Vertex> startingTraversal;
+            if (parenPathPattern.headOuterNode().isPresent())
+            {
+                startingTraversal = compileStartingElementPattern(traversal, parenPathPattern.headOuterNode().get(), capturedSet);
+                parenPathPattern = parenPathPattern.dropHead();
+            }
+            else 
+            {
+                startingTraversal = traversal.V();
+            }
+
             if (labeledPath)
             {
                 startingTraversal = startingTraversal.as(startLabel);
             }
-            traversal = compileParenPathPattern(
-                startingTraversal, (ParenPathPattern) head, capturedSet, variables);
+            traversal = compileParenPathPattern(startingTraversal, parenPathPattern, capturedSet, variables);
         }
 
         for (PathComponent component : components.subList(1, components.size()))

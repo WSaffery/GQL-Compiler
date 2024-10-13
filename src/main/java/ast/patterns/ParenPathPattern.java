@@ -12,4 +12,9 @@ public record ParenPathPattern(
     Optional<NodePattern> headOuterNode,
     Optional<NodePattern> tailOuterNode
 ) implements PathComponent {
+
+    public ParenPathPattern dropHead()
+    {
+        return new ParenPathPattern(pathPattern, whereExpression, quantifier, Optional.empty(), tailOuterNode);
+    }
 }
