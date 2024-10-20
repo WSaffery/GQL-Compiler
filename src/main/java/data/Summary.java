@@ -1,5 +1,5 @@
 package data;
-import java.util.HashMap;
+import java.io.Serializable;
 import java.util.Map;
 
 import org.javatuples.Triplet;
@@ -11,7 +11,7 @@ import gql_gremlin.query.QueryNode;
 public record Summary(
     Map<String, Long> nodeCardinalities,
     Map<Triplet<String, String, String>, Long> tripletCardinalities
-) {
+) implements Serializable {
 
     public Long getCardinality(QueryNode node)
     {

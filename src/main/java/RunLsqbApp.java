@@ -47,6 +47,7 @@ public class RunLsqbApp {
     public static final String defaultVariant = "";
     public static final String defaultResultsFile = "results/results.csv";
     public static final String defaultCompilerType = "rigid";
+    public static final String defaultSummaryName = "lsqb";
 
     public static final CliArgParser argParser = new CliArgParser(Map.of(
         "querydir", Arg.single(defaultQueryDirectory),
@@ -96,7 +97,7 @@ public class RunLsqbApp {
         String compilerDescription = Compiler.getCompilerDescription(compilerType);
         String system = String.format("GqlToGremlin[%s]", compilerDescription);
         // the optimising compiler has our datasets' summary included, but no other state
-        Compiler compiler = Compiler.getCompiler(compilerType);
+        Compiler compiler = Compiler.getCompiler(compilerType, "lsqb");
         
         double scaleFactor = 0.1;
 

@@ -22,7 +22,6 @@ import static gql_gremlin.helpers.GremlinHelpers.appendTraversal;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,8 +40,6 @@ import antlr.GqlLexer;
 import antlr.GqlParser;
 import ast.GqlProgram;
 import ast.visitors.AstListener;
-import cli.Arg;
-import cli.CliArgParser;
 import cli.Arg;
 import cli.CliArgParser;
 import gql_gremlin.GremlinCompiler;

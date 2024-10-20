@@ -51,11 +51,13 @@ public class NewGqlGremlinScriptApp {
     static final String testQueryFolder = "/src/test/resources/queries/";
     static final String defaultQueryPath = "";
     static final String defaultCompiler = "rigid";
+    public static final String defaultSummaryName = "lsqb";
 
 
     public static final CliArgParser argParser = new CliArgParser(Map.of(
         "query", Arg.single(defaultQueryPath),
-        "compiler", Arg.single(defaultCompiler)
+        "compiler", Arg.single(defaultCompiler),
+        "summary", Arg.single(defaultSummaryName)
     ));
 
     // usage: -query query -compiler compiler
@@ -63,6 +65,7 @@ public class NewGqlGremlinScriptApp {
         argParser.parseArgs(args);
         String query = argParser.getArgSingle("query");
         String compilerType = argParser.getArgSingle("compiler");
+        String summaryName = argParser.getArgSingle("summary");
 
         assert !query.equals("") : "-query argument required";
 
@@ -83,7 +86,7 @@ public class NewGqlGremlinScriptApp {
         }
 
         
-        Compiler compiler = Compiler.getCompiler(compilerType);
+        Compiler compiler = Compiler.getCompiler(compilerType, summaryName);
 
         final long startTime = System.currentTimeMillis();
         GraphTraversal<Vertex, Map<String,Object>> traversal = compiler.compileToTraversal(program);

@@ -31,6 +31,7 @@ import graphs.ResourcePaths;
 // for some reason can't get remote-graph.properties files working
 // have to instantiate connection directly using remote-objects.yaml files
 
+// TODO! add support for summary files using SummaryStorage class
 public class RunRemoteDbApp {
     // usage: -query query -conf conf -rts rts
     // where query is some query path relative to /src/test/resources/queries/
@@ -43,6 +44,7 @@ public class RunRemoteDbApp {
     public static final String defaultLanguage = "gql";
     public static final String defaultOutputFile = ""; // stdout
     public static final String defaultCompiler = "rigid";
+    public static final String defaultSummaryName = "lsqb";
 
     public static final CliArgParser argParser = new CliArgParser(Map.of(
         "query", Arg.single(defaultQuery),
@@ -51,6 +53,7 @@ public class RunRemoteDbApp {
         "output", Arg.single(defaultOutputFile),
         "language", Arg.single(defaultLanguage),
         "compiler", Arg.single(defaultCompiler),
+        "summary", Arg.single(defaultSummaryName),
         "profile", Arg.flag(),
         "explain", Arg.flag()
     ));
@@ -68,7 +71,7 @@ public class RunRemoteDbApp {
         String queryPath = ResourcePaths.getQueryFolder() + queryArg;
         String queryLanguage = argParser.getArgSingle("language");
         String compilerType = argParser.getArgSingle("compiler");
-
+        String summaryName = argParser.getArgSingle("summary");
         System.out.println("conf: " + conf);
         System.out.println("query: " + queryArg);
         System.out.println("queryPath: " + queryPath);
@@ -87,7 +90,7 @@ public class RunRemoteDbApp {
             final long startTime = System.currentTimeMillis();
 
             GqlProgram program = GqlProgram.buildProgram(queryPath);
-            Compiler compiler = Compiler.getCompiler(compilerType);
+            Compiler compiler = Compiler.getCompiler(compilerType, summaryName);
             GraphTraversal<Vertex, Map<String,Object>> traversal = compiler.compileToTraversal(program);
             traversal = appendTraversal(gts, traversal.asAdmin().getBytecode());
             final long compileEndTime = System.currentTimeMillis();

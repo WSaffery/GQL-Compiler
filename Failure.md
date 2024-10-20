@@ -15,3 +15,9 @@ Arcade GqlToGremlin Fails for
 
 Janus GqlToGremlin Fails for
 - 1, 2, 3, 6, 9
+
+# Optimising
+
+
+Arcade Optimised GqlToGremlin Fails for
+- 3, 9
