@@ -38,7 +38,7 @@ public class RunLsqbApp {
     // where conf is cluster yaml config files, ala remote-objects.yaml
     // and rts is the remote traversal source name, "g" by default
 
-    public static final String defaultQueryDirectory = "gql/lsqb_optimised";
+    public static final String defaultQueryDirectory = "gql/lsqb";
     public static final String defaultConfigFile = "conf/remote-objects.yaml";
     public static final String defaultRTSName = "g";
     public static final String defaultOutputFile = ""; // stdout

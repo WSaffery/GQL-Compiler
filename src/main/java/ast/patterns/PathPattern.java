@@ -131,6 +131,11 @@ public class PathPattern {
         return pathSequence.toString();
     }
 
+    public String toOrdering()
+    {
+        return String.join(" ", pathSequence.stream().map(c -> c.toString()).toList());
+    }
+
     public static void validatePathSequence(ArrayList<PathComponent> pathSequence)
     {
         if (pathSequence.size() % 2 == 0) {

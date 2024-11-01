@@ -51,15 +51,17 @@ public class GremlinHelpers {
     @SuppressWarnings("unchecked")
     public static <A, B> GraphTraversal<A, B> conjoinTraversals(GraphTraversal<A, B> x, QueryConjunctor conjunctor, GraphTraversal<A, B> y)
     {
+        // TODO: why do we even have this, remove??
         GraphTraversal<A, A> traversal = start();
         switch (conjunctor)
         {
             case UNION_ALL:
                 return traversal.union(x, y);
+            case UNION_DISTINCT:
+                return traversal.union(x, y).dedup();
             default:
-                System.out.println("Only union all is currently supported");
-                assert(false);
-            
+                System.out.println("Only union all and union distinct is currently supported");
+                assert(false); // nice, TODO: fix
         }
         return null;
     }

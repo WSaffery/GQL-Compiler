@@ -5,7 +5,9 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Triplet;
 
 import ast.GqlProgram;
+import ast.patterns.EdgePattern;
 import ast.patterns.ElementPattern;
+import ast.patterns.NodePattern;
 import ast.patterns.PathComponent;
 import ast.patterns.PathPattern;
 import ast.patterns.QualifiedPathPattern;
@@ -15,6 +17,7 @@ import gql_gremlin.matching.MatchExpression;
 import gql_gremlin.query.QueryEdge;
 import gql_gremlin.query.QueryGraph;
 import gql_gremlin.query.QueryNode;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,19 +25,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-
-enum GQLDirection {
-    UNDIRECTED,
-    RIGHT_TO_LEFT,
-    LEFT_TO_RIGHT
-}
-
-record PropertyResult(
-    String propertyKey,
-    String alias
-)
-{}
 
 // Manipulates the order of paths given in the given GqlProgram in compileToTraversal
 // to optimise intermediate result size, and then compiles using the 
@@ -173,30 +163,48 @@ public class OptimisingCompiler implements Compiler {
         ArrayList<PathComponent> currentComponents = new ArrayList<>();
         QueryNode prior = null;
         
+        HashSet<String> addedElements = new HashSet<>();
+
         for (Triplet<QueryNode, QueryEdge, QueryNode> join : ordering)
         {
             QueryNode nodeA = join.getValue0();
             QueryEdge edge = join.getValue1();
             QueryNode nodeB = join.getValue2();
 
+            NodePattern patternA = addedElements.contains(nodeA.variableName()) ? 
+                nodeA.pattern().getNoPredicate() : 
+                nodeA.pattern();
+
+            EdgePattern edgePattern = edge.variableName().map(n -> addedElements.contains(n)).isPresent() ?
+                edge.pattern().getNoPredicate() :
+                edge.pattern();
+
+            NodePattern patternB = addedElements.contains(nodeB.variableName()) ? 
+                nodeB.pattern().getNoPredicate() : 
+                nodeB.pattern();
+
+            addedElements.add(nodeA.variableName());
+            addedElements.add(nodeB.variableName());
+            edge.variableName().ifPresent(n -> addedElements.add(n));
+
             if (prior == null)
             {
-                currentComponents.add(nodeA.pattern());   
-                currentComponents.add(edge.pattern());
-                currentComponents.add(nodeB.pattern());
+                currentComponents.add(patternA);
+                currentComponents.add(edgePattern);
+                currentComponents.add(patternB);
             }
             else if (prior.variableName().equals(nodeA.variableName()))
             {
-                currentComponents.add(edge.pattern());
-                currentComponents.add(nodeB.pattern());
+                currentComponents.add(edgePattern);
+                currentComponents.add(patternB);
             }
             else 
             {
                 paths.add(new PathPattern(currentComponents));
                 currentComponents = new ArrayList<>();
-                currentComponents.add(nodeA.pattern());
-                currentComponents.add(edge.pattern());
-                currentComponents.add(nodeB.pattern());
+                currentComponents.add(patternA);
+                currentComponents.add(edgePattern);
+                currentComponents.add(patternB);
             }
 
             prior = nodeB;
@@ -315,6 +323,15 @@ public class OptimisingCompiler implements Compiler {
         }
 
         return backend.compileToTraversal(program);
+    }
+
+
+    public void optimiseProgram(GqlProgram program) 
+    {
+        for (GqlQuery query : program.body.queries())
+        {
+            optimiseQuery(query);    
+        }
     }
     
 }

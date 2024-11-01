@@ -25,7 +25,7 @@ queryExpression
     ;
 
 focusedQueryExpression
-    : focusedMatchClause+ returnStatement
+    : focusedMatchClause returnStatement
     ;
 
 ambientQueryExpression

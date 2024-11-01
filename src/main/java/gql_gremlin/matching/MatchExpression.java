@@ -7,14 +7,12 @@ import ast.expressions.Expression;
 import ast.patterns.QualifiedPathPattern;
 
 public class MatchExpression {
-    public Optional<String> graphName;
     public boolean isMandatory;
     public Optional<Expression> whereClause;
     public List<QualifiedPathPattern> pathPatterns;
 
-    public MatchExpression(Optional<String> graphName, boolean isMandatory, Optional<Expression> whereClause, List<QualifiedPathPattern> pathPatterns)
+    public MatchExpression(boolean isMandatory, Optional<Expression> whereClause, List<QualifiedPathPattern> pathPatterns)
     {
-        this.graphName = graphName;
         this.isMandatory = isMandatory;
         this.whereClause = whereClause;
         this.pathPatterns = pathPatterns;
@@ -22,7 +20,7 @@ public class MatchExpression {
 
     public String toString()
     {
-        String str = "graphName: " + graphName + ", Is Mandatory:" + isMandatory + ", whereClause" + whereClause;
+        String str = "Is Mandatory:" + isMandatory + ", whereClause" + whereClause;
         int i = 0;
         for (QualifiedPathPattern pathPattern : pathPatterns)
         {

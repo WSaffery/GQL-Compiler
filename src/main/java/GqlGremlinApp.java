@@ -42,6 +42,7 @@ import ast.GqlProgram;
 import ast.visitors.AstListener;
 import cli.Arg;
 import cli.CliArgParser;
+import gql_gremlin.Compiler;
 import gql_gremlin.GremlinCompiler;
 import graphs.GremlinGraph;
 import graphs.GremlinGraphFactory;
@@ -50,17 +51,21 @@ import static cli.display.DisplayHelpers.printTable;
 
 public class GqlGremlinApp {
     public static final String defaultQuery = "gql/noop.gql";
-    public static final String defaultCompiler = "rigid";
+    public static final String defaultCompiler = "rigid";    
+    public static final String defaultSummaryName = "lsqb";
 
     public static final CliArgParser argParser = new CliArgParser(Map.of(
         "query", Arg.single(defaultQuery),
         "compiler", Arg.single(defaultCompiler),
+        "summary", Arg.single(defaultSummaryName),
         "norun", Arg.flag(),
         "printgraph", Arg.flag()
     ));
 
     public static void main(String[] args) throws Exception {
         argParser.parseArgs(args);
+        String compilerType = argParser.getArgSingle("compiler");
+        String summaryName = argParser.getArgSingle("summary");
         String queryArg = argParser.getArgSingle("query");
         boolean norun = argParser.checkFlagged("norun");
         boolean printgraph = argParser.checkFlagged("printgraph");
@@ -78,7 +83,7 @@ public class GqlGremlinApp {
 
         printProgram(program);
 
-        GremlinCompiler compiler = new GremlinCompiler();
+        Compiler compiler = Compiler.getCompiler(compilerType, summaryName);
 
         GraphTraversal<Vertex, Map<String,Object>> traversal = compiler.compileToTraversal(program);
 

@@ -21,4 +21,22 @@ public record QualifiedPathPattern(
     {
         return new QualifiedPathPattern(Optional.empty(), EvaluationMode.WALK, pathPattern);
     }
+
+    public String toOrdering()
+    {
+        String s = "";
+        if (!evaluationMode.equals(EvaluationMode.WALK))
+        {
+            s += evaluationMode.toString();
+        }
+
+        if (variableName.isPresent())
+        {
+            s += variableName.get() + " = ";
+        }
+
+        s += pathPattern.toOrdering();
+
+        return s;
+    }
 }

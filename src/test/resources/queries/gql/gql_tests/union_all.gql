@@ -1,0 +1,11 @@
+FROM t1
+MATCH (x)-[]->(y)
+WHERE x.v < y.v
+RETURN x, y
+-- Expected 
+-- (b {v: 2}) -> (d {v: 1})
+-- (c {v: 3}) -> (d {v: 1})
+UNION ALL
+MATCH (x) -[]-> (y)
+WHERE x.v > y.v
+RETURN x, y

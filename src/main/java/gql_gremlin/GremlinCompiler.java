@@ -36,6 +36,7 @@ import ast.returns.Asterisk;
 import ast.returns.CountAsterisk;
 import ast.returns.ReturnExpression;
 import ast.returns.ReturnItem;
+import ast.variables.Variable;
 import enums.EvaluationMode;
 import enums.SetQuantifier;
 import enums.ValueComparator;
@@ -765,7 +766,19 @@ public class GremlinCompiler implements Compiler {
         {
             if (query.returnStatement.returnItems().get(0) instanceof Asterisk)
             {
-                throw new SyntaxErrorException("Asterisk return currently unsupported");
+                for (Variable var : query.variables.getVariables())
+                {
+                    returnNames.add(var.name());
+                    if (var.group())
+                    {
+                        returnNameTypes.add(ReturnType.GroupGraphValue);
+                    }
+                    else 
+                    {
+                        returnNameTypes.add(ReturnType.GraphValue);
+                    }
+                }
+                // throw new SyntaxErrorException("Asterisk return currently unsupported");
             }
             else if (query.returnStatement.returnItems().get(0) instanceof CountAsterisk)
             {

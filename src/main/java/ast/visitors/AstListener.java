@@ -86,13 +86,13 @@ public class AstListener extends GqlParserBaseListener {
             Optional.of(whereClauseVisitor.visitWhereClause(whereClause)) : 
             Optional.empty();
 
-        Optional<String> graphName = Optional.empty();
-        if (ctx.getParent() instanceof FocusedMatchClauseContext) {
-            FocusedMatchClauseContext focused = (FocusedMatchClauseContext) ctx.getParent();
-            graphName = Optional.of(focused.graphName().getText());
-        }
+        // Optional<String> graphName = Optional.empty();
+        // if (ctx.getParent() instanceof FocusedMatchClauseContext) {
+        //     FocusedMatchClauseContext focused = (FocusedMatchClauseContext) ctx.getParent();
+        //     graphName = Optional.of(focused.graphName().getText());
+        // }
 
-        MatchExpression expression = new MatchExpression(graphName, isMandatory, whereClauseExpression, pathPatterns);
+        MatchExpression expression = new MatchExpression(isMandatory, whereClauseExpression, pathPatterns);
         currentQuery.matchExpressions.add(expression);
     }
 

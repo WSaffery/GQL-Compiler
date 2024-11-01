@@ -41,11 +41,9 @@ import cli.CliArgParser;
 import gql_gremlin.Compiler;
 import graphs.ResourcePaths;
 
-import org.apache.tinkerpop.gremlin.process.traversal.translator.GroovyTranslator;
-import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalExplanation;
 
 
-public class GqlGremlinScriptApp {
+public class GqlGremlinOrderApp {
     public static final String defaultQuery = "gql/noop.gql";
     public static final String defaultCompiler = "rigid";
     public static final String defaultSummaryName = "lsqb";
@@ -64,24 +62,11 @@ public class GqlGremlinScriptApp {
         String queryPath = ResourcePaths.getQueryFolder() + queryArg;
         assert Paths.get(queryPath).toAbsolutePath().toFile().exists() : "File doesn't exist";
 
-
         GqlProgram program = GqlProgram.buildProgram(queryPath);
-
-        if (program.graphName.isPresent())
-        {
-            System.err.println("[WARN] Graph loading not performed by gremlin script.");
-        }
-
         Compiler compiler = Compiler.getCompiler(compilerType, summaryName);
-
-        GraphTraversal<Vertex, Map<String,Object>> traversal = compiler.compileToTraversal(program);
-
-        GroovyTranslator translator = GroovyTranslator.of("g");
-        Script script = translator.translate(traversal);
         
-        System.out.println(script.getScript());
-        
-        // Files.writeString(Paths.get(System.getProperty("user.dir") + testQueryFolder + args[0] + ".gremlin"), script.getScript());
+        compiler.optimiseProgram(program);
+        program.describeOrdering(System.out);
     }
 
 }

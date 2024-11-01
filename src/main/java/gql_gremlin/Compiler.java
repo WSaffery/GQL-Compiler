@@ -1,17 +1,23 @@
 package gql_gremlin;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import ast.GqlProgram;
+import ast.patterns.QualifiedPathPattern;
 import data.Summary;
 import data.SummaryStorage;
 
 public interface Compiler {
+    // optimises program (mutating) and then compiles it to a Gremlin traversal
     public GraphTraversal<Vertex, Map<String,Object>> compileToTraversal(GqlProgram program);
+    
+    // optimises program (mutating)
+    public default void optimiseProgram(GqlProgram program) { return; }
 
     public static String getCompilerDescription(String compilerType)
     {
