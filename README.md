@@ -21,7 +21,7 @@ If you're marking my thesis you might be interested in the original [thesis bran
 
 # GQL Features
 
-- Graph Pattern Matching (ofc)
+- Graph Pattern Matching
 	- Inline label predicates (including disjunctions) (i.e. `(a: Label1 | Label2)`, and property predicates (i.e. `(a: Label1 | Label2 {v : 1)`.
 - Bounded iteration of parenthesised paths (which use `[` and`]` not `(` and `)` right now).
 - Acyclic path pattern mode
