@@ -5,6 +5,9 @@ A [GQL](https://www.gqlstandards.org/home) to [Gremlin](https://tinkerpop.apache
 This project was initially derived from Olaf Morra's [GQL Parser](https://github.com/OlofMorra/GQL-parser), but has since significantly diverged from it.
 Some parts of the ANTLR grammar and the visitors used for transforming it from GQL Parser remain in use, as is some of the code for handling datasets.
 
+If you're marking my thesis you might be interested in the original [thesis branch](https://github.com/WSaffery/GQL-Compiler/tree/thesis) although I wouldn't recommend looking at it too much, it's only there for posterity.
+- no major changes have been made since thesis submission besides cleaning up some files and this readme.
+
 # Standout Features
 
 - Compiles to static Gremlin traversals (i.e. no match step, which we've found in practice is slow).
