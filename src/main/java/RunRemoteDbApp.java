@@ -30,8 +30,6 @@ import graphs.ResourcePaths;
 
 // for some reason can't get remote-graph.properties files working
 // have to instantiate connection directly using remote-objects.yaml files
-
-// TODO! add support for summary files using SummaryStorage class
 public class RunRemoteDbApp {
     // usage: -query query -conf conf -rts rts
     // where query is some query path relative to /src/test/resources/queries/
