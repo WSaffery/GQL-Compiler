@@ -41,3 +41,16 @@ The following apps provide useful functionality that doesn't interact with a liv
 	- Essentially a high level view of the "query plan".
 
 
+# Running an App
+
+run 
+
+```
+mvn exec:java -Dexec.mainClass="<AppName>" -e -Dexec.args="<Args>"
+```
+
+# Getting started
+
+The above assumes you have the parser and lexer generated, and everything built.
+
+A more detailed but shorter and more focused usage guide can be found in `docs/docs.md`
