@@ -3,7 +3,10 @@
 A [GQL](https://www.gqlstandards.org/home) to [Gremlin](https://tinkerpop.apache.org/docs/3.4.4/reference/#intro) transpiler written by William Saffery
 
 This project was initially derived from Olaf Morra's [GQL Parser](https://github.com/OlofMorra/GQL-parser), but has since significantly diverged from it.
-Some parts of the ANTLR grammar and the visitors used for transforming it from GQL Parser remain in use, as is some of the code for handling datasets.
+Some parts from GQL Parser remain in use including parts of the ANTLR grammar and the visitors used for transforming it, and some of the code for handling test datasets.
+
+If you're marking my thesis you might be interested in the original [thesis branch](https://github.com/WSaffery/GQL-Compiler/tree/thesis) although I wouldn't recommend looking at it too much, it's only there for posterity.
+- No major changes have been made in this branch since thesis submission besides cleaning up some files and this readme.
 
 # Standout Features
 
@@ -18,7 +21,7 @@ Some parts of the ANTLR grammar and the visitors used for transforming it from G
 
 # GQL Features
 
-- Graph Pattern Matching (ofc)
+- Graph Pattern Matching
 	- Inline label predicates (including disjunctions) (i.e. `(a: Label1 | Label2)`, and property predicates (i.e. `(a: Label1 | Label2 {v : 1)`.
 - Bounded iteration of parenthesised paths (which use `[` and`]` not `(` and `)` right now).
 - Acyclic path pattern mode
