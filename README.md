@@ -27,6 +27,13 @@ If you're marking my thesis you might be interested in the original [thesis bran
 - Returning named elements, named groups, named element's properties (either individually selected \[i.e. `<name>.<value>`]  or all as a map with the non-standard `<name>.*` syntax), or a single global match count (`COUNT(*)`).
 - `WHERE` clause with graphical predicates (i.e. `WHERE NOT (a)->(b)` and property predicates (i.e. `WHERE a.v > 1`).
 
+# Setup
+
+Run `./setupAntlr.sh`
+Run `mvn install`
+
+
+
 # Usage
 
 Add a `remote-objects.yaml` to the `conf` directory with properties filled out appropriately for a Gremlin system supporting [Gremlin Server](https://tinkerpop.apache.org/docs/3.4.4/reference/#gremlin-server).

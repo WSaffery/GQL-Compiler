@@ -1,9 +1,8 @@
 package graphs;
 
 public class ResourcePaths {
-    static final String testGraphFolder = "/src/test/resources/database/";
-    static final String mainGraphFolder = "/src/main/resources/database/";
-    static final String testQueryFolder = "/src/test/resources/queries/";
+    static final String graphFolder = "/src/main/resources/database/";
+    static final String queryFolder = "/src/main/resources/queries/";
     static final String summaryFolder = "/src/main/resources/summaries/";
 
 
@@ -19,16 +18,11 @@ public class ResourcePaths {
     
     public static String getGraphFolder()
     {
-        return getResourceFolder() + mainGraphFolder;
-    }
-
-    public static String getGraphString(boolean isTest)
-    {
-        return getResourceFolder() + (isTest ? testGraphFolder : mainGraphFolder );
+        return getResourceFolder() + graphFolder;
     }
 
     public static String getQueryFolder()
     {
-        return getResourceFolder() + testQueryFolder;
+        return getResourceFolder() + queryFolder;
     }
 }

@@ -30,13 +30,13 @@ import ast.GqlProgram;
 import ast.visitors.AstListener;
 
 public class GqlAstApp {
-    static String testQueryFolder = "/src/test/resources/queries/";
+    static String queryFolder = "/src/test/main/queries/";
 
     public static void main(String[] args) throws Exception {
         assert(args.length >= 1);        
         System.out.println(args[0]);
 
-        GqlLexer lexer = makeGqlFileLexer(testQueryFolder + args[0]);
+        GqlLexer lexer = makeGqlFileLexer(queryFolder + args[0]);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GqlParser parser = new GqlParser(tokens);
         

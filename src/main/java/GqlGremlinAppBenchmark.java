@@ -47,15 +47,15 @@ import graphs.GremlinGraphFactory;
 import graphs.ResourcePaths;
 
 public class GqlGremlinAppBenchmark {
-    static final String testQueryFolder = "/src/test/resources/queries/";
+    static final String queryFolder = "/src/test/main/queries/";
 
     public static void main(String[] args) throws Exception {
         assert(args.length >= 1);        
         System.out.println(args[0]);
 
-        assert Paths.get(System.getProperty("user.dir") + testQueryFolder + args[0]).toAbsolutePath().toFile().exists() : "File doesn't exist";
+        assert Paths.get(System.getProperty("user.dir") + queryFolder + args[0]).toAbsolutePath().toFile().exists() : "File doesn't exist";
 
-        GqlLexer lexer = makeGqlFileLexer(testQueryFolder + args[0]);
+        GqlLexer lexer = makeGqlFileLexer(queryFolder + args[0]);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GqlParser parser = new GqlParser(tokens);
         
