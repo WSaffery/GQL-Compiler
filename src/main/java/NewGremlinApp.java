@@ -28,8 +28,8 @@ import graphs.ResourcePaths;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 
-// record QualifiedTraverser(Object Sack, )
-
+// this is not a user facing app
+// was used to manually test and experiment with various ways to implement GQL in Gremlin
 
 public class NewGremlinApp {    
      public static void main(String[] args) throws Exception {

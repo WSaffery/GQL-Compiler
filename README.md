@@ -6,7 +6,6 @@ This project was initially derived from Olaf Morra's [GQL Parser](https://github
 Some parts from GQL Parser remain in use including parts of the ANTLR grammar and the visitors used for transforming it, and some of the code for handling test datasets.
 
 If you're marking my thesis you might be interested in the original [thesis branch](https://github.com/WSaffery/GQL-Compiler/tree/thesis) although I wouldn't recommend looking at it too much, it's only there for posterity.
-- No major changes have been made in this branch since thesis submission besides cleaning up some files and this readme.
 
 # Standout Features
 
@@ -36,7 +35,8 @@ The following apps interact with a live Gremlin database and take a `-conf` argu
 
 All apps that use a query take a `-query` argument specifying a query path relative to `src/test/queries`.
 
-All apps have a documentation of their arguments in their source code, automatic help is out of scope for now.
+Running any application with `-help` shows all its arguments their type (singular, multiple, or flag) and defaults, but doesn't include further documentation.
+All apps have more in-depth documentation of their arguments in their source.
 
 - `GenerateSummaryApp`
 	- Generates a summary of the cardinalities of nodes by label, and label triplets, in the database

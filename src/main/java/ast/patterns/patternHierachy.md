@@ -1,5 +1,6 @@
+# Parsing Parenthesised Paths
 
-# Node-Link-Node Formulation
+## Node-Link-Node Formulation
 () [() ... ()] ()
 
 ```
@@ -9,7 +10,7 @@ pathPart = LinkPattern | Node Pattern
 Path = pathPart*
 ```
 
-# Node-Link-Path Formulation
+## Node-Link-Path Formulation
 () -> [() ... ()]
 () -> [() ... ()] -> [() ... ()] -> ...
 () -> [() ... ()] -> () -> ... -> () | []
@@ -35,7 +36,7 @@ point = node | parenPath
 (A) ->[() -> ()]{1,k-2} -> (B) // k >= 3
 
 
-# Node-Link*-Path
+## Node-Link*-Path
 
 () -> -> ... -> ()
 () -> [() ... ()] -> ()
@@ -47,3 +48,16 @@ parenPath = LEFT path RIGHT
 ```
 
 // support standalone edges but not standalone nodes
+
+## Our Approach
+
+We ended up using approximately the following grammar
+
+```
+path = point edge* path
+point = node | parenPath
+parenPath = node? LEFT path RIGHT node?
+```
+
+That is parenthesised paths can have one adjacent node on either side, but otherwise our formulation is equivalent to Node-Link*-Path.
+I think this gives all the meaningful expressions using adjacent nodes, while also making implementation relatively easy.
