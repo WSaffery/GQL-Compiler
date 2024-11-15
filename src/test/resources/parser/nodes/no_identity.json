@@ -1,5 +1,5 @@
-{
-  "n": {
+[
+  {
     "labels": [
       "Person",
       "Professor"
@@ -9,4 +9,4 @@
       "employer": "TU/e"
     }
   }
-}
+]

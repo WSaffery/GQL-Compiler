@@ -1,5 +1,5 @@
-{
-  "e": {
+[
+  {
     "identity": 2,
     "start": 85,
     "end": 5,
@@ -10,7 +10,7 @@
       "in_semester": 2
     }
   },
-  "e": {
+  {
     "identity": 3,
     "start": 85,
     "end": 19,
@@ -18,7 +18,7 @@
       "LearnsFrom"
     ]
   },
-  "e": {
+  {
     "identity": 12,
     "start": 19,
     "end": 85,
@@ -26,7 +26,7 @@
       "Teaches"
     ]
   },
-  "e": {
+  {
     "identity": 21,
     "start": 29,
     "end": 19,
@@ -35,7 +35,7 @@
     ],
     "isDirected": 0
   },
-  "e": {
+  {
     "identity": 86,
     "start": 19,
     "end": 5,
@@ -43,4 +43,4 @@
       "Supervises"
     ]
   }
-}
+]

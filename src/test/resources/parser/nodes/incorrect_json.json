@@ -1,11 +1,11 @@
-{
-  "n": {
+[
+  {
     "identity": 5,
     "labels": [
       "Internship"
     ]
   },
-  "n": {
+  {
     "identity": 19,
     "labels": [
       "Person",
@@ -16,7 +16,7 @@
       "employer": "TU/e"
     }
   },
-  "n": {
+  {
     "identity": 29,
     "labels": [
       "Person"
@@ -26,7 +26,7 @@
       "employer": "Amazon"
     }
   },
-  "n": {
+  {
     "identity": 85,
     "labels": [
       "Person"
@@ -35,4 +35,4 @@
       "name": "Olof Morra",
       "studies": "Data Science"
     }
-  }
+]

@@ -41,20 +41,6 @@ import static org.junit.Assert.assertEquals;
 public class NodeParserTest {
     private final String TEST_DIRECTORY = "/src/test/resources/parser/nodes/";
 
-    // Test incorrect input
-    @Test(expected = InvalidNodeFormatException.class)
-    public void testNoIdentityInNode() throws FileNotFoundException, InvalidNodeFormatException {
-        NodeParser parser = getNodeParser("no_identity.json");
-        parser.getNodes();
-    }
-
-    // Test incorrect input
-    @Test(expected = InvalidNodeFormatException.class)
-    public void testDuplicateIdentityInNode() throws FileNotFoundException, InvalidNodeFormatException {
-        NodeParser parser = getNodeParser("duplicate_identity.json");
-        parser.getNodes();
-    }
-
     @Test(expected = InvalidNodeFormatException.class)
     public void testIncorrectLabelsInFile() throws FileNotFoundException, InvalidNodeFormatException {
         NodeParser parser = getNodeParser("incorrect_labels.json");

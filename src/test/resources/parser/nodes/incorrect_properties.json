@@ -1,5 +1,5 @@
-{
-  "n": {
+[
+  {
     "identity": 19,
     "labels": [
       "Person",
@@ -10,4 +10,4 @@
       "employer":
     }
   }
-}
+]

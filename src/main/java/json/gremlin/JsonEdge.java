@@ -32,7 +32,7 @@ public class JsonEdge {
     public String end;
     public ArrayList<String> labels;
     public Map<String, Object> properties;
-    public Boolean isDirected;
+    public Boolean isDirected = true; // directed by default
 
     // allow jackson to build up JsonEdge incrementally
     public JsonEdge() 

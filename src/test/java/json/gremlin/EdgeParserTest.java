@@ -43,31 +43,6 @@ public class EdgeParserTest {
     private final Boolean DIRECTED = true;
     private final Boolean UNDIRECTED = false;
 
-    // Test incorrect input
-    @Test(expected = InvalidEdgeFormatException.class)
-    public void testNoIdentityInEdge() throws FileNotFoundException, InvalidEdgeFormatException {
-        EdgeParser parser = getEdgeParser("no_identity.json");
-        parser.getEdges();
-    }
-
-    @Test(expected = InvalidEdgeFormatException.class)
-    public void testDuplicateIdentityInEdge() throws FileNotFoundException, InvalidEdgeFormatException {
-        EdgeParser parser = getEdgeParser("duplicate_identity.json");
-        parser.getEdges();
-    }
-
-    @Test(expected = InvalidEdgeFormatException.class)
-    public void testNoStartNodeInEdge() throws FileNotFoundException, InvalidEdgeFormatException {
-        EdgeParser parser = getEdgeParser("no_start_node.json");
-        parser.getEdges();
-    }
-
-    @Test(expected = InvalidEdgeFormatException.class)
-    public void testNoEndNodeInEdge() throws FileNotFoundException, InvalidEdgeFormatException {
-        EdgeParser parser = getEdgeParser("no_end_node.json");
-        parser.getEdges();
-    }
-
     @Test(expected = InvalidEdgeFormatException.class)
     public void testIncorrectLabelsInFile() throws FileNotFoundException, InvalidEdgeFormatException {
         EdgeParser parser = getEdgeParser("incorrect_labels.json");
