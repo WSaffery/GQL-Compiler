@@ -29,9 +29,14 @@ If you're marking my thesis you might be interested in the original [thesis bran
 
 # Setup
 
+- Install maven
+- Install antlr4 dependencies
+- For Fedora antlr4-maven-plugin covers everything
+	- Targeting latest Fedora antlr4 version over development period (2024)
+	- This could change if there's a significant breaking change
 - Run `./setupAntlr.sh`
 - Run `mvn install`
-- Test your installation by running `mvn exec:java -Dexec.mainClass="GqlGremlinApp" -e -Dexec.args="-query gql/gql_tests/iter_collapse.gql"`
+- Test your installation by running `./runApp GqlGremlinApp -query gql/gql_tests/iter_collapse.gql`
 
 This test runs the following query
 
@@ -114,11 +119,15 @@ The following apps provide useful functionality that doesn't interact with a liv
 run 
 
 ```
+./runApp <AppName> <Args>
+```
+
+or alternatively run
+
+```
 mvn exec:java -Dexec.mainClass="<AppName>" -e -Dexec.args="<Args>"
 ```
 
 # Getting started
 
-The above is a high level summary that as a guide assumes you have the parser and lexer generated, and everything built.
-
-A more detailed but shorter and more focused usage guide can be found in `docs/docs.md`
+The above is a high level summary a more detailed but shorter and more focused setup and usage guide can be found in `docs/docs.md`
