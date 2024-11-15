@@ -36,7 +36,7 @@ If you're marking my thesis you might be interested in the original [thesis bran
 	- This could change if there's a significant breaking change
 - Run `./setupAntlr.sh`
 - Run `mvn install`
-- Test your installation by running `./runApp GqlGremlinApp -query gql/gql_tests/iter_collapse.gql`
+- Test your installation by running `./runApp.sh GqlGremlinApp -query gql/gql_tests/iter_collapse.gql`
 
 This test runs the following query
 
@@ -72,6 +72,8 @@ With results
  v[a6]     | [v[a6]]              | [v[a7]]              | [v[a8]]              | v[a8]   |
  v[a7]     | [v[a7]]              | [v[a8]]              | [v[a9]]              | v[a9]   |
 ```
+
+You can see the corresponding Gremlin code by running `./runApp.sh GqlGremlinScriptApp -query gql/gql_tests/iter_collapse.gql`
 
 # Usage
 
@@ -119,7 +121,7 @@ The following apps provide useful functionality that doesn't interact with a liv
 run 
 
 ```
-./runApp <AppName> <Args>
+./runApp.sh <AppName> <Args>
 ```
 
 or alternatively run
