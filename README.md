@@ -29,10 +29,44 @@ If you're marking my thesis you might be interested in the original [thesis bran
 
 # Setup
 
-Run `./setupAntlr.sh`
-Run `mvn install`
+- Run `./setupAntlr.sh`
+- Run `mvn install`
+- Test your installation by running `mvn exec:java -Dexec.mainClass="GqlGremlinApp" -e -Dexec.args="-query gql/gql_tests/iter_collapse.gql"`
 
+This test runs the following query
 
+```
+FROM chain_graph
+MATCH (start_node) [(a) -[]-> (b) -[]-> (c)] {1,3} (end_node)
+RETURN start_node, a, b, c, end_node
+```
+
+On the following labelled "chain" graph
+
+```
+(a1)->(a2)->(a3)->(a4)->(a5)->(a6)->(a7)->(a8)->(a9)
+```
+
+With results
+
+```
+ start_node| a                    | b                    | c                    | end_node|
+ v[a1]     | [v[a1]]              | [v[a2]]              | [v[a3]]              | v[a3]   |
+ v[a1]     | [v[a1], v[a3]]       | [v[a2], v[a4]]       | [v[a3], v[a5]]       | v[a5]   |
+ v[a1]     | [v[a1], v[a3], v[a5]]| [v[a2], v[a4], v[a6]]| [v[a3], v[a5], v[a7]]| v[a7]   |
+ v[a2]     | [v[a2]]              | [v[a3]]              | [v[a4]]              | v[a4]   |
+ v[a2]     | [v[a2], v[a4]]       | [v[a3], v[a5]]       | [v[a4], v[a6]]       | v[a6]   |
+ v[a2]     | [v[a2], v[a4], v[a6]]| [v[a3], v[a5], v[a7]]| [v[a4], v[a6], v[a8]]| v[a8]   |
+ v[a3]     | [v[a3]]              | [v[a4]]              | [v[a5]]              | v[a5]   |
+ v[a3]     | [v[a3], v[a5]]       | [v[a4], v[a6]]       | [v[a5], v[a7]]       | v[a7]   |
+ v[a3]     | [v[a3], v[a5], v[a7]]| [v[a4], v[a6], v[a8]]| [v[a5], v[a7], v[a9]]| v[a9]   |
+ v[a4]     | [v[a4]]              | [v[a5]]              | [v[a6]]              | v[a6]   |
+ v[a4]     | [v[a4], v[a6]]       | [v[a5], v[a7]]       | [v[a6], v[a8]]       | v[a8]   |
+ v[a5]     | [v[a5]]              | [v[a6]]              | [v[a7]]              | v[a7]   |
+ v[a5]     | [v[a5], v[a7]]       | [v[a6], v[a8]]       | [v[a7], v[a9]]       | v[a9]   |
+ v[a6]     | [v[a6]]              | [v[a7]]              | [v[a8]]              | v[a8]   |
+ v[a7]     | [v[a7]]              | [v[a8]]              | [v[a9]]              | v[a9]   |
+```
 
 # Usage
 
