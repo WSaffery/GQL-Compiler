@@ -22,9 +22,6 @@ package json.gremlin;
 import org.junit.Test;
 
 import exceptions.InvalidEdgeFormatException;
-// import json.gremlin.EdgeParser;
-// import json.gremlin.JsonEdge;
-
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;

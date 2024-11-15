@@ -22,9 +22,6 @@ package json.gremlin;
 import org.junit.Test;
 
 import exceptions.InvalidNodeFormatException;
-// import json.gremlin.JsonNode;
-// import json.gremlin.NodeParser;
-
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
