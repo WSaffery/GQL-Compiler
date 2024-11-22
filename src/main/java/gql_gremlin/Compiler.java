@@ -1,15 +1,12 @@
 package gql_gremlin;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import ast.GqlProgram;
-import ast.patterns.QualifiedPathPattern;
-import data.Summary;
 import data.SummaryStorage;
 
 public interface Compiler {

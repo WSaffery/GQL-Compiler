@@ -5,6 +5,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.Pop;
 import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.javatuples.Pair;
 
 import ast.GqlProgram;
@@ -216,6 +217,54 @@ public class GremlinCompiler implements Compiler {
         return traversal;
     }
 
+    
+    interface EdgeElementCompiler
+    {
+        public GraphTraversal<Vertex, Edge> compileElementPattern(GraphTraversal<Vertex, Edge> traversal, ElementPattern pattern);
+    }
+    
+    private GraphTraversal<Vertex, Vertex> compileEdgePattern(
+        GraphTraversal<Vertex, Vertex> traversal, EdgePattern edgePattern, 
+        EdgeElementCompiler elementCompiler)
+    {
+        GraphTraversal<Vertex, Edge> intermediary = null;
+        String[] matchedLabels = LabelPattern.matchedLabels(edgePattern.labelPattern).toArray(new String[0]);
+        edgePattern.labelPattern = new WildcardLabel(); 
+        // once we've matched all the labels with the to step we don't want to rematch them in 
+        // compileElementPattern (or anywhere else if we allowed repeated edges with the same identity [we don't]).
+        // System.out.println("hi");
+        if (edgePattern.direction.isPresent())
+        {
+            if (!edgePattern.properties.isEmpty() || edgePattern.variableName.isPresent())
+            {
+                intermediary = traversal.toE(toGremlinDirection(edgePattern.direction.get()), matchedLabels);
+                intermediary = elementCompiler.compileElementPattern(intermediary, edgePattern);
+                traversal = intermediary.otherV();
+            }
+            else
+            {
+                traversal = traversal.to(toGremlinDirection(edgePattern.direction.get()), matchedLabels);
+            }
+        }
+        else 
+        {
+            if (!edgePattern.properties.isEmpty() || edgePattern.variableName.isPresent())
+            {
+                // System.out.println(edgePattern);
+                intermediary = traversal.bothE(matchedLabels);
+                intermediary = elementCompiler.compileElementPattern(intermediary, edgePattern);
+                traversal = intermediary.otherV();
+            }
+            else 
+            {
+                traversal = traversal.both(matchedLabels);
+            }
+        }
+
+        return traversal;
+        
+    }
+
     public GraphTraversal<Vertex, Vertex> compileStartingElementPattern(GraphTraversal<Vertex, Vertex> traversal, 
         ElementPattern pattern, HashSet<String> capturedSet)
     {
@@ -262,26 +311,14 @@ public class GremlinCompiler implements Compiler {
         HashSet<String> capturedSet = new HashSet<>();
         HashSet<String> variables = CompilerHelpers.pathPatternVariables(components);
 
-        GraphTraversal<Vertex, ?> intermediary = null;
+        // GraphTraversal<Vertex, ?> intermediary = null;
 
         for (PathComponent component : components)
         {
             if (component instanceof EdgePattern) 
             {
                 EdgePattern edgePattern = (EdgePattern) component;
-                // can use labels parameter in toE/bothE, but hasLabels is added in filterByPattern anyway
-                if (edgePattern.direction.isPresent())
-                {
-                    intermediary = traversal.toE(toGremlinDirection(edgePattern.direction.get()));
-                    intermediary = compileElementPattern(intermediary, edgePattern, capturedSet, outerCapturedSet);
-                    traversal = intermediary.otherV();
-                }
-                else 
-                {
-                    intermediary = traversal.bothE();
-                    intermediary = compileElementPattern(intermediary, edgePattern, capturedSet, outerCapturedSet);
-                    traversal = intermediary.otherV();
-                }   
+                traversal = compileEdgePattern(traversal, edgePattern, (t, e) -> compileElementPattern(t, e, capturedSet, outerCapturedSet));
             }
             else if (component instanceof NodePattern)
             {
@@ -424,20 +461,7 @@ public class GremlinCompiler implements Compiler {
             if (component instanceof EdgePattern) 
             {
                 EdgePattern edgePattern = (EdgePattern) component;
-                // can use labels parameter in toE, but hasLabels is added in filterByPattern anyway
-                if (edgePattern.direction.isPresent())
-                {
-                    temp = traversal.toE(toGremlinDirection(edgePattern.direction.get()));
-                    temp = compileElementPattern(temp, edgePattern, capturedSet);
-                    traversal = temp.otherV();
-                }
-                else 
-                {
-                    temp = traversal.bothE();
-                    temp = compileElementPattern(temp, edgePattern, capturedSet);
-                    traversal = temp.otherV();
-                }
-                
+                traversal = compileEdgePattern(traversal, edgePattern, (t, e) -> compileElementPattern(t, e, capturedSet));
             }
             else if (component instanceof NodePattern)
             {
